@@ -1,11 +1,10 @@
-# API 授权 (Passport)
+# Laravel 的 API 认证系统 Passport
 
 - [介绍](#introduction)
 - [安装](#installation)
     - [前端快速上手](#frontend-quickstart)
 - [配置](#configuration)
     - [令牌的使用期限](#token-lifetimes)
-    - [清理已失效的令牌](#pruning-revoked-tokens)
 - [发放访问令牌](#issuing-access-tokens)
     - [管理客户端](#managing-clients)
     - [请求令牌](#requesting-tokens)
@@ -14,6 +13,8 @@
     - [创建密码授权客户端](#creating-a-password-grant-client)
     - [请求密码授权令牌](#requesting-password-grant-tokens)
     - [请求所有作用域](#requesting-all-scopes)
+- [简化授权令牌](#implicit-grant-tokens)
+- [客户端授权令牌](#client-credentials-grant-tokens)
 - [私人访问令牌](#personal-access-tokens)
     - [创建私人访问令牌的客户端](#creating-a-personal-access-client)
     - [管理私人访问令牌](#managing-personal-access-tokens)
@@ -25,6 +26,8 @@
     - [给令牌分派作用域](#assigning-scopes-to-tokens)
     - [检查作用域](#checking-scopes)
 - [使用 JavaScript 接入 API](#consuming-your-api-with-javascript)
+- [事件](#events)
+- [测试](#testing)
 
 <a name="introduction"></a>
 ## 介绍
@@ -47,6 +50,8 @@
 Passport 使用服务提供者注册内部的数据库迁移脚本目录，所以上一步完成后，你需要更新你的数据库结构。Passport 的迁移脚本会自动创建应用程序需要的客户端数据表和令牌数据表：
 
     php artisan migrate
+
+> {note} 如果你不打算使用 Passport 的默认迁移，你应该在`AppServiceProvider`的`register`方法中调用`Passport :: ignoreMigrations`方法。 你可以导出这个默认迁移用`php artisan vendor:publish --tag=passport-migrations`命令。
 
 接下来，你需要运行 `passport:install` 命令来创建生成安全访问令牌时用到的加密密钥，同时，这条命令也会创建「私人访问」客户端和「密码授权」客户端：
 
@@ -156,9 +161,9 @@ Passport 配备了一些可以让你的用户自行创建客户端和私人访�
 ### 令牌的有效期
 
 默认情况下，Passport 发放的访问令牌是永久有效的，不需要刷新。但是如果你想给访问令牌配置一个短一些的有效期，那你就需要用到 `tokensExpireIn` 和 `refreshTokensExpireIn` 方法了，上述两个方法同样需要在 `AuthServiceProvider` 的 `boot` 方法中调用：
-    
+
     use Carbon\Carbon;
-    
+
     /**
      * Register any authentication / authorization services.
      *
@@ -174,17 +179,6 @@ Passport 配备了一些可以让你的用户自行创建客户端和私人访�
 
         Passport::refreshTokensExpireIn(Carbon::now()->addDays(30));
     }
-
-<a name="pruning-revoked-tokens"></a>
-### 清理已失效的令牌
-
-默认情况下，Passport 不会从数据库中删除已失效的令牌。随着时间增长，数据库中会积累大量已失效的令牌。如果你希望 Passport 自动删除它们，你可以在  `AuthServiceProvider` 的 `boot` 方法中调用 `pruneRevokedTokens` 方法：
-
-    use Laravel\Passport\Passport;
-
-    Passport::pruneRevokedTokens();
-
-这个函数的效果是在用户请求到新的访问令牌或刷新已存在令牌时会删除老的已失效令牌，而不是每次调用时立即删除所有的失效令牌。
 
 <a name="issuing-access-tokens"></a>
 ## 发放访问令牌
@@ -259,7 +253,7 @@ Passport 配备了一些可以让你的用户自行创建客户端和私人访�
 
 此接口用于删除客户端：
 
-    this.$http.delete('/oauth/clients/' + clientId)
+    axios.delete('/oauth/clients/' + clientId)
         .then(response => {
             //
         });
@@ -380,11 +374,64 @@ OAuth2 密码授权机制可以让自有应用基于邮箱地址（用户名）�
         'form_params' => [
             'grant_type' => 'password',
             'client_id' => 'client-id',
+            'client_secret' => 'client-secret',
             'username' => 'taylor@laravel.com',
             'password' => 'my-password',
             'scope' => '*',
         ],
     ]);
+
+<a name="implicit-grant-tokens"></a>
+## 简化授权令牌
+
+简化授权和通过授权码授权相似; 区别是, 不需要通过授权码去获取令牌而是把令牌直接返回客户端. 主要用在无法安全存储证书场景中，这种授权在 JavaScript 和 移动应用 是最常用的. 开启授权, 在 `AuthServiceProvider` 中调用 `enableImplicitGrant` 方法:
+
+    /**
+     * Register any authentication / authorization services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerPolicies();
+
+        Passport::routes();
+
+        Passport::enableImplicitGrant();
+    }
+
+调用上面方法开启授权后, 开发者可以通过自己的应用把 client ID 当做参数去请求一个令牌. 在你的应用程序 `/oauth/authorize` 的接口中应该有一个重定向请求像下面这样:
+
+    Route::get('/redirect', function () {
+        $query = http_build_query([
+            'client_id' => 'client-id',
+            'redirect_uri' => 'http://example.com/callback',
+            'response_type' => 'token',
+            'scope' => '',
+        ]);
+
+        return redirect('http://your-app.com/oauth/authorize?'.$query);
+    });
+
+> {tip} 记住, 这个 `/oauth/authorize` 接口已经定义在 `Passport::routes` 中. 所以无需再次手动定义.
+
+<a name="client-credentials-grant-tokens"></a>
+## 客户端证书授权令牌
+
+客户端证书授权适用于机器对机器认证，例如，你可以在通过API执行脚本任务中使用此授权。 要获取令牌，向 `oauth/token` 接口发出请求:
+
+    $guzzle = new GuzzleHttp\Client;
+
+    $response = $guzzle->post('http://your-app.com/oauth/token', [
+        'form_params' => [
+            'grant_type' => 'client_credentials',
+            'client_id' => 'client-id',
+            'client_secret' => 'client-secret',
+            'scope' => 'your-scope',
+        ],
+    ]);
+
+    echo json_decode((string) $response->getBody(), true);
 
 <a name="personal-access-tokens"></a>
 ## 私人访问令牌
@@ -575,25 +622,59 @@ Passport 包含两个检查作用域的中间件，通过访问令牌请求时�
 
 Passport 的这个中间件将会在你所有的对外请求中添加一个 `laravel_token` cookie ，该 cookie 将包含一个加密后的 [JWT](https://jwt.io/) ，Passport 可以根据此数据判断你 JavaScript 应用的授权状态。至此，你可以无需传递访问令牌直接请求应用程序的 API 了：
 
-    this.$http.get('/user')
+    axios.get('/user')
         .then(response => {
             console.log(response.data);
         });
 
-当使用上面方法授权时，在每次请求中都需要使用 `X-CSRF-TOKEN` 请求头传递 CSRF 令。如果你使用框架默认的 [Vue](https://vuejs.org) 配置，Laravel 已经自动帮你做了这件事了：
+当使用上面方法授权时，Axios 会自动带上 `X-CSRF-TOKEN` 请求头传递。另外，默认的 Laravel JavaScript 也会带上 `X-Requested-With` 请求头:
 
-    Vue.http.interceptors.push((request, next) => {
-        request.headers['X-CSRF-TOKEN'] = Laravel.csrfToken;
+    window.axios.defaults.headers.common = {
+        'X-Requested-With': 'XMLHttpRequest',
+    };
 
-        next();
-    });
-
-> {note} 如果你用了其他 JavaScript 框架，需要确保每次对外请求都会带有此请求头。
+> {note} 如果你用了其他 JavaScript 框架，需要确保每次对外请求都会带有 `X-CSRF-TOKEN` 和 `X-Requested-With` 请求头。
 
 
+<a name="events"></a>
+## 事件
+
+Passport 在访问令牌和刷新令牌时触发事件。 你可以通过触发这些事件来修改或删除数据库中的其他访问令牌。 你可以在应用程序的 `EventServiceProvider` 中为这些事件附加监听器:
+
+    /**
+     * The event listener mappings for the application.
+     *
+     * @var array
+     */
+    protected $listen = [
+        'Laravel\Passport\Events\AccessTokenCreated' => [
+            'App\Listeners\RevokeOldTokens',
+        ],
+
+        'Laravel\Passport\Events\RefreshTokenCreated' => [
+            'App\Listeners\PruneOldTokens',
+        ],
+    ];
+
+<a name="testing"></a>
+## 测试
+
+Passport 的 `actingAs` 方法可以用于指定当前认证的用户及其授权范围。 `actingAs` 方法第一个参数是一个对象，第二个参数是数组表示申请的授权范围:
+
+    public function testServerCreation()
+    {
+        Passport::actingAs(
+            factory(User::class)->create(),
+            ['create-servers']
+        );
+
+        $response = $this->post('/api/create-server');
+
+        $response->assertStatus(200);
+    }
+    
+    
 ## 译者署名
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@zhwei](https://github.com/zhwei)  | <img class="avatar-66 rm-style" src="https://avatars3.githubusercontent.com/u/1446459?v=3&s=100">  |  翻译  | 部分关键字翻译参考 [学院君的翻译](http://laravelacademy.org/post/5993.html)  |
-| [@JobsLong](https://phphub.org/users/56)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/56_1427370654.jpeg?imageView2/1/w/100/h/100">  |  Review  | 我的个人主页：[http://jobslong.com](http://jobslong.com)  |
-| [@summerblue](https://github.com/summerblue)  | <img class="avatar-66 rm-style" src="https://avatars2.githubusercontent.com/u/324764?v=3&s=100">  |  Review  | A man seeking for Wisdom. |
+| [@KevinDiamen](https://github.com/KevinDiamen)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/10242_1487138520.jpg?imageView2/1/w/100/h/100">  |  翻译  | 部分关键字翻译参考 [@zhwei](https://github.com/zhwei)  |

@@ -1,10 +1,10 @@
-# Envoy 任务运行器
+# Laravel 的远程服务器任务处理器 Envoy
 
 - [简介](#introduction)
     - [安装](#installation)
 - [编写任务](#writing-tasks)
     - [任务启动](#setup)
-    - [任务变量](#task-variables)
+    - [任务变量](#variables)
     - [任务故事](#stories)
     - [多个服务器](#multiple-servers)
 - [运行任务](#running-tasks)
@@ -20,14 +20,17 @@
 <a name="installation"></a>
 ### 安装
 
-因为 Composer 的全局库有时会导致包的版本冲突，所以你可以考虑使用 `cgr`，它是 `composer global require` 命令的一种替代实现。`cgr` 库的安装指导可以在 [GitHub上找到](https://github.com/consolidation-org/cgr)。
+首先，使用 Composer `global require` 命令来安装 Enovy ：
 
-> {note} 一定要确保 `~/.composer/vendor/bin` 目录加入到了你的 PATH 中，这样才能在命令行运行 `envoy`。
+    composer global require "laravel/envoy=~1.0"
+
+因为 Composer 的全局库有时会导致包的版本冲突，所以你可以考虑使用 `cgr` ，它是 `composer global require` 命令的一种替代实现 `cgr` 库的安装指导可以在 [GitHub上找到](https://github.com/consolidation-org/cgr)。
+
+> {note} 一定要确保 `~/.composer/vendor/bin` 目录加入到了你的 PATH 中，这样才能在命令行运行 `envoy` 。
 
 #### 更新 Envoy
 
-你也可以使用 Composer 来更新 Envoy 到最新版本。
-要注意 `composer global update` 命令是更新你所有在全局安装的包。
+你也可以使用 Composer 来更新 Envoy 到最新版本。 要注意 `composer global update` 命令是更新你所有在全局安装的包：
 
     composer global update
 
@@ -36,15 +39,15 @@
 
 所有的 Envoy 任务都必须定义在项目根目录的 `Envoy.blade.php` 文件中，这里有个例子：
 
-    @servers(['web' => 'user@192.168.1.1'])
+    @servers(['web' => ['user@192.168.1.1']])
 
     @task('foo', ['on' => 'web'])
         ls -la
     @endtask
 
-如你所见，`@servers` 的数组被定义在文件的起始位置处，让你在声明任务时可以在 `on` 选项里参照使用这些服务器。在你的 `@task` 声明里，你可以放置当任务运行时想要在远程服务器运行的 Bash 命令。
+如你所见， `@servers` 的数组被定义在文件的起始位置处，让你在声明任务时可以在 `on` 选项里参照使用这些服务器。在你的  `@task` 声明里，你可以放置当任务运行时想要在远程服务器运行的 Bash 命令。
 
-你可以通过指定服务器的IP地址为 `127.0.0.1` 来执行本地任务：
+你可以通过指定服务器的 IP 地址为 `127.0.0.1` 来执行本地任务：
 
     @servers(['localhost' => '127.0.0.1'])
 
@@ -59,7 +62,7 @@
         $environment = isset($env) ? $env : "testing";
     @endsetup
 
-如果你想在任务执行前引入其他 PHP 文件，可以直接在 `Envoy.blade.php` 文件起始位置使用 `@include`：
+如果你想在任务执行前引入其他 PHP 文件，可以直接在 `Envoy.blade.php` 文件起始位置使用 `@include` ：
 
     @include('vendor/autoload.php')
 
@@ -91,7 +94,7 @@
 <a name="stories"></a>
 ### 任务故事
 
-任务故事通过一个统一的、便捷的名字来划分一组任务，来让你把小而专的子任务合并到大的任务里。比如说，一个名为 `deploy` 的任务故事可以在它定义范围内列出子任务名字 `git` 和 `composer` 来运行各自对应的任务：
+任务故事通过一个统一的、便捷的名字来划分一组任务，来让你把小而专的子任务合并到大的任务里。比如说，一个名为  `deploy` 的任务故事可以在它定义范围内列出子任务名字 `git` 和 `composer` 来运行各自对应的任务：
 
     @servers(['web' => '192.168.1.1'])
 
@@ -138,7 +141,7 @@
     @endtask
 
 <a name="running-tasks"></a>
-##运行任务
+## 运行任务
 
 要想运行一个在 `Envoy.blade.php` 文件中定义好的任务或者故事，就执行 Envoy 的 `run` 命令，并将这个任务的名字传递给它。Envoy 会去执行这个任务并且把任务执行过程中的输出给打印出来：
 
@@ -155,7 +158,6 @@
         php artisan migrate
     @endtask
 
-
 <a name="notifications"></a>
 <a name="hipchat-notifications"></a>
 ## 通知
@@ -163,15 +165,21 @@
 <a name="slack"></a>
 ### Slack
 
-Envoy 也支持任务执行完毕后发送通知至 [Slack](https://slack.com)。`@slack` 命令接收 Slack hook 网址和频道名称。当你在 Slack 的网站控制面板上创建 `Incoming WebHooks` 时会获得 webhook 网址。`webhook-url` 参数必须是 Slack 的 Incoming WebHooks 所提供的完整网址：
+Envoy 也支持任务执行完毕后发送通知至 [Slack](https://slack.com)。`@slack` 命令接收 Slack hook 网址和频道名称。你可以通在在 Slack 的控制面板上创建 「Incoming WebHooks」 时来检索 webhook 网址。webhook-url 参数必须是 `@slack` 的 Incoming WebHooks 所提供的完整网址：
 
-    @after
+    @finished
         @slack('webhook-url', '#bots')
-    @endafter
+    @endfinished
 
 你可以选择下方的任意一个来作为 channel 参数：
 
 <div class="content-list" markdown="1">
-- 如果要发送通知至一个频道：`#channel`
-- 如果要发送通知给一位用户：`@user`
+- 如果要发送通知至一个频道： `#channel`
+- 如果要发送通知给一位用户： `@user`
 </div>
+
+## 译者署名
+| 用户名 | 头像 | 职能 | 签名 |
+|---|---|---|---|
+| [@司维](https://phphub.org/users/11602)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/11602_1487572457.png?imageView2/1/w/380/h/380">  |  翻译  |  [@leon0204](https://github.com/leon0204) at Github  |
+

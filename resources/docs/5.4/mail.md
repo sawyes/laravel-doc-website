@@ -1,4 +1,4 @@
-# Mail
+# Laravel 的 邮件发送功能
 
 - [简介](#introduction)
     - [驱动前提](#driver-prerequisites)
@@ -9,6 +9,10 @@
     - [视图数据](#view-data)
     - [附件](#attachments)
     - [内部附件](#inline-attachments)
+- [Markdown 格式的邮件](#markdown-mailables)
+    - [生成 Markdown 格式的邮件](#generating-markdown-mailables)
+    - [编写 Markdown 格式的邮件](#writing-markdown-messages)
+    - [自定义组件](#customizing-the-components)
 - [发送邮件](#sending-mail)
     - [队列邮件](#queueing-mail)
 - [邮件与本地开发](#mail-and-local-development)
@@ -17,7 +21,7 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套简洁的邮件 API ，Laravel 为 SMTP，Mailgun，SparkPost， Amazon SES，PHP 的 `mail` 函数及 `sendmail` 提供驱动，让你可以快速从本地或云端服务自由地发送邮件。
+Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套干净、简洁的邮件 API ，Laravel 为 SMTP 、Mailgun 、SparkPost 、 Amazon SES 、 PHP 的 `mail` 函数及 `sendmail` 提供驱动，让你可以快速从本地或云端服务自由地发送邮件。
 
 <a name="driver-prerequisites"></a>
 ### 驱动前提
@@ -67,7 +71,7 @@ Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套简
 <a name="writing-mailables"></a>
 ## 编写 mailables
 
-所有的 「mailables」类都在其 `build` 方法中完成配置。在这个方法内，你可以调用其他各种方法，如 `from`，`subject`，`view` 和 `attach` 来配置完成邮件的详情。
+所有的 「mailables」类都在其 `build` 方法中完成配置。在这个方法内，你可以调用其他各种方法，如 `from` 、 `subject` 、 `view` 和 `attach` 来配置完成邮件的详情。
 
 <a name="configuring-the-sender"></a>
 ### 配置发送者
@@ -250,7 +254,7 @@ Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套简
                         ->attach('/path/to/file');
         }
 
-附加文件到消息时，你也可以传递 `数组` 给 `attache` 方法作为第二个个参数，以指定显示名称和 / 或是 MIME 类型：
+附加文件到消息时，你也可以传递 `数组` 给 `attache` 方法作为第二个参数，以指定显示名称和 / 或是 MIME 类型：
 
         /**
          * Build the message.
@@ -303,6 +307,93 @@ Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套简
 
         <img src="{{ $message->embedData($data, $name) }}">
     </body>
+
+<a name="markdown-mailables"></a>
+## Markdown 格式的 Mailables 类
+
+Markdown 格式的 mailable 消息允许你从预编译的模板和你的 mailables 类中的邮件提醒组件中受益。因为消息是用 Markdown 格式写的， Laravel 能为消息体渲染出漂亮、响应式的 HTML 模板，也能自动生成一个纯文本的副本。
+
+<a name="generating-markdown-mailables"></a>
+### 生成 Markdown 格式的 Mailables
+
+要生成一个包含友好的 Markdown 模板的 mailable 类，你在使用  `make:mail` 这个 Artisan 命令时，要加上 `--markdown` 选项：
+
+    php artisan make:mail OrderShipped --markdown=emails.orders.shipped
+
+然后，在使用 `build` 方法配置 mailable 时，用 `markdown` 方法来换掉 `view` 方法， `markdown` 方法接受一个 Markdown 模板的名称和一个将在模板中可用的选项数组：
+
+    /**
+     * 构建消息。
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->from('example@example.com')
+                    ->markdown('emails.orders.shipped');
+    }
+
+<a name="writing-markdown-messages"></a>
+### 编写 Markdown 格式的消息
+
+Markdown mailables 使用 Blade 组件和 Markdown 语法的组合，允许你轻松地构建邮件消息，同时利用 Laravel 的预制组件。
+
+    @component('mail::message')
+    # Order Shipped
+
+    Your order has been shipped!
+
+    @component('mail::button', ['url' => $url])
+    View Order
+    @endcomponent
+
+    Thanks,<br>
+    {{ config('app.name') }}
+    @endcomponent
+
+> {tip} 当你在写 Markdown 格式邮件的时候千万不要有多余缩进，不然 Markdown 解析器很容易会把缩进的内容渲染成代码块。
+
+#### 按钮组件
+
+按钮连组件渲染一个居中的连接按钮，组件接受两个参数，一个 `url` 和一个可选的 `color` 。支持的颜色有 `blue` 、 `green` 、 和 `red` 。你可以在邮件消息体中加入随便多个你想要的按钮。
+
+    @component('mail::button', ['url' => $url, 'color' => 'green'])
+    View Order
+    @endcomponent
+
+#### 面板组件
+
+面板组件将面板中给定的一块文字的背景渲染成跟其他的消息体背景稍微不同。这样可以让这块文字引起人们的注意。
+
+    @component('mail::panel')
+    This is the panel content.
+    @endcomponent
+
+#### 表格组件
+
+表格组件允许你将一个 Markdown 格式的表格转换成一个 HTML 格式的表格。组件接受 Markdown 格式的表格作为它的内容。表格列对齐方式按照默认的 Markdown 对齐风格而定。
+
+    @component('mail::table')
+    | Laravel       | Table         | Example  |
+    | ------------- |:-------------:| --------:|
+    | Col 2 is      | Centered      | $10      |
+    | Col 3 is      | Right-Aligned | $20      |
+    @endcomponent
+
+<a name="customizing-the-components"></a>
+### 自定义组件
+
+你或许会为了自定义而导出你应用中所有的 Markdown 邮件组件。要导出这些组件，使用 `vendor:publish` 这个 Artisan 命令来发布资源文件标签。
+
+    php artisan vendor:publish --tag=laravel-mail
+
+这个命令会发布 Markdown 邮件组件到 `resources/views/vendor/mail` 文件夹。而 `mail` 文件夹会包含一个 `html` 文件夹和一个 `markdown` 文件夹，每个文件夹都包含他们的可用组件的描述。你可以按照你的意愿自定义这些组件。
+
+#### 自定义样式表 CSS
+
+在导出组件之后，`resources/views/vendor/mail/html/themes` 文件夹将包含一个默认的 `default.css` 文件。你可以在这个文件中自定义 CSS ，你定义的这些样式将会在 Markdown 格式消息体转换成 HTML 格式时自动得到应用。
+
+> {tip} 如果你想为 Markdown 组件构建一个全新的主题，只要写一个新的 CSS 文件，放在 `html/themes` 文件夹，然后在你的 `mail` 配置文件中改变 `theme` 选项就可以了。
 
 <a name="sending-mail"></a>
 ## 发送邮件
@@ -383,6 +474,17 @@ Laravel 基于 [SwiftMailer](http://swiftmailer.org) 函数库提供了一套简
         ->bcc($evenMoreUsers)
         ->queue($message);
 
+#### 默认队列
+
+如果你的 mailable 类想要默认使用队列，你可以在类中实现 `ShouldQueue` 接口契约。现在，即便你调用 `send` 方法来发送邮件， mailable 类仍将邮件放入队列中发送。
+
+    use Illuminate\Contracts\Queue\ShouldQueue;
+
+    class OrderShipped extends Mailable implements ShouldQueue
+    {
+        //
+    }
+
 <a name="mail-and-local-development"></a>
 ## 邮件和本地开发
 
@@ -422,6 +524,7 @@ Laravel 会在发送邮件消息之前触发一个事件。切记，这个事件
     ];
 
 ## 译者署名
+
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@麦索](https://github.com/dongm2ez)  | <img class="avatar-66 rm-style" src="https://avatars3.githubusercontent.com/u/9032795?v=3&s=460?imageView2/1/w/100/h/100">  |  翻译  | 程序界的小学生，目前生活在北京，希望能够多结交大牛。Follow me [@dongm2ez](https://github.com/dongm2ez) at Github
+| [@qufo](https://github.com/qufo)  | <img class="avatar-66 rm-style" src="https://avatars1.githubusercontent.com/u/2526883?v=3&s=460?imageView2/1/w/100/h/100">  |  翻译  | 欢迎共同探讨。[@Qufo](https://github.com/qufo) |

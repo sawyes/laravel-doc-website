@@ -1,8 +1,9 @@
-# HTTP请求
+# Laravel 的 HTTP 请求 Request
 
 - [获取请求](#accessing-the-request)
     - [请求路径 & 方法](#request-path-and-method)
     - [PSR-7 请求](#psr7-requests)
+- [输入数据的预处理和规范化](#input-trimming-and-normaliation)
 - [获取输入数据](#retrieving-input)
     - [旧输入数据](#old-input)
     - [Cookies](#cookies)
@@ -132,6 +133,13 @@
 
 > {tip} 如果你从路由或者控制器返回了一个 PSR-7 响应实例，那么这个实例将被自动转换回一个 Laravel 响应实例，同时由框架显示。
 
+<a name="input-trimming-and-normaliation"></a>
+## 输入数据的预处理和规范化
+
+在 Laravel 的全局中间件中默认包含了 `TrimStrings` 和 `ConvertEmptyStringsToNull` 两个中间件。这些中间件被列在 `App\Http\Kernel` 类中。它们会自动处理所有请求中传入的字符串字段，比如将空的字符串字段转变成 `null` 值。你再也不用担心路由和控制器中数据规范化的问题。
+
+如果你想停用这些功能，你可以在 `App\Http\Kernel` 类的 `$middleware` 属性中移除这些中间件。
+
 <a name="retrieving-input"></a>
 ## 获取输入数据
 
@@ -182,6 +190,10 @@ Laravel 在处理动态属性的优先级是，先从请求的数据中查找，
     $input = $request->except(['credit_card']);
 
     $input = $request->except('credit_card');
+
+`only` 方法会返回所有你指定的键值对，即使这个键在输入数据中并不存在。如果一个键在输入数据中并不存在时，它对应的值是 `null` 。当你想要获取请求中实际存在的输入数据时，你可以使用 `intersect` 方法。
+
+    $input = $request->intersect(['username', 'password']);
 
 #### 确定是否有输入值
 
@@ -260,10 +272,10 @@ Laravel 框架创建的每个 cookie 都会被加密并且加上认证标识，�
 
     return response('Hello World')->cookie($cookie);
     
-> 译者注： 关于 Cookie，需要注意一点，默认 Laravel 创建的所有 Cookie 都是加密过的，创建未加密的 Cookie 的方法请见 [【小技巧分享】在 Laravel 中设置没有加密的 cookie](https://phphub.org/topics/1758)
+> 译者注： 关于 Cookie，需要注意一点，默认 Laravel 创建的所有 Cookie 都是加密过的，创建未加密的 Cookie 的方法请见 [【小技巧分享】在 Laravel 中设置没有加密的 cookie](https://laravel-china.org/topics/1758)
 
 <a name="files"></a>
-### Files
+## 文件资源
 
 <a name="retrieving-uploaded-files"></a>
 ### 获取上传文件
@@ -298,7 +310,7 @@ Laravel 框架创建的每个 cookie 都会被加密并且加上认证标识，�
 
 #### 其它上传文件的方法
 
-`UploadedFile` 的实例还有许多可用的方法，可以到 [该对象的 API 文档](http://api.symfony.com/3.0/Symfony/Component/HttpFoundation/File/UploadedFile.html) 了解这些方法的详细信息。
+`UploadedFile` 的实例还有许多可用的方法，可以到该对象的 [API 文档](http://api.symfony.com/3.0/Symfony/Component/HttpFoundation/File/UploadedFile.html) 了解这些方法的详细信息。
 
 <a name="storing-uploaded-files"></a>
 ### 储存上传文件
@@ -319,3 +331,4 @@ Laravel 框架创建的每个 cookie 都会被加密并且加上认证标识，�
     $path = $request->photo->storeAs('images', 'filename.jpg');
 
     $path = $request->photo->storeAs('images', 'filename.jpg', 's3');
+

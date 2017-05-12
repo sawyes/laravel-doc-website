@@ -1,4 +1,4 @@
-# 辅助函数
+# Laravel 的辅助函数列表
 
 - [简介](#introduction)
 - [可用方法](#available-methods)
@@ -6,7 +6,7 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身框架中使用到。如果你觉得实用，也可以在你自己的应用中使用它们。
+Laravel 包含有各种各样的 PHP 辅助函数，许多都是在 Laravel 自身框架中使用到。如果你觉得实用，也可以在你自己的应用中使用它们。
 
 <a name="available-methods"></a>
 ## 可用方法
@@ -57,7 +57,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 [base_path](#method-base-path)
 [config_path](#method-config-path)
 [database_path](#method-database-path)
-[elixir](#method-elixir)
+[mix](#method-mix)
 [public_path](#method-public-path)
 [resource_path](#method-resource-path)
 [storage_path](#method-storage-path)
@@ -96,6 +96,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 [action](#method-action)
 [asset](#method-asset)
 [secure_asset](#method-secure-asset)
+[secure_url](#method-secure-url)
 [route](#method-route)
 [url](#method-url)
 
@@ -111,6 +112,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 [auth](#method-auth)
 [back](#method-back)
 [bcrypt](#method-bcrypt)
+[cache](#method-cache)
 [collect](#method-collect)
 [config](#method-config)
 [csrf_field](#method-csrf-field)
@@ -120,11 +122,14 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 [env](#method-env)
 [event](#method-event)
 [factory](#method-factory)
+[info](#method-info)
+[logger](#method-logger)
 [method_field](#method-method-field)
 [old](#method-old)
 [redirect](#method-redirect)
 [request](#method-request)
 [response](#method-response)
+[retry](#method-retry)
 [session](#method-session)
 [value](#method-value)
 [view](#method-view)
@@ -150,7 +155,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-array-add"></a>
 #### `array_add()` {#collection-method .first-collection-method}
 
-如果指定的键不存在于该数组中，`array_add` 函数就会将指定的键值对加到数组中：
+如果给定的键不存在与数组中，`array_add` 就会把给定的键值对添加到数组中：
 
     $array = array_add(['name' => 'Desk'], 'price', 100);
 
@@ -216,7 +221,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-array-flatten"></a>
 #### `array_flatten()` {#collection-method}
 
-`array_flatten` 函数将多维数组压制成一维数组：
+`array_flatten`  函数将多维数组压制成一维数组：
 
     $array = ['name' => 'Joe', 'languages' => ['PHP', 'Ruby']];
 
@@ -255,11 +260,15 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
 `array_has` 函数使用「点」式语法检查指定的项目是否存在于数组中：
 
-    $array = ['products' => ['desk' => ['price' => 100]]];
+    $array = ['product' => ['name' => 'desk', 'price' => 100]];
 
-    $hasDesk = array_has($array, 'products.desk');
+    $hasItem = array_has($array, 'product.name');
 
     // true
+
+    $hasItems = array_has($array, ['product.price', 'product.discount']);
+
+    // false
 
 <a name="method-array-last"></a>
 #### `array_last()` {#collection-method}
@@ -364,7 +373,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-array-sort-recursive"></a>
 #### `array_sort_recursive()` {#collection-method}
 
-`array_sort_recursive` 函数使用 `sort` 函数递归排序数组：
+`array_sort_recursive` 函数使用 sort 函数递归排序数组：
 
     $array = [
         [
@@ -466,12 +475,12 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
     $path = database_path();
 
-<a name="method-elixir"></a>
-#### `elixir()` {#collection-method}
+<a name="method-mix"></a>
+#### `mix()` {#collection-method}
 
-`elixir` 函数获取带有版本号的 [Elixir](/docs/{{version}}/elixir) 文件路径：
+`mix` 函数获取带有版本号的 [mix](/docs/{{version}}/mix) 文件:
 
-    elixir($file);
+    mix($file);
 
 <a name="method-public-path"></a>
 #### `public_path()` {#collection-method}
@@ -483,7 +492,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-resource-path"></a>
 #### `resource_path()` {#collection-method}
 
-`resource_path` 函数返回 `resource` 目录的完整路径。你也可以使用 `resource_path` 函数生成针对指定文件相对于 `resource` 目录的完整路径：
+`resource_path` 函数返回 `resources` 目录的完整路径。你也可以使用 `resource_path` 函数生成针对指定文件相对于 `resources` 目录的完整路径：
 
     $path = resource_path();
 
@@ -492,7 +501,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-storage-path"></a>
 #### `storage_path()` {#collection-method}
 
-`storage_path` 函数返回 `storage` 目录的完整路径。你也可以使用 `resource_path` 函数生成针对指定文件相对于 `storage` 目录的完整路径：
+`storage_path` 函数返回 `storage` 目录的完整路径。你也可以使用 `storage_path` 函数生成针对指定文件相对于 `storage` 目录的完整路径：
 
     $path = storage_path();
 
@@ -513,7 +522,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-class-basename"></a>
 #### `class_basename()` {#collection-method}
 
-`class_basename` 返回不包含命名空间的类名称：
+`class_basename` 函数返回不包含命名空间的类名称：
 
     $class = class_basename('Foo\Bar\Baz');
 
@@ -570,6 +579,12 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 `str_contains` 函数判断字符串是否包含有指定内容：
 
     $value = str_contains('This is my name', 'my');
+
+    // true
+
+你也可以传递数组，来判断字符串是否包任意指定内容:
+
+    $value = str_contains('This is my name', ['my', 'foo']);
 
     // true
 
@@ -671,7 +686,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-trans-choice"></a>
 #### `trans_choice()` {#collection-method}
 
-`trans_choice` 函数根据数量翻译指定的语句：
+`trans_choice` 函数根据给定数量来决定翻译指定语句是复数形式还是单数形式：
 
     $value = trans_choice('foo.bar', $count);
 
@@ -694,14 +709,14 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
 根据当前请求的协议（HTTP 或 HTTPS）生成资源文件的 URL：
 
-	$url = asset('img/photo.jpg');
+    $url = asset('img/photo.jpg');
 
 <a name="method-secure-asset"></a>
 #### `secure_asset()` {#collection-method}
 
 使用 HTTPS 协议生成资源文件的 URL：
 
-	echo secure_asset('foo/bar.zip', $title, $attributes = []);
+    echo secure_asset('foo/bar.zip', $title, $attributes = []);
 
 <a name="method-route"></a>
 #### `route()` {#collection-method}
@@ -714,6 +729,15 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
     $url = route('routeName', ['id' => 1]);
 
+<a name="method-secure-url"></a>
+#### `secure_url()` {#collection-method}
+
+`secure_url` 数使用 HTTPS 协议生成指定路径的完整 URL：
+
+    echo secure_url('user/profile');
+
+    echo secure_url('user/profile', [1]);
+
 <a name="method-url"></a>
 #### `url()` {#collection-method}
 
@@ -723,7 +747,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
     echo url('user/profile', [1]);
 
-如果没有提供路径参数，将会返回一个 `Illuminate\Routing\UrlGenerator` 实例： 
+如果没有提供路径参数，将会返回一个 `Illuminate\Routing\UrlGenerator` 实例：
 
     echo url()->current();
     echo url()->full();
@@ -760,14 +784,14 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-auth"></a>
 #### `auth()` {#collection-method}
 
-`auth` 函数返回一个 authenticator 实例，可以使用它来代替 `Auth` facade。
+`auth` 函数返回一个 authenticator 实例，可以使用它来代替 Auth facade：
 
     $user = auth()->user();
 
 <a name="method-back"></a>
 #### `back()` {#collection-method}
 
-`back` 函数生成一个重定向响应让用户返回到之前的位置：
+`back()` 函数生成一个重定向响应让用户返回到之前的位置：
 
     return back();
 
@@ -777,6 +801,21 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 `bcrypt` 函数使用 Bcrypt 算法哈希指定的数值。你可以使用它代替 `Hash` facade：
 
     $password = bcrypt('my-secret-password');
+
+<a name="method-cache"></a>
+#### `cache()` {#collection-method}
+
+`cache` 函数尝试从缓存获取给定 `key` 的值。如果 `key` 不存在则返回默认值：
+
+    $value = cache('key');
+
+    $value = cache('key', 'default');
+
+同时，你也可以传递键值对来设置缓存，第二个参数可以指定缓存的过期时间，单位分钟：
+
+    cache(['key' => 'value'], 5);
+
+    cache(['key' => 'value'], Carbon::now()->addSeconds(10));
 
 <a name="method-collect"></a>
 #### `collect()` {#collection-method}
@@ -794,7 +833,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
     $value = config('app.timezone', $default);
 
-`config` 辅助函数也可以在运行期间，根据指定的键值对设置指定的配置信息
+`config` 辅助函数也可以在运行期间，根据指定的键值对设置指定的配置信息：
 
     config(['app.debug' => true]);
 
@@ -828,7 +867,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-dispatch"></a>
 #### `dispatch()` {#collection-method}
 
-`dispatch` 函数把一个新任务推送到 Laravel 的 [任务队列](/docs/{{version}}/queues) 中：
+`dispatch` 函数把一个新任务推送到 Laravel 的 [任务队列](/docs/{{version}}/queues)中：
 
     dispatch(new App\Jobs\SendEmails);
 
@@ -839,27 +878,53 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 
     $env = env('APP_ENV');
 
-    // 当变量不存在时返回一个默认值...
+    // Return a default value if the variable doesn't exist...
     $env = env('APP_ENV', 'production');
 
 <a name="method-event"></a>
 #### `event()` {#collection-method}
 
-`event` 函数发派指定的 [事件](/docs/{{version}}/events) 到所属的侦听器：
+`event` 函数派发指定的 [事件](/docs/{{version}}/events) 到所属的侦听器：
 
     event(new UserRegistered($user));
 
 <a name="method-factory"></a>
 #### `factory()` {#collection-method}
 
-`factory` 函数根据指定类、名称以及数量生成模型工厂构造器（model factory builder）。可用于 [测试](/docs/{{version}}/testing#model-factories) 或 [数据填充](/docs/{{version}}/seeding#using-model-factories)：
+`factory`  函数根据指定类、名称以及数量生成模型工厂构造器（model factory builder）。可用于 [测试](/docs/{{version}}/database-testing#writing-factories) 或 [数据填充](/docs/{{version}}/seeding#using-model-factories)：
 
     $user = factory(App\User::class)->make();
+
+<a name="method-info"></a>
+#### `info()` {#collection-method}
+
+`info` 函数以 `info` 级别写入日志:
+
+    info('Some helpful information!');
+
+包含上下文数据的数组可以通过第二个参数传递给函数：
+
+    info('User login attempt failed.', ['id' => $user->id]);
+
+<a name="method-logger"></a>
+#### `logger()` {#collection-method}
+
+`logger` 函数以 `debug` 级别写入日志:
+
+    logger('Debug message');
+
+同时支持传入数组作为参数：
+
+    logger('User has logged in.', ['id' => $user->id]);
+
+如果没有传入参数，则会返回一个 [日志](/docs/{{version}}/errors#logging) 的实例：
+
+    logger()->error('You are not allowed here.');
 
 <a name="method-method-field"></a>
 #### `method_field()` {#collection-method}
 
-`method_field` 函数生成模拟表单 HTTP 动词的 HTML 表单隐藏字段。例如，使用 [Blade 语法](/docs/{{version}}/blade)：
+`method_field` 函数生成模拟各种 HTTP 动作请求的 HTML 表单隐藏字段。例如，使用 [Blade 语法](/docs/{{version}}/blade)：
 
     <form method="POST">
         {{ method_field('DELETE') }}
@@ -868,7 +933,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-old"></a>
 #### `old()` {#collection-method}
 
-`old` 函数 [获取](/docs/{{version}}/requests#retrieving-input) session 内一次性的旧有输入值：
+`old` 函数 [获取](/docs/{{version}}/requests#retrieving-input) session 内一次性的历史输入值：
 
     $value = old('value');
 
@@ -886,7 +951,7 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 <a name="method-request"></a>
 #### `request()` {#collection-method}
 
-`request` 函数返回当前 [请求](/docs/{{version}}/requests) 实例或获取输入的项目： 
+`request` 函数返回当前 [请求](/docs/{{version}}/requests) 实例或获取输入的项目：
 
     $request = request();
 
@@ -900,6 +965,15 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
     return response('Hello World', 200, $headers);
 
     return response()->json(['foo' => 'bar'], 200, $headers);
+
+<a name="method-retry"></a>
+#### `retry()` {#collection-method}
+
+`retry` 函数将会重复调用给定的回调函数，最多调用指定的次数。如果回调函数没有抛出异常并且有值返回，则 `retry` 函数返回该值。如果回调函数抛出异常，`retry` 函数将拦截异常并自动再次调用回调函数，直到调用给定的次数。如果重试次数超出给定次数，拦截的异常将会抛出：
+
+    return retry(5, function () {
+        // Attempt 5 times while resting 100ms in between attempts...
+    }, 100);
 
 <a name="method-session"></a>
 #### `session()` {#collection-method}
@@ -935,4 +1009,4 @@ Laravel 包含有各种各样的PHP辅助函数，许多都是在 Laravel 自身
 ## 译者署名
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@zjien](https://laravel-china.org/users/2554)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/2554_1445051146.png?imageView2/1/w/200/h/200">  |  翻译  | 专注于PHP，Laravel并学习设计模式中，[@zjien](https://github.com/zjien/) at Github  |
+| [@zyxcba](https://github.com/cmzz)  | <img class="avatar-66 rm-style" src="https://avatars3.githubusercontent.com/u/6111715?v=3&s=100">  |  翻译  | [小猪淘客](http://pigtk.com) - 免费的淘宝客优惠券CMS |

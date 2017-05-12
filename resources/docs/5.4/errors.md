@@ -1,65 +1,63 @@
-# 错误与日志
+# Laravel 的错误和日志记录
 
 - [简介](#introduction)
-- [设置](#configuration)
-    - [错误细节](#error-detail)
-    - [日志储存](#log-storage)
-    - [日志严重级别](#log-severity-levels)
-    - [自定义 Monolog 配置](#custom-monolog-configuration)
+- [配置](#configuration)
+    - [显示错误信息](#error-detail)
+    - [日志存储](#log-storage)
+    - [日志等级](#log-severity-levels)
+    - [自定义 Monolog 设置](#custom-monolog-configuration)
 - [异常处理](#the-exception-handler)
     - [Report 方法](#report-method)
-    - [render 方法](#render-method)
+    - [Render 方法](#render-method)
 - [HTTP 异常](#http-exceptions)
-    - [自定义 HTTP 错误页面](#custom-http-error-pages)
-- [日志](#logging)
+    - [自定义错误页面](#custom-http-error-pages)
+- [记录](#logging)
 
 <a name="introduction"></a>
 ## 简介
 
-当你创建一个新的 Laravel 项目时，Laravel 已经将错误和异常处理帮你配置好了。 `App\Exceptions\Handler` 类会将触发异常记入日志并返回给用户。本文会深入的对这个类进行探讨。
+当您启动一个新的 Laravel 项目时，错误和异常处理就已为您配置。 应用程序触发的所有异常都被 `App\Exceptions\Handler` 类记录下来，然后渲染给用户。 我们将在本文档中深入介绍此类。
 
-日志记录，Laravel 利用 [Monolog](https://github.com/Seldaek/monolog) 函数库提供多样而强大的日志处理。 Laravel 配置了几个处理程序给你，允许你选择单个日志文件或多个来系统记录错误信息。
+Laravel 使用功能强大的 [Monolog](https://github.com/Seldaek/monolog) 库进行日志处理。Laravel 配置了多几种日志处理 handler ，方便您在单个日志文件、多个交替日志文件之间进行选择写入或将错误信息写入系统日志。
 
 <a name="configuration"></a>
-## 设置
-
+## 配置
 <a name="error-detail"></a>
-#### 错误细节
+### 显示错误信息
+`config/app.php` 文件的 `debug` 选项，决定了是否向用户显示错误信息。默认情况下，此选项设置为存储在 `.env` 文件中的  `APP_DEBUG` 环境变量中。
 
-你的应用程序通过 `config/app.php` 配置文件中的 `debug` 设置选项来控制浏览器对错误的细节显示。默认情况下，此设置选项是参照于保存在 `.env` 文件的 `APP_DEBUG` 环境变量。
-
-在开发的时候，你应该将 `APP_DEBUG` 环境变量设置为 `true`。在你的上线环境中，这个值应该永远为 `false`。 如果在生产环境中将这个值设置为 `true`，你将冒风险将一些敏感配置信息暴露个最终用户。
+开发环境下，应该将 `APP_DEBUG` 环境变量设置为 `true` 。在您的生产环境中，此值应始终为  `false` 。如果在生产中将该值设置为 `true` ，则可能会将敏感的配置值暴露给应用程序的最终用户。
 
 <a name="log-storage"></a>
 ### 日志存储
-
-Laravel 提供可立即使用的 `single`、`daily`、`syslog` 和 `errorlog` 日志模式。例如，如果你想要每天保存一个日志文件，而不是单个文件，则可以在 `config/app.php` 配置文件内设置 `log` 变量：
+开箱即用，Laravel 支持 `single` 、`daily` 、 `syslog` 和 `errorlog` 日志模式。要配置 Laravel 使用的存储机制，应该修改 `config/app.php` 配置文件中的 `log` 选项。例如，如果您希望使用每日一个日志文件而不是单个文件，则应将 `app` 配置文件中的 `log` 值设置为 `daily`：
 
     'log' => 'daily'
 
 #### 日志保存天数限制
 
-当使用 `daily` 日志模式时，默认情况下会保存 5 天的日志，你可通过 `app.php` 配置文件里的配置项 `log_max_files` 来定制日志保存天数：
+使用 `daily` 日志模式时，Laravel 将只保留五天默认的日志文件。如果你想调整保留文件的数量，您可以添加一个 `log_max_files` 配置项目到 `APP` 配置文件：
 
     'log_max_files' => 30
 
 <a name="log-severity-levels"></a>
-### 日志记录级别
+### 日志等级
 
-使用 Monolog 时, log 信息可以有不同的严重级别。默认，Laravel 将所有级别日志写到 storage ，然而在你的生产环境中，你可能希望配置一个最小严重级别，那么你应该添加 `log_level` 选项到你的 `app.php` 配置文件。
+使用 Monolog 时，日志消息可能具有不同的日志等级。默认情况下，Laravel 将所有日志级别写入存储。但是，在生产环境中，您可能希望通过将 `log_level` 选项添加到 `app.php` 配置文件中来配置应记录的最低日志等级。
 
-一旦该选项被配置，Laravel 会记录所有大于或等于这个级别的日志。例如，一个默认 `log_level` 是 `error` 那么将会记录 **error**, **critical**, **alert** 和 **emergency** 信息：
+一旦配置了此选项，Laravel 将记录大于或等于指定日志等级的所有级别。例如，默认将 `log_level` 设置为 `error` 那么将会记录 error , critical , alert 和 emergency 日志信息：
 
     'log_level' => env('APP_LOG_LEVEL', 'error'),
 
-> {tip} Monolog 辨识以下严重级别 - 最低到高为： `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert`, `emergency` 。
+> {tip} Monolog 识别以下日志等级 - 从低到高为: `debug` , `info` , `notice` , `warning` , `error` , `critical` , `alert` , `emergency`。
+
 
 <a name="custom-monolog-configuration"></a>
 ### 自定义 Monolog 设置
 
-如果你想要完全控制 Monolog，则使用应用程序的 `configureMonologUsing` 方法。此方法应该在 `bootstrap/app.php` 文件返回 `$app` 变量之前被调用：
+如果你想让你的应用程序完全控制 Monolog ，可以使用应用程序的 `configureMonologUsing` 方法。你应该放置一个回调方法到 `bootstrap/app.php` 文件中，在文件返回 `$app` 变量之前，调用这个方法：
 
-    $app->configureMonologUsing(function($monolog) {
+    $app->configureMonologUsing(function ($monolog) {
         $monolog->pushHandler(...);
     });
 
@@ -71,14 +69,14 @@ Laravel 提供可立即使用的 `single`、`daily`、`syslog` 和 `errorlog` �
 <a name="report-method"></a>
 ### Report 方法
 
-所有异常处理都由 `App\Exceptions\Handler` 类进行。这个类包含两个方法：`report` 和 `render`。 我们将研究这些方法的细节。`report` 方法方法用于记录异常或将异常寄给外部服务如 [Bugsnag](https://bugsnag.com) 或 [Sentry](https://github.com/getsentry/sentry-laravel) 。默认， `report` 方法简单地通过传递异常到基类进行处理，然而，你可以自由选择任何方式进行处理。
+所有异常都由 `App\Exceptions\Handler` 类处理。 这个类包含两个方法：`report` 和 `render` 。 我们将详细研究这些方法。 `report` 方法用于记录异常或将其发送到外部服务，如 [Bugsnag](https://bugsnag.com) 或 [Sentry](https://github.com/getsentry/sentry-laravel) 。默认情况下，`report` 方法只是将异常传递给记录异常的基类。然而，你可以自由选择任何方式进行处理。
 
-例如，如果你需要将不同的异常类型报告给不同的方法，你可以使用 PHP `instanceof` 比较操作符：
+例如，如果您需要以不同的方式报告不同类型的异常，您可以使用 PHP `instanceof` 比较运算符：
 
     /**
-     * 报告或记录异常。
+     * 报告或记录异常
      *
-     * 这是一个很棒的位置将异常发送到 Sentry ，Bugsnag ，etc 。
+     * 这是一个很棒的位置向 Sentry ，Bugsnag 等发送异常。
      *
      * @param  \Exception  $exception
      * @return void
@@ -94,10 +92,11 @@ Laravel 提供可立即使用的 `single`、`daily`、`syslog` 和 `errorlog` �
 
 #### 通过类型忽略异常
 
- `$dontReport` 属性包含一个不会被记录的异常类型数组。例如，404 异常以及其他几个类型异常不会被写到你的日志文件中，如果需要你可以添加其他异常类型这个数组：
+异常 handler 的 `$dontReport` 属性包含不会记录的异常类型数组。例如，404错误导致的异常以及其他几种类型的错误不会写入您的日志文件。您可以根据需要向此数组添加其他异常类型：
+
 
     /**
-     * 不需要报告的异常类型列表。
+     * 不应报告的异常类型列表
      *
      * @var array
      */
@@ -112,10 +111,10 @@ Laravel 提供可立即使用的 `single`、`daily`、`syslog` 和 `errorlog` �
 <a name="render-method"></a>
 ### Render 方法
 
-`render` 方法负责将异常转换成 HTTP 响应发送给浏览器。默认，异常传递给生成响应的基类，然而你也可以自由的想检查异常类型或返回自定义响应：
+`render` 方法负责将异常转换成 HTTP 响应发送给浏览器。默认情况下，异常会传递给为您生成响应的基类。但是，您可以自由检查异常类型或返回您自己的自定义响应：
 
     /**
-     * 渲染异常并添加到响应中。
+     * 渲染异常并添加到 HTTP 响应中。
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Exception  $exception
@@ -133,23 +132,26 @@ Laravel 提供可立即使用的 `single`、`daily`、`syslog` 和 `errorlog` �
 <a name="http-exceptions"></a>
 ## HTTP 异常
 
-一些异常描述来自服务器的 HTTP 错误码。例如这个方法可以是一个「页面未找到」 错误 (404)，一个 「认证失败错误」 (401) 或者一个开发人员生成的 500 错误。为了在应用中生成一个这样的响应，你可以使用 `abort` 辅助函数：
+一些异常描述了来自服务器的 HTTP 错误代码。例如这可能是「找不到页面」 错误（404），「未授权错误」（401）或甚至开发者生成的500错误。你可以使用 `abort` 函数，在应用程序中的任何地方生成这样的响应：
 
     abort(404);
 
- `abort` 辅助函数将会立即引发一个被异常处理器渲染的异常。此外，你还可以提供响应文本：
+`abort`函数将立即创建一个被渲染的异常。此外，您还可以提供响应文本：
 
     abort(403, 'Unauthorized action.');
 
 <a name="custom-http-error-pages"></a>
-### 自定义 HTTP 错误页面
+### 自定义错误页面
 
-Laravel 制作自定义的 HTTP 错误显示页面很简单。例如，如果你想定义一个 404 页面，创建一个 `resources/views/errors/404.blade.php` 。这个文件将会用于渲染所有的 404 错误。这个视图目录中的视图命名应该和·对于的 HTTP 状态码相匹配。 `HttpException` 实例会将 `abort` 函数传递到视图作为 `$exception` 变量.
+Laravel 可以轻松地显示各种HTTP状态代码的自定义错误页面。例如，如果您要自定义404 HTTP状态代码的错误页面，请创建一个 `resources/views/errors/404.blade.php` 。此文件将会用于渲染所有404错误。此目录中的视图文件命名应与它们对应的HTTP状态代码匹配。由 `abort` 函数引发的 `HttpException` 实例将作为 `$exception` 变量传递给视图。
+
 
 <a name="logging"></a>
-## 日志
+## 记录
 
-Laravel 用强大的 [Monolog](http://github.com/seldaek/monolog) 函数库提供一个简单日志抽象层。默认，Laravel 会在 `storage/logs` 目录下创建一个日志文件。你可以使用 `Log` [facade](/docs/{{version}}/facades) 写入信息：
+Laravel 在强大的 [Monolog](https://github.com/seldaek/monolog) 库上提供了一个简单的抽象层。默认情况下，Laravel 日志目录为 `storage/logs` 。您可以使用 `Log` [facade](/docs/{{version}}/facades) :将信息写入日志：
+
+
 
     <?php
 
@@ -162,7 +164,7 @@ Laravel 用强大的 [Monolog](http://github.com/seldaek/monolog) 函数库提�
     class UserController extends Controller
     {
         /**
-         * 显示指定用户的详情。
+         * 显示给定用户的配置文件
          *
          * @param  int  $id
          * @return Response
@@ -175,7 +177,7 @@ Laravel 用强大的 [Monolog](http://github.com/seldaek/monolog) 函数库提�
         }
     }
 
-该日志记录器提供八种 [RFC 5424](http://tools.ietf.org/html/rfc5424) 定义的日志级别: **emergency** ，**alert** ，**critical**, **error** ，**warning** ，**notice** ，**info** 和 **debug** 。
+该日志记录器提供八种 [RFC 5424](https://tools.ietf.org/html/rfc5424) :定义的日志级别: emergency ，alert ，critical, error ，warning ，notice ，info 和 debug 。
 
     Log::emergency($message);
     Log::alert($message);
@@ -188,17 +190,17 @@ Laravel 用强大的 [Monolog](http://github.com/seldaek/monolog) 函数库提�
 
 #### 上下文信息
 
-一个数组上下文信息数据也会传递给日志方法，上下文信息数据也会被格式化记录在日志信息中：
+将上下文数据以数组格式传递给日志方法。此上下文数据将被格式化并与日志消息一起显示：
 
     Log::info('User failed to login.', ['id' => $user->id]);
 
 #### 访问底层 Monolog 实例
 
-Monolog 有一个多样的日志处理器，如果你需要，你可以访问 Laravel 底层的 Monolog 实例：
+Monolog 还有多种其他的处理 handler ，你可以用来记录。如果需要，您可以访问 Laravel 底层的 Monolog 实例：
 
     $monolog = Log::getMonolog();
 
 ## 译者署名
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@麦索](https://github.com/dongm2ez)  | <img class="avatar-66 rm-style" src="https://avatars3.githubusercontent.com/u/9032795?v=3&s=460?imageView2/1/w/100/h/100">  |  翻译  | 程序界的小学生，目前生活在北京，希望能够多结交大牛。Follow me [@dongm2ez](https://github.com/dongm2ez) at Github
+| [@e421083458](https://github.com/e421083458)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/10802_1486368142.jpeg?imageView2/1/w/100/h/100">  |  翻译  | Github求star，[@e421083458](https://github.com/e421083458/) at Github  |

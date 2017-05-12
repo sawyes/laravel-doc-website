@@ -1,4 +1,4 @@
-# Laravel Cashier
+# Laravel 的收费系统 Cashier
 
 - [简介](#introduction)
 - [配置](#configuration)
@@ -48,7 +48,7 @@ Laravel Cashier 提供了直观、流畅的接口来接入 [Stripe's](https://st
 
 #### Service 服务提供者
 
-接下来，需要注册 `Laravel\Cashier\CashierServiceProvider` [服务提供者](/docs/{{version}}/providers) 到你的 `config/app/php` 配置文件。
+接下来，需要注册 `Laravel\Cashier\CashierServiceProvider` [服务提供者](/docs/{{version}}/providers) 到你的 `config/app.php` 配置文件。
 
 #### 数据库迁移
 
@@ -92,6 +92,7 @@ Laravel Cashier 提供了直观、流畅的接口来接入 [Stripe's](https://st
 
     'stripe' => [
         'model'  => App\User::class,
+        'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
     ],
 
@@ -175,10 +176,10 @@ Laravel Cashier 提供了直观、流畅的接口来接入 [Stripe's](https://st
 
 然后你需要将 Braintree SDK 添加到你的 `AppServiceProvider` 的 `boot` 方法中：
 
-    \Braintree_Configuration::environment(env('BRAINTREE_ENV'));
-    \Braintree_Configuration::merchantId(env('BRAINTREE_MERCHANT_ID'));
-    \Braintree_Configuration::publicKey(env('BRAINTREE_PUBLIC_KEY'));
-    \Braintree_Configuration::privateKey(env('BRAINTREE_PRIVATE_KEY'));
+    \Braintree_Configuration::environment(config('services.braintree.environment'));
+    \Braintree_Configuration::merchantId(config('services.braintree.merchant_id'));
+    \Braintree_Configuration::publicKey(config('services.braintree.public_key'));
+    \Braintree_Configuration::privateKey(config('services.braintree.private_key'));
 
 <a name="currency-configuration"></a>
 ### 货币配置
@@ -199,7 +200,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
 
     $user = User::find(1);
 
-    $user->newSubscription('main', 'monthly')->create($creditCardToken);
+    $user->newSubscription('main', 'monthly')->create($stripeToken);
 
 `newSubscription` 方法的第一个参数应该是订阅的名称。如果你的应用程序只是提供一个简单的订阅，你可以简单的设置为 `main` 或者 `primary`。第二个参数需要指定用户的 Stripe / Braintree 订阅计划。这里的值应该和在 Stripe 或 Braintree 的中的对应值保持一致。
 
@@ -209,7 +210,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
 
 如果你需要添加额外的客户细节信息，你可以在 `create` 方法的第二个参数中进行传递：
 
-    $user->newSubscription('main', 'monthly')->create($creditCardToken, [
+    $user->newSubscription('main', 'monthly')->create($stripeToken, [
         'email' => $email,
     ]);
 
@@ -221,7 +222,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
 
     $user->newSubscription('main', 'monthly')
          ->withCoupon('code')
-         ->create($creditCardToken);
+         ->create($stripeToken);
 
 <a name="checking-subscription-status"></a>
 ### 查询订阅状态
@@ -232,7 +233,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
         //
     }
 
-也可以在 [route middleware](/docs/{{version}}/middleware) 中使用 `subscribed` 方法，来基于用户的订阅状态过滤用户请求：
+也可以在 [路由中间件](/docs/{{version}}/middleware) 中使用 `subscribed` 方法，来基于用户的订阅状态过滤用户请求：
 
     public function handle($request, Closure $next)
     {
@@ -243,7 +244,6 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
 
         return $next($request);
     }
-
 
 如果你想知道用户是否在一个常识周期内，你可以使用 `onTrial` 方法。该方法可以用来提示用户他们还在试用期之内：
 
@@ -266,7 +266,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
         //
     }
 
-可以去判断用户是否已经取消了他们的订阅，但是还是在订阅的「宽限期」指导订阅完全到期。比方说，如果一个用户在 3 月 5 号取消了订阅，但是原本订阅定于 3 月 10 号到期，那么该用户就会处于「宽限期」直到 3 月 10 号。需要注意的是，`subscribed` 方法在宽限期还是会返回 `true` :
+可以去判断用户是否已经取消了他们的订阅，但是还是在订阅的「宽限期」直到订阅完全到期。比方说，如果一个用户在 3 月 5 号取消了订阅，但是原本订阅定于 3 月 10 号到期，那么该用户就会处于「宽限期」直到 3 月 10 号。需要注意的是，`subscribed` 方法在宽限期还是会返回 `true` :
 
     if ($user->subscription('main')->onGracePeriod()) {
         //
@@ -281,11 +281,7 @@ Cashier 使用美元（USD）作为默认货币。你可以在某个服务提供
 
     $user->subscription('main')->swap('provider-plan-id');
 
-
 如果用户在试用期，试用期的期限会被保留。如果订阅有限量的「份额」存在，该份额数目也会被保留。
-
-
-If you would like to swap plans and cancel any trial period the user is currently on, you may use the `skipTrial` method:
 
 如果你想在更改用户订阅计划的时候取消用户当前订阅的试用期，可以使用 `skipTrial` 方法：
 
@@ -364,7 +360,7 @@ If you would like to swap plans and cancel any trial period the user is currentl
 
 `updateCard` 方法被用于更新客户的信用卡信息。该方法会接受一个 Stripe 的 token，并设置一个新的信用卡作为默认的结算来源：
 
-    $user->updateCard($creditCardToken);
+    $user->updateCard($stripeToken);
 
 <a name="subscription-trials"></a>
 ## 试用订阅
@@ -378,7 +374,7 @@ If you would like to swap plans and cancel any trial period the user is currentl
 
     $user->newSubscription('main', 'monthly')
                 ->trialDays(10)
-                ->create($creditCardToken);
+                ->create($stripeToken);
 
 该方法会设置一个试用期结束日期在数据库的订阅记录上，同时告知 Stripe / Braintree 在该日期之前并不开始结算。
 
@@ -404,6 +400,8 @@ If you would like to swap plans and cancel any trial period the user is currentl
         'trial_ends_at' => Carbon::now()->addDays(10),
     ]);
 
+> {note}  请确保在你的模型中已经为 `trial_ends_at` 添加[日期转换器](/docs/{{version}}/eloquent-mutators#date-mutators)。
+
 Cashier 把这种类型的试用引用为「generic trial」, 因为它并没有关联任何已存在的订阅。`User` 实例上的 `onTrial` 会返回 `true` 值，只要当前的日期没有超过 `trial_ends_at` 的值：
 
     if ($user->onTrial()) {
@@ -420,7 +418,7 @@ Cashier 把这种类型的试用引用为「generic trial」, 因为它并没有
 
     $user = User::find(1);
 
-    $user->newSubscription('main', 'monthly')->create($creditCardToken);
+    $user->newSubscription('main', 'monthly')->create($stripeToken);
 
 <a name="handling-stripe-webhooks"></a>
 ## 处理 Stripe Webhooks
@@ -438,7 +436,7 @@ Cashier 的控制器默认会在多次失败的支付尝试后自动取消该订
 
 #### Webhooks & CSRF 保护
 
-因为 Stripe webhooks 需要绕过 Laravel 的 [CSRF 保护](/docs/{{version}}/routing#csrf-protection) ，所以需要确保将相关的 URI 作为例外添加到你的 `VerifyCsrfToken` 中间件或者在 `web` 中间件集合之外定义相关路由。
+因为 Stripe webhooks 需要绕过 Laravel 的 [CSRF 保护](/docs/{{version}}/csrf) ，所以需要确保将相关的 URI 作为例外添加到你的 `VerifyCsrfToken` 中间件或者在 `web` 中间件集合之外定义相关路由。
 
     protected $except = [
         'stripe/*',
@@ -484,10 +482,10 @@ Cashier 对于失败的支付自动进行取消订阅的处理，但是如果你
 <a name="handling-braintree-webhooks"></a>
 ## 处理 Braintree Webhooks
 
-Stripe 和 Braintree 都能通过 webhooks 通知大量的事件给你的应用程序。为了处理 Stripe webhooks，定义一个路由指向 Cashier's webhook 控制器。该控制器会处理所有传来的请求并分发到合适的控制器方法：
+Stripe 和 Braintree 都能通过 webhooks 通知大量的事件给你的应用程序。为了处理 Braintree webhooks，定义一个路由指向 Cashier's webhook 控制器。该控制器会处理所有传来的请求并分发到合适的控制器方法：
 
     Route::post(
-        'stripe/webhook',
+        'braintree/webhook',
         '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
     );
 
@@ -497,7 +495,7 @@ Cashier 的控制器默认会在多次失败的支付尝试后自动取消该订
 
 #### Braintree & CSRF 保护
 
-因为 Stripe webhooks 需要绕过 Laravel 的 [CSRF 保护](/docs/{{version}}/routing#csrf-protection) ，所以需要确保将相关的 URI 作为例外添加到你的 `VerifyCsrfToken` 中间件或者在 `web` 中间件集合之外定义相关路由。
+因为 Stripe webhooks 需要绕过 Laravel 的 [CSRF 保护](/docs/{{version}}/csrf) ，所以需要确保将相关的 URI 作为例外添加到你的 `VerifyCsrfToken` 中间件或者在 `web` 中间件集合之外定义相关路由。
 
 
     protected $except = [
@@ -507,7 +505,7 @@ Cashier 的控制器默认会在多次失败的支付尝试后自动取消该订
 <a name="defining-braintree-webhook-event-handlers"></a>
 ### 定义 Webhook 事件处理器
 
-Cashier 对于失败的支付自动进行取消订阅的处理，但是如果你想对 Stripe webhook 事件进行额外的处理，可以简单的扩展一下 Webhook 控制器。你的方法名称应该与 Cashier 的预设惯例一直，特别的是，方法名应该以 `handle` 为前缀，然后以 「驼峰」命名的方式加上你要处理的 Stripe webhook 的名称。比如，如果你希望去处理 `dispute_opened` webhook, 你应该添加一个 `handleDisputeOpened` 方法到控制器：
+Cashier 对于失败的支付自动进行取消订阅的处理，但是如果你想对 Braintree webhook 事件进行额外的处理，可以简单的扩展一下 Webhook 控制器。你的方法名称应该与 Cashier 的预设惯例一直，特别的是，方法名应该以 `handle` 为前缀，然后以 「驼峰」命名的方式加上你要处理的 Braintree webhook 的名称。比如，如果你希望去处理 `dispute_opened` webhook, 你应该添加一个 `handleDisputeOpened` 方法到控制器：
 
     <?php
 
@@ -539,7 +537,6 @@ Cashier 对于失败的支付自动进行取消订阅的处理，但是如果你
         'braintree/webhook',
         '\Laravel\Cashier\Http\Controllers\WebhookController@handleWebhook'
     );
- Don't forget: you will need to configure the webhook URI in your Braintree control panel settings.
 
 就这么简单！失败的支付会被控制器捕捉、并处理。Cashier 控制器会自动取消客户的订阅当 Braintree 判断该订阅已经失败（正常会经过三次错误的支付尝试）。不要忘了：你需要在 Braintree 的控制面板正确配置 webhook URI。
 
@@ -629,8 +626,3 @@ Cashier 对于失败的支付自动进行取消订阅的处理，但是如果你
             'product' => 'Your Product',
         ]);
     });
-
-## 译者署名
-| 用户名 | 头像 | 职能 | 签名 |
-|---|---|---|---|
-| [@JobsLong](https://phphub.org/users/56)  | <img class="avatar-66 rm-style" src="http://i4.buimg.com/567571/a3dc28a55fdb2b7a.png">  |  翻译  | 碎片论坛，自学编程：[http://suip.cc](http://jobslong.com)  |

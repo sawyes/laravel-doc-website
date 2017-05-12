@@ -1,4 +1,4 @@
-# 服务容器
+# Laravel 服务容器解析
 
 - [简介](#introduction)
 - [绑定](#binding)
@@ -247,9 +247,3 @@ Laravel 服务容器是管理类依赖和运行依赖注入的有力工具。依
     });
 
 如你所见，被解析的对象会被传递至回调中，让你在对象被传递到消费者前可以设置任何额外属性到对象上。
-
-## 译者署名
-| 用户名 | 头像 | 职能 | 签名 |
-|---|---|---|---|
-| [@yangjingqzp](https://phphub.org/users/5742)  |  <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/5742_1473308107.jpeg?imageView2/1/w/100/h/100"> |  翻译  | 大神们请多多指教，[@yangjingqzp](https://github.com/yangjingqzp) at Github  |
-

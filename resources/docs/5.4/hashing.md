@@ -1,4 +1,4 @@
-# 哈希
+# Laravel 的哈希加密
 
 - [简介](#introduction)
 - [基本用法](#basic-usage)
@@ -6,9 +6,9 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 通过 `Hash` [facade](/docs/{{version}}/facades) 提供 Bcrypt 加密来保存用户密码。如果你在当前应用使用了 `AuthController` 控制器，它将自动使用 Bcrypt 加密来进行注册跟验证。
+Laravel 通过 `Hash` [facade](/docs/{{version}}/facades) 提供 Bcrypt 加密来保存用户密码。 如果您在当前的 Laravel 应用程序中使用了内置的`LoginController` 和 `RegisterController` 类，它们将自动使用 Bcrypt 进行注册和身份验证。
 
-由于 Bcrypt 的 「加密系数（word fator）」可以任意调整，这使它成为最好的加密选择。这代表每一次加密的时间可以随着硬件设备的升级而加长。
+> {tip} 由于 Bcrypt 的 「加密系数（word fator）」可以任意调整，这使它成为最好的加密选择。这代表每一次加密的次数可以随着硬件设备的升级而增加。
 
 <a name="basic-usage"></a>
 ## 基本用法
@@ -19,42 +19,34 @@ Laravel 通过 `Hash` [facade](/docs/{{version}}/facades) 提供 Bcrypt 加密�
 
     namespace App\Http\Controllers;
 
-    use Hash;
-    use App\User;
     use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Hash;
     use App\Http\Controllers\Controller;
 
-    class UserController extends Controller
+    class UpdatePasswordController extends Controller
     {
         /**
-         * 为用户更新密码。
+         * 跟新用户密码
          *
          * @param  Request  $request
-         * @param  int  $id
          * @return Response
          */
-        public function updatePassword(Request $request, $id)
+        public function update(Request $request)
         {
-            $user = User::findOrFail($id);
+            // Validate the new password length...
 
-            // 验证新密码的长度...
-
-            $user->fill([
+            $request->user()->fill([
                 'password' => Hash::make($request->newPassword)
             ])->save();
         }
     }
 
-另外，你也可以使用 `bcrypt` 辅助函数：
-
-    bcrypt('plain-text');
-
 #### 根据哈希值验证密码
 
-`check` 方法允许你通过一个指定的纯字符串跟哈希值进行验证。如果你目前正使用 [Laravel 内含的](/docs/{{version}}/authentication) `AuthController`，你可能不需要直接使用该方法，它已经包含在控制器当中并且会被自动调用。
+`check` 方法允许你通过一个指定的纯字符串跟哈希值进行验证。 如果你目前正使用[Laravel内含的](/docs/{{version}}/authentication) `LoginController` , 你可能不需要直接使用该方法，它已经包含在控制器当中并且会被自动调用：
 
     if (Hash::check('plain-text', $hashedPassword)) {
-        // The passwords match...
+        // 密码对比...
     }
 
 #### 验证密码是否须重新加密
@@ -64,9 +56,8 @@ Laravel 通过 `Hash` [facade](/docs/{{version}}/facades) 提供 Bcrypt 加密�
     if (Hash::needsRehash($hashed)) {
         $hashed = Hash::make('plain-text');
     }
-
+	
 ## 译者署名
-| 用户名 | 头像 | 职能 | 签名 |
-|---|---|---|---|
-| [@silvercell](https://github.com/silvercell)  | <img class="avatar-66 rm-style" src="https://avatars2.githubusercontent.com/u/20363459?v=3&u=2234d736aa27209a2e986d4d789f95c6d110aa0c&s=140">  |  翻译  | [你今天吃药了吗？](http://www.cxdog.com) |
-| [@buer](https://github.com/buer0)  | <img class="avatar-66 rm-style" src="https://avatars3.githubusercontent.com/u/22141008?v=3&u=f14a9d540240e1d39079dc1319eb146a91aabfa8&s=140">  | 翻译 | [已放弃治疗](http://www.cxdog.com) |
+| 用户名                                      | 头像                                       | 职能   | 签名                                       |
+| ---------------------------------------- | ---------------------------------------- | ---- | ---------------------------------------- |
+| [@GanymedeNil](https://github.com/GanymedeNil) | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/6859_1487055454.jpg?imageView2/1/w/100/h/100"> | 翻译   | 我不是Full Stack Developer 2333  [@GanymedeNil](http://weibo.com/jinhongyang) |

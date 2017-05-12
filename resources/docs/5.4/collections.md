@@ -1,8 +1,9 @@
-# 集合
+# Laravel 的集合 Collection
 
 - [简介](#introduction)
-- [创建集合](#creating-collections)
+    - [创建集合](#creating-collections)
 - [可用的方法](#available-methods)
+- [高阶信息传递](#higher-order-messages)
 
 <a name="introduction"></a>
 ## 简介
@@ -15,6 +16,7 @@
     ->reject(function ($name) {
         return empty($name);
     });
+
 
 如上面的代码示例，`Collection` 类支持链式调用，一般来说，每一个 `Collection` 方法会返回一个全新的 `Collection` 实例，你可以放心地进行链接调用。
 
@@ -78,7 +80,9 @@
 [max](#method-max)
 [merge](#method-merge)
 [min](#method-min)
+[nth](#method-nth)
 [only](#method-only)
+[partition](#method-partition)
 [pipe](#method-pipe)
 [pluck](#method-pluck)
 [pop](#method-pop)
@@ -98,6 +102,7 @@
 [sortBy](#method-sortby)
 [sortByDesc](#method-sortbydesc)
 [splice](#method-splice)
+[split](#method-split)
 [sum](#method-sum)
 [take](#method-take)
 [toArray](#method-toarray)
@@ -106,10 +111,11 @@
 [union](#method-union)
 [unique](#method-unique)
 [values](#method-values)
+[when](#method-when)
 [where](#method-where)
 [whereStrict](#method-wherestrict)
 [whereIn](#method-wherein)
-[whereInLoose](#method-whereinloose)
+[whereInStrict](#method-whereinstrict)
 [zip](#method-zip)
 
 </div>
@@ -309,19 +315,13 @@
 <a name="method-every"></a>
 #### `every()` {#collection-method}
 
-创建一个包含每 **第 n 个** 元素的新集合：
+判断集合中每一个元素是否都符合指定条件：
 
-    $collection = collect(['a', 'b', 'c', 'd', 'e', 'f']);
+    collect([1, 2, 3, 4])->every(function ($value, $key) {
+        return $value > 2;
+    });
 
-    $collection->every(4);
-
-    // ['a', 'e']
-
-你可以选择性的传递偏移值作为第二个参数：
-
-    $collection->every(4, 1);
-
-    // ['b', 'f']
+    // false
 
 <a name="method-except"></a>
 #### `except()` {#collection-method}
@@ -352,6 +352,14 @@
     $filtered->all();
 
     // [3, 4]
+
+如果没有提供回调函数，集合中所有返回 `false` 的元素都会被移除：
+
+    $collection = collect([1, 2, 3, null, false, '', 0, []]);
+
+    $collection->filter()->all();
+
+    // [1, 2, 3]
 
 与 `filter` 相反的方法可以查看 [reject](#method-reject)。
 
@@ -550,9 +558,9 @@
 
     $collection = collect(['account_id' => 1, 'product' => 'Desk']);
 
-    $collection->has('email');
+    $collection->has('product');
 
-    // false
+    // true
 
 <a name="method-implode"></a>
 #### `implode()` {#collection-method}
@@ -763,6 +771,23 @@
 
     // 1
 
+<a name="method-nth"></a>
+#### `nth()` {#collection-method}
+
+由每隔第 n 个元素组成一个新的集合：
+
+    $collection = collect(['a', 'b', 'c', 'd', 'e', 'f']);
+
+    $collection->nth(4);
+
+    // ['a', 'e']
+
+你也可以选择传入一个偏移量作为第二个参数
+
+    $collection->nth(4, 1);
+
+    // ['b', 'f']
+
 <a name="method-only"></a>
 #### `only()` {#collection-method}
 
@@ -777,6 +802,17 @@
     // ['product_id' => 1, 'name' => 'Desk']
 
 与 `only` 相反的方法请查看 [except](#method-only)。
+
+<a name="method-partition"></a>
+#### `partition()` {#collection-method}
+
+结合 PHP 中的 `list` 方法来分开符合指定条件的元素以及那些不符合指定条件的元素：
+
+    $collection = collect([1, 2, 3, 4, 5, 6]);
+
+    list($underThree, $aboveThree) = $collection->partition(function ($i) {
+        return $i < 3;
+    });
 
 <a name="method-pipe"></a>
 #### `pipe()` {#collection-method}
@@ -851,7 +887,7 @@
 
     $collection->all();
 
-    // ['zero' => 0, 'one' => 1, 'two', => 2]
+    // ['zero' => 0, 'one' => 1, 'two' => 2]
 
 <a name="method-pull"></a>
 #### `pull()` {#collection-method}
@@ -937,7 +973,7 @@
 <a name="method-reject"></a>
 #### `reject()` {#collection-method}
 
-`reject` 方法以指定的回调函数筛选集合。该回调函数应该对希望从最终集合移除掉的项目返回 `true`：
+`reject` 方法以指定的回调函数筛选集合。会移除掉那些通过判断测试（即结果返回 `true`）的项目：
 
     $collection = collect([1, 2, 3, 4]);
 
@@ -1152,6 +1188,19 @@
 
     // [1, 2, 10, 11, 4, 5]
 
+<a name="method-split"></a>
+#### `split()` {#collection-method}
+
+将集合按指定组数分解：
+
+    $collection = collect([1, 2, 3, 4, 5]);
+
+    $groups = $collection->split(3);
+
+    $groups->toArray();
+
+    // [[1, 2], [3, 4], [5]]
+
 <a name="method-sum"></a>
 #### `sum()` {#collection-method}
 
@@ -1161,7 +1210,7 @@
 
     // 15
 
-如果集合包含嵌套数组或对象，你应该传入一个「键」来指定要用哪些数值来计算总合：
+如果集合包含嵌套数组或对象，你应该传入一个「键」来指定要用哪些数值来计算总和：
 
     $collection = collect([
         ['name' => 'JavaScript: The Good Parts', 'pages' => 176],
@@ -1172,7 +1221,7 @@
 
     // 1272
 
-此外，你可以传入自己的回调函数来决定要用哪些数值来计算总合：
+此外，你可以传入自己的回调函数来决定要用哪些数值来计算总和：
 
     $collection = collect([
         ['name' => 'Chair', 'colors' => ['Black']],
@@ -1265,7 +1314,7 @@
 
     $union->all();
 
-    // [1 => ['a'], 2 => ['b'], [3 => ['c']]
+    // [1 => ['a'], 2 => ['b'], 3 => ['c']]
 
 <a name="method-unique"></a>
 #### `unique()` {#collection-method}
@@ -1338,6 +1387,21 @@
             1 => ['product' => 'Desk', 'price' => 200],
         ]
     */
+<a name="method-when"></a>
+#### `when()` {#collection-method}
+
+当第一个参数运算结果为 `true` 的时候，会执行第二个参数传入的闭包：
+
+    $collection = collect([1, 2, 3]);
+
+    $collection->when(true, function ($collection) {
+        return $collection->push(4);
+    });
+
+    $collection->all();
+
+    // [1, 2, 3, 4]
+
 <a name="method-where"></a>
 #### `where()` {#collection-method}
 
@@ -1391,12 +1455,12 @@
     ]
     */
 
-此方法是用严格的匹配，你可以使用 [`whereInLoose`](#method-whereinloose) 做比较 `宽松` 的匹配。
+此方法是用宽松的匹配，你可以使用 [`whereInStrict`](#method-whereinstrict) 做比较 `严格` 的匹配。
 
-<a name="method-whereinloose"></a>
-#### `whereInLoose()` {#collection-method}
+<a name="method-whereinstrict"></a>
+#### `whereInStrict()` {#collection-method}
 
-此方法的使用于 [`whereIn`](#method-wherein) 方法类似，只是使用了比较 `宽松` 的过滤。
+此方法的使用于 [`whereIn`](#method-wherein) 方法类似，只是使用了比较 `严格` 的过滤。
 
 <a name="method-zip"></a>
 #### `zip()` {#collection-method}
@@ -1410,3 +1474,20 @@
     $zipped->all();
 
     // [['Chair', 100], ['Desk', 200]]
+
+<a name="higher-order-messages"></a>
+## 高阶信息传递
+
+集合也提供「高阶信息传递支持」，这是对集合执行常见操作的快捷方式。支持高阶信息传递的集合方法有： `contains`， `each`， `every`， `filter`， `first`， `map`， `partition`， `reject`， `sortBy`， `sortByDesc` 和 `sum`。
+
+每个高阶信息都能作为集合实例的动态属性来访问。例如，我们在集合中使用 `each` 高阶信息传递方法拉哎对每个对象去调用一个方法：
+
+    $users = User::where('votes', '>', 500)->get();
+
+    $users->each->markAsVip();
+
+同样，我们可以使用 `sum` 高阶信息传递的方式来统计出集合中用户总共的「投票数」：
+
+    $users = User::where('group', 'Development')->get();
+
+    return $users->sum->votes;

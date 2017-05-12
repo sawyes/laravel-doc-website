@@ -1,12 +1,12 @@
-# 数据库测试
+# Laravel 测试之 - 数据库测试
 
 - [简介](#introduction)
 - [每次测试后重置数据库](#resetting-the-database-after-each-test)
     - [使用迁移](#using-migrations)
     - [使用事务](#using-transactions)
-- [模型工厂](#writing-factories)
-    - [多个工厂类型](#factory-types)
-- [在测试中使用工厂](#using-factories)
+- [创建模型工厂](#writing-factories)
+    - [多种模型工厂状态](#factory-states)
+- [在测试中使用模型工厂](#using-factories)
     - [创建模型](#creating-models)
     - [持久化模型](#persisting-models)
     - [模型关联](#relationships)
@@ -14,18 +14,18 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 也提供了多种有用的工具来让你更容易的测试使用数据库的应用程序。首先，你可以使用 `seeInDatabase` 辅助函数，来断言数据库中是否存在与指定条件互相匹配的数据。举例来说，如果我们想验证 `users` 数据表中是否存在 `email` 值为 `sally@example.com` 的数据，我们可以按照以下的方式来做测试：
+Laravel 提供了多种有用的工具来让你更容易的测试使用数据库的应用程序。首先，你可以使用 `assertDatabaseHas` 辅助函数，来断言数据库中是否存在与指定条件互相匹配的数据。举例来说，如果我们想验证 `users` 数据表中是否存在 `email` 值为 `sally@example.com` 的数据，我们可以按照以下的方式来做测试：
 
     public function testDatabase()
     {
         // 创建调用至应用程序...
 
-        $this->seeInDatabase('users', [
+        $this->assertDatabaseHas('users', [
             'email' => 'sally@example.com'
         ]);
     }
 
-当然，使用 `seeInDatabase` 方法及其它的辅助函数只是为了方便。你也可以随意使用 PHPUnit 内置的所有断言方法来扩充测试。
+当然，使用 `assertDatabaseHas` 方法及其它的辅助函数只是为了方便。你也可以随意使用 PHPUnit 内置的所有断言方法来扩充测试。
 
 <a name="resetting-the-database-after-each-test"></a>
 ## 每次测试后重置数据库
@@ -39,6 +39,9 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
 
     <?php
 
+    namespace Tests\Feature;
+
+    use Tests\TestCase;
     use Illuminate\Foundation\Testing\WithoutMiddleware;
     use Illuminate\Foundation\Testing\DatabaseMigrations;
     use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -54,8 +57,9 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
          */
         public function testBasicExample()
         {
-            $this->visit('/')
-                 ->see('Laravel 5');
+            $response = $this->get('/');
+
+            // ...
         }
     }
 
@@ -66,6 +70,9 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
 
     <?php
 
+    namespace Tests\Feature;
+
+    use Tests\TestCase;
     use Illuminate\Foundation\Testing\WithoutMiddleware;
     use Illuminate\Foundation\Testing\DatabaseMigrations;
     use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -81,61 +88,52 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
          */
         public function testBasicExample()
         {
-            $this->visit('/')
-                 ->see('Laravel 5');
+            $response = $this->get('/');
+
+            // ...
         }
     }
 
-> {note} 此 trait 的事务只包含默认的数据库连接。 如果你的应用程序使用多个数据库连接，就需要你手动处理事务和多个数据库之间的业务逻辑。
+> {note} 此 trait 的事务只包含默认的数据库连接。 如果你的应用程序使用多个数据库连接，你需要在你的测试类中定义一个 `$connectionsToTransact` 属性，然后你就可以把你测试中需要用到的数据库连接名称以数组的形式放到这个属性中。
 
-<a name="model-factories"></a>
-## 模型工厂
+<a name="writing-factories"></a>
+## 创建模型工厂
 
-测试时，常常需要在运行测试之前写入一些数据到数据库中。创建测试数据时，除了手动的来设置每个字段的值，还可以使用 [Eloquent 模型](/docs/{{version}}/eloquent) 的「工厂」来设置每个属性的默认值。在开始之前，你可以先查看下应用程序的 `database/factories/ModelFactory.php` 文件。此文件包含一个现成的工厂定义：
+测试时，常常需要在运行测试之前写入一些数据到数据库中。创建测试数据时，除了手动的来设置每个字段的值，还可以使用 [Eloquent 模型](/docs/{{version}}/eloquent) 的「工厂」来设置每个属性的默认值。在开始之前，你可以先查看下应用程序的 `database/factories/ModelFactory.php` 文件。此文件包含一个现成的模型工厂定义：
 
     $factory->define(App\User::class, function (Faker\Generator $faker) {
+        static $password;
+
         return [
             'name' => $faker->name,
-            'email' => $faker->email,
-            'password' => bcrypt(str_random(10)),
+            'email' => $faker->unique()->safeEmail,
+            'password' => $password ?: $password = bcrypt('secret'),
             'remember_token' => str_random(10),
         ];
     });
 
-闭包内为工厂的定义，你可以返回模型中所有属性的默认测试值。在该闭包内会接收到 [Faker](https://github.com/fzaninotto/Faker) PHP 函数库的实例，它可以让你很方便的生成各种随机数据以进行测试。
+闭包内为模型工厂的定义，你可以返回模型中所有属性的默认测试值。在该闭包内会接收到 [Faker](https://github.com/fzaninotto/Faker) PHP 函数库的实例，它可以让你很方便的生成各种随机数据以进行测试。
 
-当然，你也可以随意将自己额外的工厂增加至 `ModelFactory.php` 文件。你也可以在 `database/factories` 里为每一个数据模型创建对应的工厂模型类，如 `UserFactory.php` 和 `CommentFactory.php`。 在 `factories` 目录中的文件都会被 Laravel 自动加载。
+当然，你也可以随意将自己其他的模型工厂增加至 `ModelFactory.php` 文件。你也可以在 `database/factories` 里为每一个数据模型创建对应的模型工厂类，如 `UserFactory.php` 和 `CommentFactory.php`。 在 `factories` 目录中的文件都会被 Laravel 自动加载。
 
-<a name="factory-types"></a>
-### 多个工厂类型
+<a name="factory-states"></a>
+### 多种模型工厂状态
 
-有时你可能希望针对同一个 Eloquent 模型类来创建多个工厂。例如，除了一般用户的工厂之外，还有「管理员」工厂。你可以使用 `defineAs` 方法来定义这个工厂：
+模型工厂状态可以让你任意组合你的模型工厂，仅需要做出适当差异化的修改，就可以达到让模型拥有多种不同的状态。例如，你的 `用户` 模型中可以修改某个默认属性值来达到标识一种 `拖欠债务` 的状态。你可以使用 `state` 方法来进行这种状态转换：
 
-    $factory->defineAs(App\User::class, 'admin', function ($faker) {
+    $factory->state(App\User::class, 'delinquent', function ($faker) {
         return [
-            'name' => $faker->name,
-            'email' => $faker->email,
-            'password' => str_random(10),
-            'remember_token' => str_random(10),
-            'admin' => true,
+            'account_status' => 'delinquent',
         ];
-    });
-
-除了从一般用户工厂复制所有基本属性，你也可以使用 `raw` 方法来获取所有基本属性。一旦你获取到这些属性，就可以轻松的为其增加任何额外值：
-
-    $factory->defineAs(App\User::class, 'admin', function ($faker) use ($factory) {
-        $user = $factory->raw(App\User::class);
-
-        return array_merge($user, ['admin' => true]);
     });
 
 <a name="using-factories"></a>
-## 在测试中使用工厂
+## 在测试中使用模型工厂
 
 <a name="creating-models"></a>
 ### 创建模型
 
-在工厂定义后，就可以在测试或是数据库的填充文件中，通过全局的 `factory` 函数来生成模型实例。接着让我们先来看看几个创建模型的例子。首先我们会使用 `make` 方法创建模型，但不将它们保存至数据库：
+在模型工厂定义后，就可以在测试或是数据库的填充文件中，通过全局的 `factory` 函数来生成模型实例。接着让我们先来看看几个创建模型的例子。首先我们会使用 `make` 方法创建模型，但不将它们保存至数据库：
 
     public function testDatabase()
     {
@@ -149,22 +147,24 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
     // 创建一个 App\User 实例
     $users = factory(App\User::class, 3)->make();
 
-    // 创建一个 「admin」 类型的 App\User 实例
-    $user = factory(App\User::class, 'admin')->make();
+#### 应用模型工厂状态
 
-    // 创建 3 个 「admin」 类型的 App\User 实例
-    $users = factory(App\User::class, 'admin', 3)->make();
+你可能需要在你的模型中应用不同的 [模型工厂状态](#factory-states)。如果你想模型加上多种不同的状态，你只须指定每个你想添加的状态名称即可：
+
+    $users = factory(App\User::class, 5)->states('delinquent')->make();
+
+    $users = factory(App\User::class, 5)->states('premium', 'delinquent')->make();
 
 #### 重写模型属性
 
-如果你想重写模型中的某些默认值，则可以传递一个包含数值的数组至 `make` 方法。只有指定的数值会被替换，其它剩余的数值则会按照工厂指定的默认值来设置：
+如果你想重写模型中的某些默认值，则可以传递一个包含数值的数组至 `make` 方法。只有指定的数值会被替换，其它剩余的数值则会按照模型工厂指定的默认值来设置：
 
     $user = factory(App\User::class)->make([
         'name' => 'Abigail',
     ]);
 
 <a name="persisting-models"></a>
-### 持久化工厂模型
+### 持久化模型
 
 你不仅可使用 `create` 方法来创建模型实例，而且也可以使用 Eloquent 的 `save` 方法来将它们保存至数据库：
 
@@ -210,7 +210,7 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
         ];
     });
 
-这些闭包也可以获取到生成的工厂包含的属性数组：
+这些闭包也可以获取到生成的模型工厂包含的属性数组：
 
     $factory->define(App\Post::class, function ($faker) {
         return [
@@ -224,8 +224,3 @@ Laravel 也提供了多种有用的工具来让你更容易的测试使用数据
             }
         ];
     });
-
-## 译者署名
-| 用户名 | 头像 | 职能 | 签名 |
-|---|---|---|---|
-| [@JobsLong](https://phphub.org/users/56)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/56_1427370654.jpeg?imageView2/1/w/100/h/100">  |  翻译  | 我的个人主页：[http://jobslong.com](http://jobslong.com)  |

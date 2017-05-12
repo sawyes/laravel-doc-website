@@ -1,9 +1,10 @@
-# 任务调度
+# Laravel 的任务调度（计划任务）功能 Task Scheduling
 
 - [简介](#introduction)
 - [定义调度](#defining-schedules)
     - [调度频率设置](#schedule-frequency-options)
     - [避免任务重复](#preventing-task-overlaps)
+    - [维护模式](#maintenance-mode)
 - [任务输出](#task-output)
 - [任务钩子](#task-hooks)
 
@@ -60,9 +61,12 @@ Laravel 命令调度器允许你在 Laravel 中对命令调度进行清晰流畅
         }
     }
 
-除了计划 `闭包` 调用，你还能计划  [Artisan 命令](/docs/{{version}}/artisan)以及系统命令操作。举个例子，你可以使用 `command` 方法计划一个 `Artisan` 命令：
+
+除了计划 `闭包` 调用，你还能计划  [Artisan 命令](/docs/{{version}}/artisan)以及系统命令操作。举个例子，你可以使用 `command` 方法传参命令名称或者命令类名称来计划一个 `Artisan` 命令：
 
     $schedule->command('emails:send --force')->daily();
+
+    $schedule->command(EmailsCommand::class, ['--force'])->daily();
 
 `exec` 命令可发送命令到操作系统上：
 
@@ -76,14 +80,15 @@ Laravel 命令调度器允许你在 Laravel 中对命令调度进行清晰流畅
 方法  | 描述
 ------------- | -------------
 `->cron('* * * * * *');`  |  自定义调度任务
-`->everyMinute();`  |  每分钟执行一次任务
+`->everyMinute();`  |  每分钟执行一次任务
 `->everyFiveMinutes();`  |  每五分钟执行一次任务
 `->everyTenMinutes();`  |  每十分钟执行一次任务
 `->everyThirtyMinutes();`  |  每半小时执行一次任务
 `->hourly();`  |  每小时执行一次任务
+`->hourlyAt(17);`  |  每一个小时的第 17 分钟运行一次
 `->daily();`  |  每到午夜执行一次任务
-`->dailyAt('13:00');`  |  在 13:00 执行一次任务
-`->twiceDaily(1, 13);`  |  在 1:00 和 13:00 分别执行一次任务
+`->dailyAt('13:00');`  |  每天的 13:00 执行一次任务
+`->twiceDaily(1, 13);`  |  每天的 1:00 和 13:00 分别执行一次任务
 `->weekly();`  |  每周执行一次任务
 `->monthly();`  |  每月执行一次任务
 `->monthlyOn(4, '15:00');`  |  在每个月的第四天的 15:00 执行一次任务
@@ -103,9 +108,7 @@ Laravel 命令调度器允许你在 Laravel 中对命令调度进行清晰流畅
               ->weekdays()
               ->hourly()
               ->timezone('America/Chicago')
-              ->when(function () {
-                    return date('H') >= 8 && date('H') <= 17;
-              });
+              ->between('8:00', '17:00');
 
 下方列出其它额外限制条件：
 
@@ -119,11 +122,26 @@ Laravel 命令调度器允许你在 Laravel 中对命令调度进行清晰流畅
 `->thursdays();`  |  限制任务在星期四
 `->fridays();`  |  限制任务在星期五
 `->saturdays();`  |  限制任务在星期六
-`->when(Closure);`  | 限制任务基于一个为真的验证
+`->between($start, $end);`  |  限制任务运行在开始到结束时间范围内
+`->when(Closure);`  |  限制任务基于一个为真的验证
+
+#### 时间范围限制
+
+`between` 方法可以用来限制一天中某个时间范围内：
+
+    $schedule->command('reminders:send')
+                        ->hourly()
+                        ->between('7:00', '22:00');
+
+类似的，`unlessBetween` 方法可以用来排除时间段：
+
+    $schedule->command('reminders:send')
+                        ->hourly()
+                        ->unlessBetween('23:00', '4:00');
 
 #### 为真验证限制条件
 
- `when` 方法可以用来判断是否要运行任务，主要基于一个指定的为真验证的运行结果。如果指定的 `闭包` 返回 `true`，且没有其它限制条件存在，那么这个任务将会被继续运行。
+`when` 方法可以用来判断是否要运行任务，主要基于一个指定的为真验证的运行结果。如果指定的 `闭包` 返回 `true`，且没有其它限制条件存在，那么这个任务将会被继续运行。
 
     $schedule->command('emails:send')->daily()->when(function () {
         return true;
@@ -145,6 +163,13 @@ Laravel 命令调度器允许你在 Laravel 中对命令调度进行清晰流畅
     $schedule->command('emails:send')->withoutOverlapping();
 
 在这个例子中，如果没有其它  `emails:send` [Artisan 命令](/docs/{{version}}/artisan) 在运行的话，此任务将于每分钟被运行一次。当你有些任务运行时间过长，且无法预测出具体所需时间时， `withoutOverlapping` 方法将会特别有帮助。
+
+<a name="maintenance-mode"></a>
+### 维护模式
+
+当应用进入 [维护模式](/docs/{{version}}/configuration#maintenance-mode) 时，默认情况下 Laravel 的调度功能将会停止运行。这是因为我们考虑到你可能在维护模式下做一些破坏性的维护工作，我们不想让任务调度对这些工作造成干扰。然而，如果你想强制某个任务在维护模式下运行的话，你可以使用 `evenInMaintenanceMode` 方法：
+
+    $schedule->command('emails:send')->evenInMaintenanceMode();
 
 <a name="task-output"></a>
 ## 任务输出
@@ -168,10 +193,10 @@ Laravel 调度器为任务调度输出提供多种便捷方法。首先，通过
              ->sendOutputTo($filePath)
              ->emailOutputTo('foo@example.com');
 
-> {note}  `emailOutputTo` 和 `sendOutputTo` 方法只适用于 `command`方法，不支持 `call` 方法。
+> {note}  `emailOutputTo`，`sendOutputTo` 和 `appendOutputTo`  方法只适用于 `command`方法，不支持 `call` 方法。
 
 <a name="task-hooks"></a>
-## 任务挂勾
+## 任务钩子
 
 通过 `before` 与 `after` 方法，你能让特定的代码在任务完成之前及之后运行：
 
@@ -193,6 +218,6 @@ Laravel 调度器为任务调度输出提供多种便捷方法。首先，通过
              ->pingBefore($url)
              ->thenPing($url);
 
-使用 `pingBefore($url)`` 或 `thenPing($url)`` 功能需要 Guzzle HTTP 函数库的支持。可在 `composer.json` 文件中加入以下代码来安装 Guzzle：
+使用 `pingBefore($url)` 或 `thenPing($url)` 功能需要 Guzzle HTTP 函数库的支持。可在 `composer.json` 文件中加入以下代码来安装 Guzzle：
 
     composer require guzzlehttp/guzzle

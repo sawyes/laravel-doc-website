@@ -1,32 +1,32 @@
-# CSRF 保护
+# Laravel 下的伪造跨站请求保护 CSRF
 
-- [介绍](#csrf-introduction)
+- [简介](#csrf-introduction)
 - [CSRF 白名单](#csrf-excluding-uris)
 - [X-CSRF-Token](#csrf-x-csrf-token)
 - [X-XSRF-Token](#csrf-x-xsrf-token)
 
 <a name="csrf-introduction"></a>
-## 介绍
+## 简介
 
-Laravel 提供简单的方法保护你的应用不受到 [跨站请求伪造](http://en.wikipedia.org/wiki/Cross-site_request_forgery) (CSRF) 攻击。跨站请求伪造是一种恶意的攻击，它利用已通过身份验证的用户身份来运行未经授权的命令。
+Laravel 提供了简单的方法使你的应用免受 [跨站请求伪造](https://en.wikipedia.org/wiki/Cross-site_request_forgery) (CSRF) 的袭击。跨站请求伪造是一种恶意的攻击，它凭借已通过身份验证的用户身份来运行未经过授权的命令。
 
-Laravel 会为每个活跃用户自动生成一个 CSRF "token" 。该 token 用来核实应用接收到的请求是通过身份验证的用户出于本意发送的。
+Laravel 为每个活跃用户的 Session 自动生成一个 CSRF 令牌。该令牌用来核实应用接收到的请求是通过身份验证的用户出于本意发送的。
 
-无论何时，当你需要定义一个 HTML 表单，你都应该在里面包含一个隐藏的 CSRF token ，只有这样，CSRF 保护中间件才会验证请求。你可以使用辅助函数 `csrf_field` 来生成 token 隐藏字段：
+任何情况下在你的应用程序中定义 HTML 表单时都应该包含 CSRF 令牌隐藏域，这样 CSRF 保护中间件才可以验证请求。辅助函数 `csrf_field` 可以用来生成令牌字段：
 
     <form method="POST" action="/profile">
         {{ csrf_field() }}
         ...
     </form>
 
-`VerifyCsrfToken` [中间件](/docs/{{version}}/middleware)，是包含在 `web`中间件组中的，它会自动验证请求中的 token 是否与 session 中的相匹配。
+包含在 `web` 中间件组里的 `VerifyCsrfToken` [中间件](/docs/{{version}}/middleware)会自动验证请求里的令牌 `token` 与 Session 中存储的令牌 `token` 是否匹配。
 
 <a name="csrf-excluding-uris"></a>
 ## CSRF 白名单
 
-有时候你可能会希望一组 URIs 不要被 CSRF 保护。你如果使用 [Stripe](https://stripe.com) 处理付款，并且利用他们的 webhook 系统，你需要从 CSRF 保护中排除 webhook 的处理路由，因为 Stripe 不会知道传递什么 CSRF token 给你的路由。
+有时候你可能希望设置一组并不需要 CSRF 保护的 URI。例如，如果你正在使用 [Stripe](https://stripe.com) 处理付款并使用了他们的 webhook 系统，你会需要将 Stripe webhook 处理的路由排除在 CSRF 保护外，因为 Stripe 并不知道发送给你路由的 CSRF 令牌是什么。
 
-一般的，你不应该把这种类型的路由写在  `routes/web.php` 文件中，因为此文件的所有路由在 `RouteServiceProvider` 中被绑定到 `web` 中间件组中（`web` 中间件组下的所有路由默认会进行 `VerifyCsrfToken` 过滤）。不过如果一定要这么做，你也可以通过在 `VerifyCsrfToken` 中间件中增加 `$except` 属性来排除这种路由：
+一般地，你可以把这类路由放到 `web` 中间件外，因为 `RouteServiceProvider` 适用于 `routes/web.php` 中的所有路由。不过如果一定要这么做，你也可以将这类 URI 添加到 `VerifyCsrfToken` 中间件中的 `$except` 属性来排除对这类路由的 CSRF 保护：
 
     <?php
 
@@ -37,7 +37,7 @@ Laravel 会为每个活跃用户自动生成一个 CSRF "token" 。该 token 用
     class VerifyCsrfToken extends BaseVerifier
     {
         /**
-         * The URIs that should be excluded from CSRF verification.
+         * 这些 URI 会被免除 CSRF 验证
          *
          * @var array
          */
@@ -49,11 +49,11 @@ Laravel 会为每个活跃用户自动生成一个 CSRF "token" 。该 token 用
 <a name="csrf-x-csrf-token"></a>
 ## X-CSRF-TOKEN
 
-除了检查被作为 POST 参数传递的 CSRF token 之外, `VerifyCsrfToken` 中间件也会检查请求标头中的 `X-CSRF-TOKEN`。例如，你可以将其保存在 `meta` 标签中：
+除了检查 POST 参数中的 CSRF token 外，`VerifyCsrfToken` 中间件还会检查 `X-CSRF-TOKEN` 请求头。你可以将令牌保存在 HTML `meta` 标签中：
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-一旦你创建了 `meta` 标签，你就可以使用 jQuery 之类的函数库将 token 自动地添加到所有的请求头中。这简单、方便的为你的应用的 AJAX 提供了 CSRF 保护：
+一旦创建了 `meta` 标签，你就可以使用类似 jQuery 的库将令牌自动添加到所有请求的头信息中。这可以为您基于 AJAX 的应用提供简单、方便的 CSRF 保护。
 
     $.ajaxSetup({
         headers: {
@@ -64,12 +64,12 @@ Laravel 会为每个活跃用户自动生成一个 CSRF "token" 。该 token 用
 <a name="csrf-x-xsrf-token"></a>
 ## X-XSRF-TOKEN
 
-Laravel 会通过响应把当前的 CSRF token 保存在 `XSRF-TOKEN` cookie 中。你可以使用该 cookie 的值来设置 `X-XSRF-TOKEN` 请求标头。
+Laravel 将当前的 CSRF 令牌存储在由框架生成的每个响应中包含的一个`XSRF-TOKEN` cookie 中。你可以使用该令牌的值来设置 X-XSRF-TOKEN 请求头信息。
 
-这个 cookie 通常会以更便捷的方式传递。因为一些 JavaScript 框架会自动将它的值设置到 `X-XSRF-TOKEN` 请求标头中，如 Angular。
+这个 cookie 作为头信息发送主要是为了方便，因为一些 JavaScript 框架，如 Angular，会自动将其值添加到 `X-XSRF-TOKEN` 头中.
 
 
 ## 译者署名
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@Macken](https://phphub.org/users/1289)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/1289_1473143048.jpg?imageView2/1/w/200/h/200">  |  翻译  | 专注Web开发，[麦肯先生](https://macken.me) My Blog  |
+| [@王凯波](http://weibo.com/wangkaibo)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/1924_1487053084.jpeg?imageView2/1/w/100/h/100">  |  翻译  | 面向工资编程  [@wangkaibo](https://github.com/wangkaibo/)  |

@@ -1,4 +1,4 @@
-# 分页
+# Laravel 的分页功能
 
 - [简介](#introduction)
 - [基本使用](#basic-usage)
@@ -6,14 +6,14 @@
     - [对 Eloquent 模型进行分页](#paginating-eloquent-results)
     - [手动创建分页](#manually-creating-a-paginator)
 - [显示分页结果](#displaying-pagination-results)
-    - [转换至 JSON](#converting-results-to-json)
-- [将分页结果显示在视图中](#customizing-the-pagination-view)
-- [分页实例方法](#paginator-instance-methods)
+    - [将结果转换为 JSON](#converting-results-to-json)
+- [自定义分页视图](#customizing-the-pagination-view)
+- [分页器实例方法](#paginator-instance-methods)
 
 <a name="introduction"></a>
 ## 简介
 
-在其他框架中，分页是非常让人苦恼的， Laravel 为 [查询构造器](/docs/{{version}}/queries) 和 [Eloquent ORM](/docs/{{version}}/eloquent) 集成提供了方便，使用数据库分页更容易。生成的分页样式兼容 [Bootstrap CSS 框架](http://getbootstrap.com/)。
+在其他的框架中，分页是令人非常烦恼的。 Laravel 的分页器为 [查询构造器](/docs/{{version}}/queries) 和 [Eloquent ORM](/docs/{{version}}/eloquent) 集成提供了方便，并提供基于数据库结果集的分页开箱即用。分页器生产的 HTML 兼容 [Bootstrap CSS framework](https://getbootstrap.com/).
 
 <a name="basic-usage"></a>
 ## 基本使用
@@ -21,10 +21,9 @@
 <a name="paginating-query-builder-results"></a>
 ### 对查询语句构造器进行分页
 
-有几种方法可以对项目进行分页。最简单的是在 [查询构造器](/docs/{{version}}/queries) 和 [Eloquent ORM](/docs/{{version}}/eloquent) 中使用 `paginate` 方法。 `paginate` 方法能够自动判定当前页面正确的数量限制和偏移数。默认情况下，当前页数由 HTTP 请求所带的  `?page` 参数来决定。当然，该值由 Laravel 自动检测，并自动插入由分页器生成的链接。
+有几种方法可以对项目进行分页。最简单的是在 [查询语句构造器](/docs/{{version}}/queries) 或 [Eloquent 查询](/docs/{{version}}/eloquent) 中使用 `paginate` 方法。 `paginate` 方法会自动基于当前用户查看的当前页面来设置适当的限制和偏移。默认情况下，当前页面通过 HTTP 请求所带的 `?page` 参数的值来检测。当然，这个值会被 Laravel 自动检测，并且自动插入到由分页器生产的链接中。
 
-让我们先来看看如何在查询上调用 `paginate` 方法。传递给 `paginate` 的唯一参数就是你每页想要显示的数目，这个参数规定每页显示多少条数据。在下面这个例子中，我们就是要在每页显示 15 条数据：
-
+首先，让我们先来看看如何在查询上调用 `paginate` 方法。在这个例子中，传递给 `paginate` 方法的唯一参数是你希望在「每页」显示的数据数。在这种情况下，让我们指定希望每页显示 `15` 条数据：
 
     <?php
 
@@ -36,7 +35,7 @@
     class UserController extends Controller
     {
         /**
-         *  显示应用中的所有用户.
+         * 显示应用中所有的用户
          *
          * @return Response
          */
@@ -48,44 +47,44 @@
         }
     }
 
-> {note} 目前，使用 `groupBy` 的分页操作不能被 Laravel 有效执行，如果你需要在分页结果中使用 `groupBy` ，推荐你手动查询数据库然后创建分页器。
+> {note} 目前，使用 `groupBy` 语句的分页操作无法由 Laravel 有效执行。如果你需要在一个分页结果集中使用 `groupBy`，建议你查询数据库并手动创建分页器。
 
-#### 简单分页
+#### 「简单分页」
 
-如果你只需要在分页视图中简单的显示 “下一页” 和 “上一页” 链接，你可以选择使用 `simplePaginate` 方法来进行更高效的查找。当你不需要在页面上显示页码时，这对于大数据来说将会非常有用：
+如果你只需要在你的分页视图中显示简单的「上一页」和「下一页」的链接，你可以使用 `simplePaginate` 方法来执行更高效的查询。当你在渲染视图时不需要显示页码链接，这对于大数据集非常有用。
 
     $users = DB::table('users')->simplePaginate(15);
 
 <a name="paginating-eloquent-results"></a>
-### 基于 Eloquent 模型分页
+### 对 Eloquent 模型进行分页
 
-你可能需要对 [Eloquent](/docs/{{version}}/eloquent) 分页。在这个例子中，我们将把 `User` 模型进行分页并且设置其每页有 `15` 条数据，如你所见，语法跟查询语句构造器的分页语法几乎一样：
+你也可以对 [Eloquent](/docs/{{version}}/eloquent) 查询进行分页。在这个例子中，我们将对 `User` 模型进行分页并且每页显示 `15` 条数据。正如你看到的，语法几乎与基于查询语句构造器的分页相同：
 
     $users = App\User::paginate(15);
 
-当然，你可以在设置一些约束后再使用 `paginate` 分页，我们使用 `where` 举例：
+当然，你可以在对查询设置了其他限制之后调用 `paginate` 方法，例如 `where` 子句：
 
     $users = User::where('votes', '>', 100)->paginate(15);
 
-或者也可以在使用 Eloquent 模型进行分页时使用 `simplePaginate` 方法：
+你也可以在 Eloquent 模型进行分页使用 `simplePaginate` 方法：
 
     $users = User::where('votes', '>', 100)->simplePaginate(15);
 
 <a name="manually-creating-a-paginator"></a>
 ### 手动创建分页
 
-有时候你可能会希望从项目的数组中手动创建一个分页实例。这时可以依据你的需求决定创建 `Illuminate\Pagination\Paginator` 或者 `Illuminate\Pagination\LengthAwarePaginator` 。
+有时候你可能希望手动创建一个分页实例，并传递其到项目数组中。你可以依据你的需求创建 `Illuminate\Pagination\Paginator` 或 `Illuminate\Pagination\LengthAwarePaginator` 实例。
 
- `Paginator` 类不需要知道数据的总条数；然而也正是因为这点，导致它无法提供获取最后一页的方法。`LengthAwarePaginator` 和 `Paginator` 参数几乎相同；但是它却需要知道数据的总条数。
+`Paginator` 类不需要知道结果集中的数据项总数；然而，由于这个，该类没有用于检索最后一页索引的方法。`LengthAwarePaginator` 接收的参数几乎和 `Paginator` 一样；但是，它需要计算结果集中的数据项总数。
 
-换句话说，`Paginator` 对应于查询语句构造器和 Eloquent 的 `simplePaginate` 方法。而 `LengthAwarePaginator` 则等同于 `paginate` 方法。
+换一种说法，`Paginator` 对应于查询语句构造器和 Eloquent 的 `simplePaginate` 方法，而 `LengthAwarePaginator` 对应于 `paginate` 方法。
 
-> {note} 当手动创建一个分页器实例时，你应该手动「切割」传递给分页器的数组。如果你不知道如何做到这一点，请查阅 PHP 的 [array_slice](http://php.net/manual/en/function.array-slice.php) 函数。
+> {note} 当手动创建分页器实例时，你应该手动「切割」传递给分页器的结果集。如果你不确定如何去做到这一点，查阅 PHP 的函数 [array_slice](https://secure.php.net/manual/en/function.array-slice.php) 。
 
 <a name="displaying-pagination-results"></a>
 ## 显示分页结果
 
-当你调用查询构建器或 Eloquent 查询上的 `simplePaginate` 或 `paginate`方法时,你将会获取一个分页实例，当调用 `paginate` 方法时，你将获取 `Illuminate\Pagination\LengthAwarePaginator` ，而调用方法 `simplePaginate` 方法时，将会获取 `Illuminate\Pagination\Paginator` 实例。这些对象提供相关方法描述这些结果集，除了这些帮助函数外，分页器实例本身就是迭代器，可以像数组一样对其进行循环调用。总之，一旦你获取到结果，就可以对结果进行显示，并使用  [Blade](/docs/{{version}}/blade) 渲染页面的链接：
+当调用 `paginate` 方法的时候，你将会接收到一个 `Illuminate\Pagination\LengthAwarePaginator` 实例。而当你调用 `simplePaginate` 方法时，你将会接收到一个 `Illuminate\Pagination\Paginator` 实例。这些对象提供了一些描述结果集的方法。除了这些辅助方法，分页器是迭代器并且可以作为数组循环。因此，一旦检索到结果集，你可以使用 [Blade](/docs/{{version}}/blade) 模板显示结果集并渲染页面链接：
 
     <div class="container">
         @foreach ($users as $user)
@@ -95,40 +94,40 @@
 
     {{ $users->links() }}
 
-`links` 方法将给予查找结果中其它页面的链接。每一个链接中都已经包含正确的 `?page` 查找字符串变量。请记住，由 `links` 方法生成的 HTML 兼容于 [Bootstrap CSS 框架](https://getbootstrap.com)。
+`links` 方法将会渲染结果集中的其他页链接。这些链接中每一个都已经包含了 `?page` 查询字符串变量。记住，`links` 方法生产的 HTML 兼容 [Bootstrap CSS framework](https://getbootstrap.com)
 
-#### 自定义分页链接
+#### 自定义分页器的 URI
 
-`setPath` 方法允许你生成分页链接时自定义分页使用的 URI 。例如，如果你想要分页器生成例如 `http://example.com/custom/url?page=N` 类似的链接，你可以使用 `setPath` 方法将 `custom/url` 加到分页中：
+`withPath` 方法允许你在生成分页链接时自定义 URI 。例如，如果你想分页器生成的链接如 `http://example.com/custom/url?page=N`，你应该传递 `custom/url` 到 `withPath` 方法：
 
     Route::get('users', function () {
         $users = App\User::paginate(15);
 
-        $users->setPath('custom/url');
+        $users->withPath('custom/url');
 
         //
     });
 
-#### 添加参数到分页链接
+#### 附加参数到分页链接中
 
-你可以使用 `appends` 方法添加所需要的参数到分页链接中。例如，要加入 `&sort=votes` 到每个分页链接时，你应该这样使用 `appends` 方法：
+你可以使用 `append` 方法附加查询参数到分页链接中。例如，要附加 `sort=votes` 到每个分页链接，你应该这样调用 `append` 方法：
 
     {{ $users->appends(['sort' => 'votes'])->links() }}
 
-如果你想加入一个有 “hash fragment” 的分页链接网址, 则可以使用  `fragment` 方法。例如，要在每个分页链接的最后加入 `#foo` , 应该像这样使用 `fragment` 方法：
+如果你希望附加「哈希片段」到分页器的链接中，你应该使用 `fragment` 方法。例如，要附加 `#foo` 到每个分页链接的末尾，应该这样调用 `fragment` 方法：
 
     {{ $users->fragment('foo')->links() }}
 
 <a name="converting-results-to-json"></a>
-### 转换至 JSON
+### 将结果转换为 JSON
 
-Laravel 的分页类实现了 `Illuminate\Contracts\Support\Jsonable` 的 `toJson` 方法，所以可以很容易的将你的分页结果转换成 JSON 。你可以将一个分页实例转换为 JSON，只需从一个路由或控制器中返回它即可：
+Laravel 分页器结果类实现了 `Illuminate\Contracts\Support\Jsonable` 接口契约并且提供 `toJson` 方法，所以它很容易将你的分页结果集转换为 Json。你也可以简单地通过从路由或者控制器动作返回分页实例并将其转换为 JSON ：
 
     Route::get('users', function () {
         return App\User::paginate();
     });
 
-分页器的 JSON 将包括分页相关的信息，如 `total`, `current_page`, `last_page` 等等。 该实例数据可通过 JSON 数组中的 `data` 键来获取。下方是从路由返回的分页实例转换成 JSON 的一个例子：
+从分页器获取的 JSON 将包含元信息，如： `total`, `current_page`, `last_page` 等等。实际的结果对象将通过 JSON 数组中的 `data` 键来获取。 以下是一个从路由返回分页器实例创建的 JSON 示例：
 
     {
        "total": 50,
@@ -150,31 +149,39 @@ Laravel 的分页类实现了 `Illuminate\Contracts\Support\Jsonable` 的 `toJso
     }
 
 <a name="customizing-the-pagination-view"></a>
-## 在视图中显示分页结果
+## 自定义分页视图
 
-默认情况下，渲染显示分页链接使用 Bootstrap CSS 框架。不过，如果你不使用 Bootstrap 你可以自由定义您自己的视图来呈现这些链接，当我们在分页实例中调用 `links` 方法，将视图名称传递给方法的第一个参数：
+在默认情况下，视图渲染显示的分页链接都兼容 Bootstrap CSS 框架。但是，如果你不使用 Bootstrap，你可以自定义你自己的视图去渲染这些链接。当在分页器实例中调用 `links` 方法，传递视图名称作为方法的第一参数：
 
     {{ $paginator->links('view.name') }}
 
-自定义分页视图的最简单的方法是通过 `vendor:publish` 命令创建到 `resources/views/vendor` 目录：
+    // 传递数据到视图中...
+    {{ $paginator->links('view.name', ['foo' => 'bar']) }}
+
+然而，自定义分页视图最简单的方法是通过 `vendor:publish` 命令将它们导出到你的 `resources/views/vendor` 目录：
 
     php artisan vendor:publish --tag=laravel-pagination
 
-这个名令将会在 `resources/views/vendor/pagination` 目录中创建视图。`default.blade.php` 文件为默认的分页模板，你可以编辑这个模板以修改分页的 HTML 样式。
+这个命令将视图放置在 `resources/views/vendor/pagination` 目录中。这个目录下的 `default.blade.php` 文件对应于默认分页视图。你可以简单地编辑这个文件以修改分页的 HTML 。
 
 <a name="paginator-instance-methods"></a>
-## 分页实例方法
+## 分页器实例方法
 
-每个分页实例通过以下方法提供了额外的分页信息：
+每个分页器实例通过以下方法提供额外的分页信息：
 
 - `$results->count()`
 - `$results->currentPage()`
 - `$results->firstItem()`
 - `$results->hasMorePages()`
 - `$results->lastItem()`
-- `$results->lastPage() (Not available when using simplePaginate)`
+- `$results->lastPage() (当使用 simplePagination 时无效)`
 - `$results->nextPageUrl()`
 - `$results->perPage()`
 - `$results->previousPageUrl()`
-- `$results->total() (Not available when using simplePaginate)`
+- `$results->total() (当使用 simplePagination 时无效)`
 - `$results->url($page)`
+
+## 译者署名
+| 用户名 | 头像 | 职能 | 签名 |
+|---|---|---|---|
+| [@cjjian](https://laravel-china.org/users/3848)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/3848_1477641871.png?imageView2/1/w/100/h/100">  |  翻译  | Nothing is impossible. [@Jiajian Chan](https://github.com/jcc/) at Github  |

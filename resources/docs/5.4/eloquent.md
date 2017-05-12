@@ -207,7 +207,7 @@ Eloquent 的 `all` 方法会返回在模型数据表中的所有结果。由于�
 
 #### 使用游标
 
-`cursor` 允许你使用游标来遍历数据库数据。在处理数据量大的请求时 `cursor` 方法可以大幅度减少内存的使用：
+`cursor` 允许你使用游标来遍历数据库数据，一次只执行单个查询。在处理大数据量请求时 `cursor` 方法可以大幅度减少内存的使用：
 
 
     foreach (Flight::where('foo', 'bar')->cursor() as $flight) {
@@ -341,7 +341,11 @@ Eloquent 的 `all` 方法会返回在模型数据表中的所有结果。由于�
 
 一旦我们已经设置好可以被批量赋值的属性，便能通过 `create` 方法来添加一条新记录到数据库。`create` 方法将返回已经被保存的模型实例：
 
-    $flight = App\Flight::create(['name' => 'Flight 10']);
+    $flight = App\Flight::create(['name' => 'Flight 10']);
+    
+如果你已经有一个 `model` 实例，你可以使用一个数组传递给 `fill` 方法：
+ 
+    $flight->fill(['name' => 'Flight 22']);
 
 #### Guarding Attributes
 
@@ -385,6 +389,15 @@ Eloquent 的 `all` 方法会返回在模型数据表中的所有结果。由于�
     // 用属性取回航班，当结果不存在时实例化一个新实例...
     $flight = App\Flight::firstOrNew(['name' => 'Flight 10']);
 
+其次，你可能会碰到模型已经存在则更新，否则创建新模型的情形，Laravel 提供了一个 `updateOrCreate` 方法来一步完成该操作，类似 `firstOrCreate` 方法， `updateOrCreate` 方法会持久化模型，所以无需调用 `save()` :
+
+    // If there's a flight from Oakland to San Diego, set the price to $99.
+    // If no matching model exists, create one.
+    $flight = App\Flight::updateOrCreate(
+        ['departure' => 'Oakland', 'destination' => 'San Diego'],
+        ['price' => 99]
+    );
+
 
 <a name="deleting-models"></a>
 ## 删除模型
@@ -407,14 +420,11 @@ Eloquent 的 `all` 方法会返回在模型数据表中的所有结果。由于�
 
 #### 通过查询来删除模型
 
-当然，你也可以在一组模型上运行删除查询。在这个例子中，我们将会删除所有被标示为不活跃的航班：
-
-    $deletedRows = App\Flight::where('active', 0)->delete();
-
-In this example, we will delete all flights that are marked as inactive. Like mass updates, mass deletes will not fire any model events for the models that are deleted:
 当然，你也可以运行在一组模型删除查询。在这个例子中，我们会删除被标记为不活跃的所有航班。 像批量更新那样，批量删除不会删除的任何被删除的模型的事件：
 
     $deletedRows = App\Flight::where('active', 0)->delete();
+
+>{note} 当使用 Eloquent 批量删除语句时，`deleting` 和 `deleted` 模型事件不会在被删除模型实例上触发。因为删除语句执行时，不会检索回模型实例。
 
 <a name="soft-deleting"></a>
 ### 软删除
@@ -686,46 +696,38 @@ Eloquent 还允许我们使用闭包定义全局作用域，这在实现简单�
 <a name="events"></a>
 ## 事件
 
-Eloquent 模型会触发许多事件，让你可以借助以下的方法在模型的生命周期的多个时间点进行监控：
+Eloquent 模型会触发许多事件，让你在模型的生命周期的多个时间点进行监控：
 `creating`, `created`, `updating`, `updated`, `saving`, `saved`, `deleting`, `deleted`, `restoring`, `restored`. 
 
 事件让你每当有特定的模型类在数据库保存或更新时，执行代码。
 
 当一个新模型被初次保存将会触发 `creating` 以及 `created` 事件。如果一个模型已经存在于数据库且调用了 `save` 方法，将会触发 `updating` 和 `updated` 事件。在这两种情况下都会触发 `saving` 和 `saved` 事件。
 
-让我们在 [服务提供者](/docs/{{version}}/providers) 中定义一个 Eloquent 事件监听器来作为示例。在我们的事件监听器中，我们会在指定的模型上调用 `isValid` 方法，并在模型无效时返回 `false`。从 Eloquent 事件监听器中返回 `false` 的话会取消 `save` 和 `update` 的操作
+开始前，在你的 Eloquent 模型上定义一个 `$events` 属性，将 Eloquent 模型的生命周期的多个点映射到你的 [服务提供者](/docs/{{version}}/providers) 。
 
 
-    <?php
+	<?php
 
-    namespace App\Providers;
+    namespace App;
 
-    use App\User;
-    use Illuminate\Support\ServiceProvider;
+    use App\Events\UserSaved;
+    use App\Events\UserDeleted;
+    use Illuminate\Notifications\Notifiable;
+    use Illuminate\Foundation\Auth\User as Authenticatable;
 
-    class AppServiceProvider extends ServiceProvider
+    class User extends Authenticatable
     {
-        /**
-         * 启动所有应用程序服务。
-         *
-         * @return void
-         */
-        public function boot()
-        {
-            User::creating(function ($user) {
-                return $user->isValid();
-            });
-        }
+        use Notifiable;
 
         /**
-         * 注册服务提供者。
+         * 模型的时间映射。
          *
-         * @return void
+         * @var array
          */
-        public function register()
-        {
-            //
-        }
+        protected $events = [
+            'saved' => UserSaved::class,
+            'deleted' => UserDeleted::class,
+        ];
     }
 
 <a name="observers"></a>

@@ -1,4 +1,4 @@
-# 数据库：迁移
+# Laravel 的数据库迁移 Migrations
 
 - [简介](#introduction)
 - [生成迁移](#generating-migrations)
@@ -15,7 +15,7 @@
     - [移除字段](#dropping-columns)
 - [索引](#indexes)
     - [创建索引](#creating-indexes)
-    - [移除索引](#dropping-indexes)
+    - [删除索引](#dropping-indexes)
     - [外键约束](#foreign-key-constraints)
 
 <a name="introduction"></a>
@@ -51,13 +51,14 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
     <?php
 
+    use Illuminate\Support\Facades\Schema;
     use Illuminate\Database\Schema\Blueprint;
     use Illuminate\Database\Migrations\Migration;
 
     class CreateFlightsTable extends Migration
     {
         /**
-         * 运行数据库迁移。
+         * 运行数据库迁移
          *
          * @return void
          */
@@ -72,7 +73,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
         }
 
         /**
-         * 回滚数据库迁移。
+         * 回滚数据库迁移
          *
          * @return void
          */
@@ -90,7 +91,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
     php artisan migrate
 
-> {note} 如果你使用的是 [Homestead virtual machine](/docs/{{version}}/homestead) ， 你需要在虚拟机中执行以上命令。
+> {note} 如果你使用的是 [Homestead 虚拟机](/docs/{{version}}/homestead) ， 你需要在虚拟机中执行以上命令。
 
 #### 在线上环境强制执行迁移
 
@@ -101,7 +102,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 <a name="rolling-back-migrations"></a>
 ### 回滚迁移
 
-若要回滚最后一次迁移，则可以使用 `rollback` 命令。此命令是对上一次执行的「批量」迁移进行回滚，其中可能包括多个迁移文件：
+若要回滚最后一次迁移，则可以使用 `rollback` 命令。此命令是对上一次执行的「批量」迁移回滚，其中可能包括多个迁移文件：
 
     php artisan migrate:rollback
 
@@ -113,7 +114,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
     php artisan migrate:reset
 
-#### 使用单个命令来执行回滚和迁移
+#### 使用单个命令来执行回滚或迁移
 
 `migrate:refresh` 命令不仅会回滚数据库的所有迁移还会接着运行 `migrate` 命令。所以此命令可以有效的重新创建整个数据库：
 
@@ -132,7 +133,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 <a name="creating-tables"></a>
 ### 创建数据表
 
-要创建一张新的数据表，则可以使用 `Schema` facade 的 `create` 方法。`create` 方法接收两个参数。第一个参数为数据表的名称，第二个参数为一个 `闭包` ，此闭包会接收一个用于定义新数据表的 `Blueprint` 对象：
+要创建一张新的数据表，可以使用 `Schema` facade 的 `create` 方法。`create` 方法接收两个参数：第一个参数为数据表的名称，第二个参数为一个 `闭包` ，此闭包会接收一个用于定义新数据表的 `Blueprint` 对象：
 
     Schema::create('users', function (Blueprint $table) {
         $table->increments('id');
@@ -154,15 +155,15 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
 #### 数据库连接与存储引擎
 
-如果你想要在一个非默认的数据库连接中进行数据库结构操作，则可以使用 `connection` 方法：
+如果你想要在一个非默认的数据库连接中进行数据库结构操作，可以使用 `connection` 方法：
 
-    Schema::connection('foo')->create('users', function ($table) {
+    Schema::connection('foo')->create('users', function (Blueprint $table) {
         $table->increments('id');
     });
 
 你可以在数据库结构构造器上设置 `engine` 属性来设置数据表的存储引擎：
 
-    Schema::create('users', function ($table) {
+    Schema::create('users', function (Blueprint $table) {
         $table->engine = 'InnoDB';
 
         $table->increments('id');
@@ -171,7 +172,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 <a name="renaming-and-dropping-tables"></a>
 ### 重命名与删除数据表
 
-若要重命名一张已存在的数据表，则可以使用 `rename` 方法：
+若要重命名一张已存在的数据表，可以使用 `rename` 方法：
 
     Schema::rename($from, $to);
 
@@ -183,7 +184,7 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
 #### 重命名带外键的数据表
 
-在重命名前，你需要检查外键的约束涉及到的数据表名需要在迁移文件中显式的提供，而不是让 Laravel 按照约定来设置一个名称。因为那样会让外键约束关联到老的数据表上。
+在重命名前，你需要检查外键的约束涉及到的数据表名需要在迁移文件中显式的提供，而不是让 Laravel 按照约定来设置一个名称。因为那样会让外键约束关联到旧的数据表上。
 
 <a name="columns"></a>
 ## 字段
@@ -191,9 +192,9 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 <a name="creating-columns"></a>
 ### 创建字段
 
-使用 `Schema` facade 的 `table` 方法可以更新已有的数据表。如同 `create` 方法， `table` 方法会接收两个参数：一个是数据表的名称，另一个则是接收 `Blueprint` 实例的 `闭包` 。我们可以使用它来为数据表新增字段：
+使用 `Schema` facade 的 `table` 方法可以更新已有的数据表。如同 `create` 方法，`table` 方法会接收两个参数：一个是数据表的名称，另一个则是接收 `Blueprint` 实例的`闭包`。我们可以使用它来为数据表新增字段：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->string('email');
     });
 
@@ -206,38 +207,47 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 `$table->bigIncrements('id');`  |  递增 ID（主键），相当于「UNSIGNED BIG INTEGER」型态。
 `$table->bigInteger('votes');`  |  相当于 BIGINT 型态。
 `$table->binary('data');`  |  相当于 BLOB 型态。
-`$table->boolean('confirmed');`  | 相当于 BOOLEAN 型态。
-`$table->char('name', 4);`  | 相当于 CHAR 型态，并带有长度。
-`$table->date('created_at');`  |  相当于 DATE 型态。
+`$table->boolean('confirmed');`  |  相当于 BOOLEAN 型态。
+`$table->char('name', 4);`  |  相当于 CHAR 型态，并带有长度。
+`$table->date('created_at');`  |  相当于 DATE 型态
 `$table->dateTime('created_at');`  |  相当于 DATETIME 型态。
-`$table->dateTimeTz('created_at');`  |  DATETIME (with timezone) 带时区形态
+`$table->dateTimeTz('created_at');`  |  DATETIME (带时区) 形态
 `$table->decimal('amount', 5, 2);`  |  相当于 DECIMAL 型态，并带有精度与基数。
 `$table->double('column', 15, 8);`  |  相当于 DOUBLE 型态，总共有 15 位数，在小数点后面有 8 位数。
 `$table->enum('choices', ['foo', 'bar']);` | 相当于 ENUM 型态。
-`$table->float('amount');`  |  相当于 FLOAT 型态。
-`$table->increments('id');`  |  递增的 ID (主键)，使用相当于「UNSIGNED INTEGER」的型态。
+`$table->float('amount', 8, 2);`  |  相当于 FLOAT 型态，总共有 8 位数，在小数点后面有 2 位数。
+`$table->increments('id');`  | 递增的 ID (主键)，使用相当于「UNSIGNED INTEGER」的型态。
 `$table->integer('votes');`  |  相当于 INTEGER 型态。
 `$table->ipAddress('visitor');`  |  相当于 IP 地址形态。
 `$table->json('options');`  |  相当于 JSON 型态。
 `$table->jsonb('options');`  |  相当于 JSONB 型态。
 `$table->longText('description');`  |  相当于 LONGTEXT 型态。
 `$table->macAddress('device');`  |  相当于 MAC 地址形态。
+`$table->mediumIncrements('id');`  |  递增 ID (主键) ，相当于「UNSIGNED MEDIUM INTEGER」型态。
 `$table->mediumInteger('numbers');`  |  相当于 MEDIUMINT 型态。
 `$table->mediumText('description');`  |  相当于 MEDIUMTEXT 型态。
 `$table->morphs('taggable');`  |  加入整数 `taggable_id` 与字符串 `taggable_type`。
+`$table->nullableMorphs('taggable');`  |  与 `morphs()` 字段相同，但允许为NULL。
 `$table->nullableTimestamps();`  |  与 `timestamps()` 相同，但允许为 NULL。
 `$table->rememberToken();`  |  加入 `remember_token` 并使用 VARCHAR(100) NULL。
+`$table->smallIncrements('id');`  |  递增 ID (主键) ，相当于「UNSIGNED SMALL INTEGER」型态。
 `$table->smallInteger('votes');`  |  相当于 SMALLINT 型态。
 `$table->softDeletes();`  |  加入 `deleted_at` 字段用于软删除操作。
 `$table->string('email');`  |  相当于 VARCHAR 型态。
 `$table->string('name', 100);`  |  相当于 VARCHAR 型态，并带有长度。
 `$table->text('description');`  |  相当于 TEXT 型态。
 `$table->time('sunrise');`  |  相当于 TIME 型态。
-`$table->timeTz('sunrise');`  | 相当于 TIME (with timezone) 带时区形态。
+`$table->timeTz('sunrise');`  |  相当于 TIME (带时区) 形态。
 `$table->tinyInteger('numbers');`  |  相当于 TINYINT 型态。
 `$table->timestamp('added_on');`  |  相当于 TIMESTAMP 型态。
-`$table->timestampTz('added_on');`  |  相当于 TIMESTAMP (with timezone) 带时区形态。
+`$table->timestampTz('added_on');`  |  相当于 TIMESTAMP (带时区) 形态。
 `$table->timestamps();`  |  加入 `created_at` 和 `updated_at` 字段。
+`$table->timestampsTz();`  |  加入 `created_at` and `updated_at` (带时区) 字段，并允许为NULL。
+`$table->unsignedBigInteger('votes');`  |  相当于 Unsigned BIGINT 型态。
+`$table->unsignedInteger('votes');`  |  相当于 Unsigned INT 型态。
+`$table->unsignedMediumInteger('votes');`  |  相当于 Unsigned MEDIUMINT 型态。
+`$table->unsignedSmallInteger('votes');`  |  相当于 Unsigned SMALLINT 型态。
+`$table->unsignedTinyInteger('votes');`  |  相当于 Unsigned TINYINT 型态。
 `$table->uuid('id');`  |  相当于 UUID 型态。
 
 <a name="column-modifiers"></a>
@@ -245,13 +255,13 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
 除了上述的字段类型列表，还有一些其它的字段「修饰」，你可以将它增加到字段中。例如，若要让字段「nullable」，那么你可以使用 `nullable` 方法：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->string('email')->nullable();
     });
 
 以下列表为字段的可用修饰。此列表不包括 [索引修饰](#creating-indexes)：
 
-修饰  | 描述
+Modifier  | Description
 ------------- | -------------
 `->after('column')`  |  将此字段放置在其它字段「之后」（仅限 MySQL）
 `->comment('my comment')`  |  增加注释
@@ -274,43 +284,43 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
 #### 更新字段属性
 
-`change` 方法让你可以修改一个已存在的字段类型，或修改字段属性。比如，你可能想增加字符串字段的长度。想了解 `change` 方法如何使用，让我们来把 `name` 字段的长度从 25 增加到 50 ：
+`change` 方法让你可以修改一些已存在的字段类型，或修改字段属性。比如，你可能想增加字符串字段的长度。想了解 `change` 方法如何使用，让我们来把 `name` 字段的长度从 25 增加到 50 ：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->string('name', 50)->change();
     });
 
 我们也能将字段修改为 nullable：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->string('name', 50)->nullable()->change();
     });
 
-> {note} 数据表的 `enum`，`json` 或者 `jsonb` 字段暂时不支持修改字段属性。
+> {note} 下面的字段类型不能被「修改」: char，double，enum，mediumInteger，timestamp，tinyInteger，ipAddress，json，jsonb，macAddress，mediumIncrements，morphs，nullableMorphs，nullableTimestamps，softDeletes，timeTz，timestampTz，timestamps，timestampsTz，unsignedMediumInteger，unsignedTinyInteger，uuid。
 
 <a name="renaming-columns"></a>
 #### 重命名字段
 
 要重命名字段，可使用数据库结构构造器的 `renameColumn` 方法。在重命名字段前，请确保你的 `composer.json` 文件内已经加入 `doctrine/dbal` 依赖：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->renameColumn('from', 'to');
     });
 
-> {note} 数据表的 `enum`，`json` 或者 `jsonb` 字段暂时不支持修改字段属性。
+> {note} 数据表的 `enum` 字段暂时不支持修改字段属性。
 
 <a name="dropping-columns"></a>
 ### 移除字段
 
 要移除字段，可使用数据库结构构造器的 `dropColumn` 方法。在删除 SQLite 数据库的字段前，你需要在 `composer.json` 文件中加入 `doctrine/dbal` 依赖并在终端执行 `composer update` 来安装函数库：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->dropColumn('votes');
     });
 
 你可以传递多个字段的数组至 `dropCloumn` 方法来移除多个字段：
 
-    Schema::table('users', function ($table) {
+    Schema::table('users', function (Blueprint $table) {
         $table->dropColumn(['votes', 'avatar', 'location']);
     });
 
@@ -334,24 +344,43 @@ Laravel 的 `Schema` [facade](/docs/{{version}}/facades) 对所有 Laravel 支�
 
     $table->index(['account_id', 'created_at']);
 
-Laravel 会自动生成一个索引名称，但你也可以使用第二个参数来自定义索引名称。
+Laravel 会自动生成一个合理的索引名称，但你也可以使用第二个参数来自定义索引名称:
 
     $table->index('email', 'my_index_name');
 
 #### 可用的索引类型
 
-命令  | 描述
+Command  | Description
 ------------- | -------------
 `$table->primary('id');`  |  加入主键。
 `$table->primary(['first', 'last']);`  |  加入复合键。
 `$table->unique('email');`  |  加入唯一索引。
-`$table->unique('state', 'my_index_name');`  | 自定义索引名称。
+`$table->unique('state', 'my_index_name');`  |  自定义索引名称。
+`$table->unique(['first', 'last']);`  | 加入复合唯一键。
 `$table->index('state');`  |  加入基本索引。
+
+#### 索引长度 & MySQL / MariaDB
+
+Laravel 默认使用 `utf8mb4` 字符，包括支持在数据库存储「表情」。如果你正在运行的 MySQL release 版本低于5.7.7 或 MariaDB release 版本低于10.2.2 ，为了MySQL为它们创建索引，你可能需要手动配置迁移生成的默认字符串长度，你可以通过调用 `AppServiceProvider` 中的 `Schema::defaultStringLength` 方法来配置它：
+
+    use Illuminate\Support\Facades\Schema;
+
+    /**
+     * 引导任何应用程序服务。
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
+
+或者你可以为数据库开启 `innodb_large_prefix` 选项，有关如何正确开启此选项的说明请查阅数据库文档。
 
 <a name="dropping-indexes"></a>
 ### 移除索引
 
-若要移除索引，则必须指定索引的名称。Laravel 默认会自动给索引分配合理的名称。其将数据表名称，索引的字段名称，及索引类型简单地连接在了一起。举例如下：
+若要移除索引，则必须指定索引的名称。Laravel 默认会自动给索引分配合理的名称。其将数据表名称、索引的字段名称及索引类型简单地连接在了一起。举例如下：
 
 命令  | 描述
 ------------- | -------------
@@ -361,7 +390,7 @@ Laravel 会自动生成一个索引名称，但你也可以使用第二个参数
 
 如果你对 `dropIndex` 传参索引数组，默认的约定是索引名称由数据库表名字和键名拼接而成：
 
-    Schema::table('geo', function ($table) {
+    Schema::table('geo', function (Blueprint $table) {
         $table->dropIndex(['state']); // 移除索引 'geo_state_index'
     });
 
@@ -370,7 +399,7 @@ Laravel 会自动生成一个索引名称，但你也可以使用第二个参数
 
 Laravel 也为创建外键约束提供了支持，用于在数据库层中的强制引用完整性。例如，让我们定义一个有 `user_id` 字段的 `posts` 数据表，`user_id` 引用了 `users` 数据表的 `id` 字段：
 
-    Schema::table('posts', function ($table) {
+    Schema::table('posts', function (Blueprint $table) {
         $table->integer('user_id')->unsigned();
 
         $table->foreign('user_id')->references('id')->on('users');
@@ -395,8 +424,8 @@ Laravel 也为创建外键约束提供了支持，用于在数据库层中的强
     Schema::enableForeignKeyConstraints();
 
     Schema::disableForeignKeyConstraints();
-    
+
 ## 译者署名
 | 用户名 | 头像 | 职能 | 签名 |
 |---|---|---|---|
-| [@lijinma](https://laravel-china.org/users/77)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/77_1474611480.jpg?imageView2/1/w/200/h/200">  |  翻译  | 喜欢折腾，[@ lijinma](https://github.com/lijinma/) at Github  |
+| [@em0t](https://laravel-china.org/users/5336)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/5336_1470812559.jpeg?imageView2/1/w/100/h/100">  |  翻译  | coding is funny  |

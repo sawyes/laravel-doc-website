@@ -1,4 +1,4 @@
-# JavaScript 与 CSS
+# Laravel 的前端资源处理 JavaScript 和 CSS 构建
 
 - [简介](#introduction)
 - [编写 CSS](#writing-css)
@@ -12,9 +12,9 @@ Laravel 并没有规定你使用哪个 JavaScript 或 CSS 预处理器，不过�
 
 #### CSS
 
-[Laravel Elixir](/docs/{{version}}/elixir) 提供了一个简洁、富有表现力的 API 来编译 SASS 或 Less，这些 CSS 预处理语言扩充了 CSS 语言，增加了诸如变量、混合（mixins）及其他一些强大的功能让编写 CSS 代码变得更加有趣。
+[Laravel Mix](/docs/{{version}}/mix) 提供了一个简洁、富有表现力的 API 来编译 SASS 或 Less，这些 CSS 预处理语言扩充了 CSS 语言，增加了诸如变量、混合（mixins）及其他一些强大的功能让编写 CSS 代码变得更加有趣。
 
-尽管我们会在这里简要的讨论 CSS 编译的内容，但是，你应该访问 [Laravel Elixir 文档](/docs/{{version}}/elixir) 获取更多关于编译 SASS 或 Less 的信息。
+尽管我们会在这里简要的讨论 CSS 编译的内容，但是，你应该访问 [Laravel Mix 文档](/docs/{{version}}/mix) 获取更多关于编译 SASS 或 Less 的信息。
 
 #### JavaScript
 
@@ -29,11 +29,11 @@ Laravel 并不需要你使用特定的 JavsScript 框架或者库来构建应用
 
     npm install
 
-使用 `npm install` 成功安装依赖之后，你就可以使用 [Gulp](http://gulpjs.com/) 来将 SASS 文件编译为纯 CSS。`gulp` 命令会执行处理 `gulpfile.js` 文件中的指令。通常情况下，编译好的 CSS 代码会被放置在 `public/css` 目录：
+使用 `npm install` 成功安装依赖之后，你就可以使用 [Laravel Mix](/docs/{{version}}/mix#working-with-stylesheets) 来将 SASS 文件编译为纯 CSS。.`npm run dev` 命令会执行处理 `webpack.mix.js` 文件中的指令。通常情况下，编译好的 CSS 代码会被放置在 `public/css` 目录：
 
-    gulp
-
-默认情况下，`gulpfile.js` 会编译 `resources/assets/sass/app.scss` SASS 文件。`app.scss` 文件导入了一个包含 SASS 变量的文件，加载了 Bootstrap 框架，这对大多数程序来说是一个很好的出发点。你也可以根据自己的需要去定制 `app.scss` 文件的内容，甚至使用完全不同的预处理器，详细配置见 [配置 Laravel Elixir](/docs/{{version}}/elixir)。
+    npm run dev
+    
+默认情况下，`webpack.mix.js` 会编译 `resources/assets/sass/app.scss` SASS 文件。`app.scss` 文件导入了一个包含 SASS 变量的文件，加载了 Bootstrap 框架，这对大多数程序来说是一个很好的出发点。你也可以根据自己的需要去定制 `app.scss` 文件的内容，甚至使用完全不同的预处理器，详细配置见 [配置 Laravel Mix](/docs/{{version}}/mix)。
 
 <a name="writing-javascript"></a>
 ## 编写 JavaScript
@@ -42,13 +42,13 @@ Laravel 并不需要你使用特定的 JavsScript 框架或者库来构建应用
 
     npm install
 
-Laravel `package.json` 文件默认会包含一些依赖包来帮助你开始建立 JavaScript 应用程序，例如 `vue` 和 `vue-resource` 。你可以根据自己程序的需要在 `package.json` 中添加或者移除依赖。
+Laravel `package.json` 文件默认会包含一些依赖包来帮助你开始建立 JavaScript 应用程序，例如 `vue` 和 `axios` 。你可以根据自己程序的需要在 `package.json` 中添加或者移除依赖。
 
-成功安装依赖之后，你就可以使用  `gulp`  命令来 [编译资源文件](/docs/{{version}}/elixir) 。Gulp 是一个 JavaScript 的命令行构建系统。当你运行 `Gulp` 命令时，Gulp 会执行 `gulpfile.js` 文件中的指令：
+成功安装依赖之后，你就可以使用  `npm run dev`  命令来 [编译资源文件](/docs/{{version}}/mix) 。Webpack 是一个为现代 JavaScript 应用而生的模块构建工具。当你运行 `npm run dev` 命令时，Webpack 会执行 `webpack.mix.js` 文件中的指令：
 
-    gulp
+    npm run dev
 
-默认情况下，`gulpfile.js` 会编译 SASS 文件和 `resources/assets/js/app.js` 文件。你可以在 `app.js` 文件中注册你的 Vue 组件，或者如果你更喜欢其他的框架，也可以在这里进行配置。编译好的 JavaScript 文件通常会放置在 `public/js` 目录。
+默认情况下，`webpack.mix.js` 会编译 SASS 文件和 `resources/assets/js/app.js` 文件。你可以在 `app.js` 文件中注册你的 Vue 组件，或者如果你更喜欢其他的框架，也可以在这里进行配置。编译好的 JavaScript 文件通常会放置在 `public/js` 目录。
 
 > {tip} `app.js` 会加载 `resources/assets/js/bootstrap.js` 文件来启动、 配置 Vue，Vue Resource，jQuery，以及其他的 JavaScript 依赖。如果你有额外的 JavaScript 依赖需要去配置，你也可以在这个文件中完成。
 
@@ -66,12 +66,7 @@ Laravel `package.json` 文件默认会包含一些依赖包来帮助你开始建
     @section('content')
         <example></example>
     @endsection
-
-> {tip} 谨记，你需要在每次修改 Vue 组件后都需要运行 `gulp` 命令。或者，你可以使用 `gulp watch` 命令来监控并在每次文件被修改时自动重新编译组件。
+    
+> {tip} 谨记，你需要在每次修改 Vue 组件后都需要运行 `npm run dev` 命令。或者，你可以使用 `npm run watch` 命令来监控并在每次文件被修改时自动重新编译组件。
 
 当然，如果你对学习更多编写 Vue 组件的内容感兴趣，你可以读一下 [Vue 官方引导文档](http://vuejs.org/guide/)，它提供了一个透彻、易懂的文档让你一览 Vue 框架的概貌。
-
-## 译者署名
-| 用户名 | 头像 | 职能 | 签名 |
-|---|---|---|---|
-| [@JobsLong](https://phphub.org/users/56)  | <img class="avatar-66 rm-style" src="https://dn-phphub.qbox.me/uploads/avatars/56_1427370654.jpeg?imageView2/1/w/100/h/100">  |  翻译  | 我的个人主页：[http://jobslong.com](http://jobslong.com)  |

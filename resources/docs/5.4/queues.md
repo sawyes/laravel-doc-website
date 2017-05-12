@@ -1,14 +1,15 @@
-# 队列
+# Laravel 的队列系统介绍
 
 - [简介](#introduction)
     - [连接 Vs. 队列](#connections-vs-queues)
     - [驱动的必要设置](#driver-prerequisites)
-- [编写任务类](#writing-job-classes)
+- [创建任务类](#creating-jobs)
     - [生成任务类](#generating-job-classes)
-    - [任务类结构](#job-class-structure)
+    - [任务类结构](#class-structure)
 - [分发任务](#dispatching-jobs)
     - [延迟分发](#delayed-dispatching)
     - [自定义队列 & 连接](#customizing-the-queue-and-connection)
+    - [指定任务最大尝试次数 / 超时值](#max-job-attempts-and-timeout)
     - [错误处理](#error-handling)
 - [运行队列处理器](#running-the-queue-worker)
     - [队列优先级](#queue-priorities)
@@ -24,16 +25,16 @@
 <a name="introduction"></a>
 ## 简介
 
-Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazon SQS，Redis，甚至是关系型数据库，提供了一套统一的 API 。队列允许你将一个耗时的任务进行延迟处理，例如像 e-mail 发送。这能让应用程序对页面的请求有更快的响应。
+Laravel 队列为不同的后台队列服务提供统一的 API ， 例如 Beanstalk，Amazon SQS， Redis，甚至其他基于关系型数据库的队列。 队列的目的是将耗时的任务延时处理，比如发送邮件，从而大幅度缩短Web请求和相应的时间。
 
-队列的配置文件被保存在 `config/queue.php` 中。在这个文件内你可以找到包含在 Laravel 中的每一种队列驱动的连接配置。队列驱动包括数据库、[Beanstalkd](http://kr.github.com/beanstalkd)、[IronMQ](http://iron.io)、[Amazon SQS](http://aws.amazon.com/sqs)、[Redis](http://redis.io) 以及 synchronous 驱动（ 本地使用 ）。 队列驱动也可以配置为 `null`，这样就表示丢弃队列任务。
+队列配置文件存放在 `config/queue.php`。 每一种队列驱动的配置都可以在该文件中找到， 包括数据库， [Beanstalkd](https://kr.github.io/beanstalkd/)， [Amazon SQS](https://aws.amazon.com/sqs/)， [Redis](http://redis.io)， 以及同步（本地使用）驱动。 其中还包含了一个`null`队列驱动用于那些放弃队列的任务。
 
 <a name="connections-vs-queues"></a>
 ### 连接 Vs. 队列
 
-在开始使用 Laravel 队列前，弄明白「连接」和「队列」的区别是很重要的。在你的 `config/queue.php` 配置文件里，有一个 `connections` 配置选项。这个选项给像 Amazon SQS，Beanstalk，或者 Redis 这样的后端服务定义了一个特有的连接。不管是哪一种，一个给定的连接可能会有多个「队列」，而 「队列」可以被认为是不同的栈或者大量的队列任务。
+在开始使用 Laravel 队列前，弄明白 「连接」 和 「队列」 的区别是很重要的。在你的 `config/queue.php` 配置文件里， 有一个 `connections` 配置选项。 这个选项给 Amazon SQS， Beanstalk ，或者 Redis 这样的后端服务定义了一个特有的连接。不管是哪一种，一个给定的连接可能会有多个「队列」，而 「队列」可以被认为是不同的栈或者大量的队列任务。
 
-要注意的，`queue` 配置文件中每个连接的配置示例中都包含一个 `queue` 属性。这是默认队列，任务被发给指定连接的时候会被分发到这个队列中。换句话说，如果你分发任务的时候没有显式定义队列，那么它就会被放到连接配置中 `queue` 属性所定义的队列中：
+要注意的是， `queue` 配置文件中每个连接的配置示例中都包含一个 `queue` 属性。这是默认队列，任务被发给指定连接的时候会被分发到这个队列中。换句话说，如果你分发任务的时候没有显式定义队列，那么它就会被放到连接配置中 `queue` 属性所定义的队列中：
 
     // 这个任务将被分发到默认队列...
     dispatch(new Job);
@@ -50,11 +51,24 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 
 #### 数据库
 
-要使用 `database` 这个队列驱动的话，则需要创建一个数据表来存储任务，你可以用 `queue:table` 这个 Artisan 命令来创建这个数据表的迁移。当迁移建好后，就可以用 `migrate` 这个命令来创建数据表。
+要使用 `database` 这个队列驱动的话， 你需要创建一个数据表来存储任务，你可以用 `queue:table` 这个 Artisan 命令来创建这个数据表的迁移。 当迁移创建好以后，就可以用 `migrate` 这条命令来创建数据表：
 
     php artisan queue:table
 
     php artisan migrate
+
+#### Redis
+
+为了使用 `redis` 队列驱动， 你需要在你的配置文件 `config/database.php` 中配置Redis的数据库连接
+
+如果你的 Redis 队列连接使用的是 Redis 集群， 你的队列名称必须包含 [key hash tag](https://redis.io/topics/cluster-spec#keys-hash-tags) 。 这是为了确保所有的 redis 键对于一个给定的队列都置于同一哈希中：
+
+    'redis' => [
+        'driver' => 'redis',
+        'connection' => 'default',
+        'queue' => '{default}',
+        'retry_after' => 90,
+    ],
 
 #### 其它队列驱动的依赖扩展包
 
@@ -89,6 +103,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 
     use App\Podcast;
     use App\AudioProcessor;
+    use Illuminate\Bus\Queueable;
     use Illuminate\Queue\SerializesModels;
     use Illuminate\Queue\InteractsWithQueue;
     use Illuminate\Contracts\Queue\ShouldQueue;
@@ -112,24 +127,27 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 
         /**
          * 运行任务。
-         * 
+         *
          * @param  AudioProcessor  $processor
          * @return void
          */
         public function handle(AudioProcessor $processor)
         {
-            // 处理上传播客...
+            // Process uploaded podcast...
         }
     }
 
-注意，在这个例子中，我们在任务类的构造器中直接传递了一个 [Eloquent 模型](/docs/{{version}}/eloquent)。因为我们在任务类里引用了 `SerializesModels` 这个 trait，使得 Eloquent 模型在处理任务时可以被优雅地序列化和反序列化。如果你的队列任务类在构造器中接收了一个 Eloquent 模型，那么只有可识别出该模型的属性会被序列化到队列里。当任务被实际运行时，队列系统便会自动从数据库中重新取回完整的模型。这整个过程对你的应用程序来说是完全透明的，这样可以避免在序列化完整的 Eloquent 模式实例时所带来的一些问题。
+注意，在这个例子中，我们在任务类的构造器中直接传递了一个 [Eloquent 模型](/docs/{{version}}/eloquent)。因为我们在任务类里引用了 `SerializesModels` 这个 
+，使得 Eloquent 模型在处理任务时可以被优雅地序列化和反序列化。如果你的队列任务类在构造器中接收了一个 Eloquent 模型，那么只有可识别出该模型的属性会被序列化到队列里。当任务被实际运行时，队列系统便会自动从数据库中重新取回完整的模型。这整个过程对你的应用程序来说是完全透明的，这样可以避免在序列化完整的 Eloquent 模式实例时所带来的一些问题。
 
-在队列处理任务时，会调用 `handle` 方法，而这里我们也可以通过 `handle` 方法的参数类型提示，让 Laravel 的 [服务容器](/docs/{{version}}/container) 自动注入依赖对象。
+在队列处理任务时，会调用 `handle` 方法，而这里我们也可以通过 handle 方法的参数类型提示，让 Laravel 的 [服务容器](/docs/{{version}}/container) 自动注入依赖对象。
+
+> {note} 像图片内容这种二进制数据， 在放入队列任务之前必须使用 `base64_encode` 方法转换一下。 否则，当这项任务放置到队列中时，可能无法正确序列化为 JSON。
 
 <a name="dispatching-jobs"></a>
 ## 分发任务
 
-你写好任务类后，就能通过 `dispatch` 辅助函数来分发它了。唯一需要传递给这个函数的参数是这个任务类的实例：
+你写好任务类后，就能通过 `dispatch` 辅助函数来分发它了。唯一需要传递给 `dispatch` 的参数是这个任务类的实例：
 
     <?php
 
@@ -142,7 +160,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
     class PodcastController extends Controller
     {
         /**
-         * 保存播客
+         * 保存播客。
          *
          * @param  Request  $request
          * @return Response
@@ -160,7 +178,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 <a name="delayed-dispatching"></a>
 ### 延迟分发
 
-如果你想延迟执行一个队列中的任务，你可以用任务实例的 `delay` 方法。这个方法是 `Illuminate\Bus\Queueable` trait 提供的，而这个 trait 在所有自动生成的任务类中都是默认加载了的。对于延迟任务我们可以举个例子，比如指定一个被分发10分钟后才执行的任务：
+如果你想延迟执行一个队列中的任务，你可以用任务实例的 `delay` 方法。 这个方法是 `Illuminate\Bus\Queueable` trait 提供的，而这个 trait 在所有自动生成的任务类中都是默认加载了的。对于延迟任务我们可以举个例子，比如指定一个被分发10分钟后才执行的任务：
 
     <?php
 
@@ -183,7 +201,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
         {
             // 创建播客...
 
-            $job = (new ProcessPodcast($pocast))
+            $job = (new ProcessPodcast($podcast))
                         ->delay(Carbon::now()->addMinutes(10));
 
             dispatch($job);
@@ -197,7 +215,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 
 #### 分发任务到指定队列
 
-通过推送任务到不同的队列，你可以给队列任务分类，甚至可以控制给不同的队列分配多少任务。记住，这个并不是要推送任务到队列配置文件中不同的「connections」里，而是推送到一个连接中不同的队列里。要指定队列的话，就调用任务实例的 `onQueue` 方法：
+通过推送任务到不同的队列，你可以给队列任务分类，甚至可以控制给不同的队列分配多少任务。记住，这个并不是要推送任务到队列配置文件中不同的 「connections」 里，而是推送到一个连接中不同的队列里。要指定队列的话，就调用任务实例的 `onQueue` 方法：
 
     <?php
 
@@ -227,7 +245,7 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
 
 #### 分发任务到指定连接
 
-如果你使用了多个队列连接，你可以把任务推到指定连接。要指定连接的话，你可以调用任务实例的 ｀onConnection｀ 方法：
+如果你使用了多个队列连接，你可以把任务推到指定连接。要指定连接的话，你可以调用任务实例的 `onConnection` 方法：
 
     <?php
 
@@ -261,21 +279,68 @@ Laravel 的队列服务为不同的队列后端系统，比如 Beanstalk，Amazo
                     ->onConnection('sqs')
                     ->onQueue('processing');
 
+<a name="max-job-attempts-and-timeout"></a>
+### 指定任务最大尝试次数 / 超时值
+
+#### 最大尝试次数
+
+在一项任务中指定最大的尝试次数可以尝试通过 Artisan 命令行 `--tries` 来设置：
+
+    php artisan queue:work --tries=3
+
+但是，你可以采取更为精致的方法来完成这项工作比如说在任务类中定义最大尝试次数。如果在类和命令行中都定义了最大尝试次数， Laravel 会优先执行任务类中的值：
+
+    <?php
+
+    namespace App\Jobs;
+
+    class ProcessPodcast implements ShouldQueue
+    {
+        /**
+         * 任务最大尝试次数
+         *
+         * @var int
+         */
+        public $tries = 5;
+    }
+
+#### 超时
+
+同样的，任务可以运行的最大秒数可以使用 Artisan 命令行上的 `--timeout` 开关指定：
+
+    php artisan queue:work --timeout=30
+
+然而，你也可以在任务类中定义一个变量来设置可运行的最大描述，如果在类和命令行中都定义了最大尝试次数， Laravel 会优先执行命令行中的值：
+
+    <?php
+
+    namespace App\Jobs;
+
+    class ProcessPodcast implements ShouldQueue
+    {
+        /**
+         * 任务运行的超时时间。
+         *
+         * @var int
+         */
+        public $timeout = 120;
+    }
+
 <a name="error-handling"></a>
 ### 错误处理
 
-如果任务运行的时候抛出异常，这个任务就自动被释放回队列，这样它就能被再重新运行了。如果继续抛出异常，这个任务会继续被释放回队列，直到重试次数达到你应用允许的最多次数。这个最多次数是在调用 `queue:work` Artisan 命令的时候通过 `--tries` 参数来定义的。更多队列处理器的信息可以[在下面看到](#running-the-queue-worker)
+如果任务运行的时候抛出异常，这个任务就自动被释放回队列，这样它就能被再重新运行了。如果继续抛出异常，这个任务会继续被释放回队列，直到重试次数达到你应用允许的最多次数。这个最多次数是在调用 `queue:work` Artisan 命令的时候通过 `--tries` 参数来定义的。更多队列处理器的信息可以 [在下面看到](#running-the-queue-worker) 。
 
 <a name="running-the-queue-worker"></a>
 ## 运行队列处理器
 
-Laravel 包含一个队列处理器，当新任务被推到队列中时它能处理这些任务。你可以通过`queue:work` Artisan 命令来运行处理器。要注意，一旦 `queue:work` 命令开始，它将一直运行，直到你手动停止或者你关闭控制台：
+Laravel 包含一个队列处理器，当新任务被推到队列中时它能处理这些任务。你可以通过 queue:work Artisan 命令来运行处理器。要注意，一旦 `queue:work` 命令开始，它将一直运行，直到你手动停止或者你关闭控制台：
 
     php artisan queue:work
 
-> {tip} 要让 `queue:work` 进程永久在后台运行，你应该使用进程监控工具，比如 [Supervisor](#supervisor-configuration) 来保证队列处理器没有停止运行。
+> {tip} 要让 `queue:work` 进程永久在后台运行，你应该使用进程监控工具，比如 `Supervisor` 来保证队列处理器没有停止运行。
 
-一定要记得，队列处理器是长时间运行的进程，并在内存里保存着已经启动的应用状态。这样的结果就是，处理器运行后如果你修改代码那这些改变是不会应用到处理器中的。所以在你重新部署过程中，一定要 [重启队列处理器](#queue-workers-and-deployment)。
+一定要记得，队列处理器是长时间运行的进程，并在内存里保存着已经启动的应用状态。这样的结果就是，处理器运行后如果你修改代码那这些改变是不会应用到处理器中的。所以在你重新部署过程中，一定要 [重启队列处理器](#queue-workers-and-deployment) 。
 
 #### 指定连接 & 队列
 
@@ -287,6 +352,10 @@ Laravel 包含一个队列处理器，当新任务被推到队列中时它能处
 
     php artisan queue:work redis --queue=emails
 
+#### 资源注意事项
+
+守护程序队列不会在处理每个作业之前 「重新启动」 框架。 因此，在每个任务完成后，您应该释放任何占用过大的资源。例如，如果你使用GD库进行图像处理，你应该在完成后用 `imagedestroy` 释放内存。
+
 <a name="queue-priorities"></a>
 ### 队列优先级
 
@@ -294,7 +363,7 @@ Laravel 包含一个队列处理器，当新任务被推到队列中时它能处
 
     dispatch((new Job)->onQueue('high'));
 
-要验证 `high` 队列中的任务都是在 `low` 队列中的任务之前处理的，你要启动一个队列处理器，传递给它队列名字的列表并以英文逗号 `,` 间隔：
+要验证 `high` 队列中的任务都是在 `low` 队列中的任务之前处理的，你要启动一个队列处理器，传递给它队列名字的列表并以英文逗号，间隔：
 
     php artisan queue:work --queue=high,low
 
@@ -312,19 +381,25 @@ Laravel 包含一个队列处理器，当新任务被推到队列中时它能处
 
 #### 任务过期
 
-`config/queue.php` 配置文件里，每一个队列连接都定义了一个 `retry_after` 选项。这个选项指定了任务最多处理多少秒后就被当做失败重试了。比如说，如果这个选项设置为 `90`，那么当这个任务持续执行了 90 秒而没有被删除，那么它将被释放回队列。通常情况下，你应该把 `retry_after` 设置为最长耗时的任务所对应的时间。
+`config/queue.php` 配置文件里，每一个队列连接都定义了一个 `retry_after` 选项。这个选项指定了任务最多处理多少秒后就被当做失败重试了。比如说，如果这个选项设置为 `90`，那么当这个任务持续执行了 `90` 秒而没有被删除，那么它将被释放回队列。通常情况下，你应该把 `retry_after` 设置为最长耗时的任务所对应的时间。
 
-> {note} 唯一没有 `retry_after` 选项的连接是 Amazon SQS。当用 Amazon SQS 时，你必须通过 Amazon 命令行来配置这个重试阈值。
+> {note} 唯一没有 `retry_after` 选项的连接是 Amazon SQS。当用 Amazon SQS 时，你必须通过 [Amazon](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/AboutVT.html) 命令行来配置这个重试阈值。
 
 #### 队列处理器超时
 
-`queue:work` Artisan 命令对外有一个 `--timeout` 选项。这个选项指定了 Laravel 队列处理器最多执行多长时间后就应该被关闭掉。有时候一个队列的子进程会因为很多原因僵死，比如一个外部的 HTTP 请求没有响应。这个 `--timeout` 选项会移除超出指定事件限制的僵死进程。
+`queue:work` Artisan 命令对外有一个 `--timeout` 选项。这个选项指定了 `Laravel` 队列处理器最多执行多长时间后就应该被关闭掉。有时候一个队列的子进程会因为很多原因僵死，比如一个外部的 HTTP 请求没有响应。这个 `--timeout` 选项会移除超出指定事件限制的僵死进程。
 
     php artisan queue:work --timeout=60
 
 `retry_after` 配置选项和 `--timeout` 命令行选项是不一样的，但是可以同时工作来保证任务不会丢失并且不会重复执行。
 
 > {note} `--timeout` 应该永远都要比 `retry_after` 短至少几秒钟的时间。这样就能保证任务进程总能在失败重试前就被杀死了。如果你的 `--timeout` 选项大于 `retry_after` 配置选项，你的任务可能被执行两次。
+
+#### 队列进程睡眠时间
+
+当队列需要处理任务时，进程将继续处理任务，它们之间没有延迟。 但是，如果没有新的工作可用，`sleep` 参数决定了工作进程将「睡眠」多长时间：
+
+    php artisan queue:work --sleep=3
 
 <a name="supervisor-configuration"></a>
 ## Supervisor 配置
@@ -335,7 +410,7 @@ Supervisor 是一个 Linux 操作系统上的进程监控软件，它会在 `que
 
     sudo apt-get install supervisor
 
-> {tip} 如果自己手动配置 Supervisor 听起来有点难以应付，可以考虑使用 [Laravel Forge](https://forge.laravel.com)，它能给你的 Laravel 项目自动安装与配置 Supervisor。
+> {tip} 如果自己手动配置 Supervisor 听起来有点难以应付，可以考虑使用 [Laravel Forge](https://forge.laravel.com) ，它能给你的 Laravel 项目自动安装与配置 Supervisor。 
 
 #### 配置 Supervisor
 
@@ -363,18 +438,18 @@ Supervisor 的配置文件一般是放在 `/etc/supervisor/conf.d` 目录下，�
 
     sudo supervisorctl start laravel-worker:*
 
-更多有关 Supervisor 的设置与使用，请参考 [Supervisor 官方文档](http://supervisord.org/index.html)。
+更多有关 Supervisor 的设置与使用，请参考 [Supervisor](http://supervisord.org/index.html) 官方文档。
 
 <a name="dealing-with-failed-jobs"></a>
 ## 处理失败的任务
 
-有时候你队列中的任务会失败。不要担心，本来事情就不会一帆风顺。Laravel 内置了一个方便的方式来指定任务重试的最大次数。当任务超出这个重试次数后，它就会被插入到 `failed_jobs` 数据表里面。要创建 `failed_jobs` 表的话，你可以用 `queue:failed-table` 命令：
+有时候你队列中的任务会失败。不要担心，本来事情就不会一帆风顺。 Laravel 内置了一个方便的方式来指定任务重试的最大次数。当任务超出这个重试次数后，它就会被插入到 `failed_jobs` 数据表里面。要创建 `failed_jobs` 表的话，你可以用 `queue:failed-table` 命令：
 
     php artisan queue:failed-table
 
     php artisan migrate
 
-然后运行[队列处理器](#running-the-queue-worker)，在调用 `queue:work` 命令时你应该通过 `--tries` 参数指定任务的最大重试次数。如果不指定，任务就会永久重试：
+然后运行队列处理器，在调用 [queue:work](#running-the-queue-worker) 命令时你应该通过 `--tries` 参数指定任务的最大重试次数。如果不指定，任务就会永久重试：
 
     php artisan queue:work redis --tries=3
 
@@ -390,6 +465,7 @@ Supervisor 的配置文件一般是放在 `/etc/supervisor/conf.d` 目录下，�
     use Exception;
     use App\Podcast;
     use App\AudioProcessor;
+    use Illuminate\Bus\Queueable;
     use Illuminate\Queue\SerializesModels;
     use Illuminate\Queue\InteractsWithQueue;
     use Illuminate\Contracts\Queue\ShouldQueue;
@@ -428,14 +504,14 @@ Supervisor 的配置文件一般是放在 `/etc/supervisor/conf.d` 目录下，�
          * @param  Exception  $exception
          * @return void
          */
-        public function failed(Exception $e)
+        public function failed(Exception $exception)
         {
             // 给用户发送失败通知，等等...
         }
     }
 
 <a name="failed-job-events"></a>
-### 任务失败事件
+任务失败事件
 
 如果你想注册一个当队列任务失败时会被调用的事件，则可以用 `Queue::failing` 方法。这样你就有机会通过这个事件来用 e-mail 或 [HipChat](https://www.hipchat.com) 通知你的团队。例如我们可以在 Laravel 内置的 `AppServiceProvider` 中对这个事件附加一个回调函数：
 
@@ -481,7 +557,7 @@ Supervisor 的配置文件一般是放在 `/etc/supervisor/conf.d` 目录下，�
 
     php artisan queue:failed
 
-queue:failed` 命令会列出所有任务的 ID、连接、队列以及失败时间，任务 ID 可以被用在重试失败的任务上。例如要重试一个 ID 为 5 的失败任务，其命令如下：
+`queue:failed` 命令会列出所有任务的 ID、连接、队列以及失败时间，任务 ID 可以被用在重试失败的任务上。例如要重试一个 ID 为 `5` 的失败任务，其命令如下：
 
     php artisan queue:retry 5
 
@@ -500,7 +576,7 @@ queue:failed` 命令会列出所有任务的 ID、连接、队列以及失败时
 <a name="job-events"></a>
 ## 任务事件
 
-使用队列的 `before` 和 `after` 方法，你能指定任务处理前和处理后的回调处理。在这些回调里正是实现额外的日志记录或者增加统计数据的好时机。通常情况下，你应该在 [服务容器](/docs/{{version}}/providers) 中调用这些方法。例如，我们使用 Laravel 中的  `AppServiceProvider`：
+使用队列的 `before` 和 `after` 方法，你能指定任务处理前和处理后的回调处理。在这些回调里正是实现额外的日志记录或者增加统计数据的好时机。通常情况下，你应该在 [服务容器](/docs/{{version}}/providers) 中调用这些方法。例如，我们使用 Laravel 中的 AppServiceProvider：
 
     <?php
 
@@ -543,3 +619,11 @@ queue:failed` 命令会列出所有任务的 ID、连接、队列以及失败时
             //
         }
     }
+
+在 `队列` [facade](/docs/{{version}}/facades) 中使用 `looping` 方法，你可以尝试在队列获取任务之前执行指定的回调方法。举个例子，你可以用闭包来回滚之前已失败任务的事务。
+
+    Queue::looping(function () {
+        while (DB::transactionLevel() > 0) {
+            DB::rollBack();
+        }
+    });

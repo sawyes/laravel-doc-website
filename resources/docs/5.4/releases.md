@@ -1,6 +1,7 @@
-# 发行说明
+# Laravel 发行说明
 
 - [支持策略](#support-policy)
+- [Laravel 5.4](#laravel-5.4)
 - [Laravel 5.3](#laravel-5.3)
 - [Laravel 5.2](#laravel-5.2)
 - [Laravel 5.1.11](#laravel-5.1.11)
@@ -18,6 +19,361 @@
 对于其他通用版本，只提供六个月的 bug 修复和一年的安全修复支持。
 
 > [Laravel 的发布路线图](https://phphub.org/topics/2594) - by [Summer](http://github.com/summerblue)
+
+<a name="Laravel 5.4.22"></a>
+## Laravel 5.4.22
+
+Laravel 5.4.22 为 Laravel 5.4 系列版本中能对应用程序中的用户进行网络钓鱼的安全漏洞安装了补丁。使用密码重置系统，恶意用户可以尝试欺骗你的用户将登录凭据输入到他们控制的单独应用程序中。由于密码重置通知使用主机传入请求来获取重置密码的 URL，因此用来生成重置密码的 URL 的主机可能会被欺骗。如果用户没有注意到他们访问的域名不正确，他们可能会意外将自己的登录凭据输入到恶意的应用程序中。
+
+在 Laravel 5.1 的应用程序中，密码重置通知由开发人员维护，因此此漏洞可能存在或可能不存在。你应该验证应用程序生成密码重置的链接是否是绝对的 URL：
+
+````
+{{ url('http://example.com/password/reset/'.$token) }}
+````
+
+<a name="laravel-5.4"></a>
+## Laravel 5.4
+
+Laravel 5.4 继续在 Laravel 5.3 的基础上进行优化，新特性包括以下：
+* [在邮件和通知中支持 Markdown](/docs/5.4/mail#markdown-mailables)；
+* [Laravel Dusk 浏览器自动测试框架](/docs/5.4/dusk)；
+* Laravel Mix；
+* Blade "components" 和 "slots"；
+* 在广播频道上进行路由模型绑定；
+* 在集合中支持高阶消息传递；
+* 基于对象的 Eloquent 事件；
+* 任务级别的「重试」和「超时」设置；
+* "实时" Facades；
+* 更好的支持 Redis Cluster；
+* 自定义 pivot 表模型；
+* 两个新的中间件，用于输入修剪空格和清除非必要字段，等等。
+
+此外，还对整个框架代码进行了 reviewed 和重构，以使代码更加干净和清晰。
+
+> {tip} 这个文档总结了许多框架值得注意的改进。需要知道更多细节请参考 Github 上的更新记录 [on GitHub](https://github.com/laravel/framework/blob/5.4/CHANGELOG-5.4.md)。
+
+### Markdown 邮件和通知
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/7)。
+
+此新特性允许我们在邮件通知中使用 Markdown 语法，Laravel 可以将这些消息渲染成美观、响应式的 HTML 模板，同时自动生成纯文本副本，下面是一个 Markdown 格式的邮件示例：
+
+    @component('mail::message')
+    # Order Shipped
+
+    Your order has been shipped!
+
+    @component('mail::button', ['url' => $url])
+    View Order
+    @endcomponent
+
+    Next Steps:
+
+    - Track Your Order On Our Website
+    - Pre-Sign For Delivery
+
+    Thanks,<br>
+    {{ config('app.name') }}
+    @endcomponent
+
+利用这个简单的 Markdown 模板，Laravel 可以生成一个响应式 HTML 邮件和纯文本副本：
+
+<img src="https://laravel.com/assets/img/examples/markdown.png" width="551" height="596">
+
+要想了解更多细节，查看 [mail](/docs/5.4/mail) 和 [notification](/docs/5.4/notifications) 文档。
+
+> {tip} 你可以导出所有的 Markdown 邮件组件到自己的应用中进行自定义。使用 `vendor:publish` Artisan 命令 `laravel-mail` 选项来导出资源。
+
+### Laravel Dusk
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/9)。
+
+Laravel Dusk 提供一个优雅，简单易用的浏览器自动化测试 API。默认情况下，Dusk 不需要再你安装 JDK 或 Selenium 。Dusk 使用独立的 [ChromeDriver](https://sites.google.com/a/chromium.org/chromedriver/home) 安装方式。你也可自由的使用其他 Selenium 兼容驱动。
+
+Dusk 运行使用真实的浏览器，所有你可以轻松地对那些重度使用 JavaScript 的引用进行测试和交互：
+
+    /**
+     * 一个基本浏览器测试例子.
+     *
+     * @return void
+     */
+    public function testBasicExample()
+    {
+        $user = factory(User::class)->create([
+            'email' => 'taylor@laravel.com',
+        ]);
+
+        $this->browse(function ($browser) use ($user) {
+            $browser->loginAs($user)
+                    ->visit('/home')
+                    ->press('Create Playlist')
+                    ->whenAvailable('.playlist-modal', function ($modal) {
+                        $modal->type('name', 'My Playlist')
+                              ->press('Create');
+                    });
+
+            $browser->waitForText('Playlist Created');
+        });
+    }
+
+需要了解更多关于 Dusk 的细节，查看 [Dusk 文档](/docs/5.4/dusk)
+
+### Laravel Mix
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/3)。
+
+Laravel Mix 是 Laravel Elixir 思想继承者，完全基于 Webpack 而非 Gulp。Laravel Mix 提供流式 API 定义 Webpack 构建步骤，有几种已经定义的 CSS 和 JavaScript 预处理器。通过简单的方法链，你可以流畅的定义你的资源构建流水线。例如：
+
+    mix.js('resources/assets/js/app.js', 'public/js')
+       .sass('resources/assets/sass/app.scss', 'public/css');
+
+### Blade Components & Slots
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/6)。
+
+Blade components 和 slots 提供与 sections 和 layouts 相似的功能；然而，有些人会觉得 components 和 slots 的思想更易理解。首先，让我们假设一个可重用的 "alert" 组件想要在整个应用进行重用：
+
+    <!-- /resources/views/alert.blade.php -->
+
+    <div class="alert alert-danger">
+        {{ $slot }}
+    </div>
+
+`{{ $slot }}` 变量包含我们想要插入的组件内容，要构建这个组件，我们可以使用 `component` Blade 指令：
+
+    @component('alert')
+        <strong>Whoops!</strong> Something went wrong!
+    @endcomponent
+
+命名 slots 允许在单个组件中定义多个 slots：
+
+    <!-- /resources/views/alert.blade.php -->
+
+    <div class="alert alert-danger">
+        <div class="alert-title">{{ $title }}</div>
+
+        {{ $slot }}
+    </div>
+
+命名 slots 可以通过 `@slot` 指令注入。一个 `@slot` 中的所有内容都会被传递给 `@slot` 变量：
+
+    @component('alert')
+        @slot('title')
+            Forbidden
+        @endslot
+
+        You are not allowed to access this resource!
+    @endcomponent
+
+需要了解更多关于 components 和 slots 的细节，查看 [Blade documentation](/docs/5.4/blade)。
+
+### 广播模型绑定
+
+和 HTTP 路由一样，频道路由也使用隐式和显式 [路由模型绑定](/docs/5.4/routing#route-model-binding)。例如，可以通过请求一个实际的 `Order` 模型实例来取代之前获取字符串或数字订单ID ID：
+
+    use App\Order;
+
+    Broadcast::channel('order.{order}', function ($user, Order $order) {
+        return $user->id === $order->user_id;
+    });
+
+需要了解更多关于广播模型绑定，查看 [事件广播](/docs/5.4/broadcasting)。
+
+### 集合高阶消息传递
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/2)。
+
+集合现在支持 "高阶消息传递"，从而使集合的操作更为精简，目前支持高阶消息传递方法有：
+
+ `contains`、`each`、`every`、`filter`、`first`、`map`、`partition`、`reject`、`sortBy`、`sortByDesc`、 `sum`。
+
+每一个高阶消息传递都可以通过集合实例的动态属性进行访问，例如，使用 `each` 的高阶消息传递去调用集合的某个对象：
+
+    $users = User::where('votes', '>', 500)->get();
+
+    $users->each->markAsVip();
+
+类似的，我们可以通过 `sum` 的高阶消息传递在用户集合中聚合所有的投票数：
+
+    $users = User::where('group', 'Development')->get();
+
+    return $users->sum->votes;
+
+### 基于对象的 Eloquent 事件
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/10)。
+
+Eloquent 事件处理器现在可以被映射到事件对象上。这提供了一种直观处理 Eloquent 事件并易于测试的方式。在开始使用之前，先在你的 Eloquent 模型中定义一个 `$events` 属性数组，在这个数组中可以定义 Eloquent 模型的生命周期中属于你的 [事件 classes](/docs/5.4/events):
+
+    <?php
+
+    namespace App;
+
+    use App\Events\UserSaved;
+    use App\Events\UserDeleted;
+    use Illuminate\Notifications\Notifiable;
+    use Illuminate\Foundation\Auth\User as Authenticatable;
+
+    class User extends Authenticatable
+    {
+        use Notifiable;
+
+        /**
+         * The event map for the model.
+         *
+         * @var array
+         */
+        protected $events = [
+            'saved' => UserSaved::class,
+            'deleted' => UserDeleted::class,
+        ];
+    }
+
+### 任务级别重试和超时
+
+5.4版本以前，任务队列 "retry" 和 "timeout" 设置只能在全局的队列配置中用命令行设置。现在可以单独在任务类中配置每一个任务的 "重试" 和 "超时"：
+
+    <?php
+
+    namespace App\Jobs;
+
+    class ProcessPodcast implements ShouldQueue
+    {
+        /**
+         * The number of times the job may be attempted.
+         *
+         * @var int
+         */
+        public $tries = 5;
+
+        /**
+         * The number of seconds the job can run before timing out.
+         *
+         * @var int
+         */
+        public $timeout = 120;
+    }
+
+需要了更多，查看 [队列](/docs/5.4/queues).
+
+### 请求清理中间件
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/1)。
+
+Laravel 5.4 在默认的中间件栈中引入了两个新的中间件：`TrimStrings` 和 `ConvertEmptyStringsToNull`：
+
+    /**
+     * 应用的全局 HTTP 中间件栈
+     *
+     * 这些中间件会对你的每一个请求运行
+     *
+     * @var array
+     */
+    protected $middleware = [
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
+
+新增的中间件会自动去除请求输入值首尾的空格、将空字符串转换为 `null`。这可以帮助你获得正确的输入而不需要重复在每一个路由和控制器中调用 `trim` 方法。
+
+### "实时" Facades
+
+> {video} Laracasts 上关于此新特性的免费视频 [video tutorial](https://laracasts.com/series/whats-new-in-laravel-5-4/episodes/8)。
+
+5.4版本以前，只有 Laravel 内置的服务才可以提供 [Facades](/docs/5.4/facades)，提供快速的，简短的方式访问这些服务容器的方法。在 Laravel 5.4 中，你可以轻松的将你的任意类库实时的转换成Facades，只需要将类名导入到 `Facades` 中。例如，假设你的应用中有这样一个类：
+
+    <?php
+
+    namespace App\Services;
+
+    class PaymentGateway
+    {
+        protected $tax;
+
+        /**
+         * 创建一个新的支付网关实例
+         *
+         * @param  TaxCalculator  $tax
+         * @return void
+         */
+        public function __construct(TaxCalculator $tax)
+        {
+            $this->tax = $tax;
+        }
+
+        /**
+         * Pay the given amount.
+         *
+         * @param  int  $amount
+         * @return void
+         */
+        public function pay($amount)
+        {
+            // Pay an amount...
+        }
+    }
+
+你可以这样以 Facades 的方式调用这个类的方法：
+
+    use Facades\ {
+        App\Services\PaymentGateway
+    };
+
+    Route::get('/pay/{amount}', function ($amount) {
+        PaymentGateway::pay($amount);
+    });
+
+当然，如果你以这种方式实现实时 Facades ，就可以使用 Laravel 的 [Facades 模拟功能](/docs/5.4/mocking) 编写测试用例:
+
+    PaymentGateway::shouldReceive('pay')->with('100');
+
+### 自定义 Pivot 表模型
+
+在 Laravel 5.3, 所有的 `belongsToMany` 关联关系使用同一个内置的 `Pivot` 模型实例。在 Laravel 5.4 中你可以为这些 pivot 表自定义模型类，如果你想要定义一个自定义模型，可以在定义关联关系时使用 `using` 方法：
+
+    <?php
+
+    namespace App;
+
+    use Illuminate\Database\Eloquent\Model;
+
+    class Role extends Model
+    {
+        /**
+         * 属于这个角色的用户
+         */
+        public function users()
+        {
+            return $this->belongsToMany('App\User')->using('App\UserRole');
+        }
+    }
+
+### 优化 Redis 集群支持
+
+5.4版本以前，在同一个应用中不能同时定义 Redis 链接指向单个主机和集群，在 Laravel 5.4 中可以在同一个应用中定义 Redis 链接指向多个主机和多个集群。
+
+更多关于 Laravel 中 Redis 的信息，查看 [Redis 文档](/docs/5.4/redis)。
+
+<a name="utf8mb4"></a>
+### 迁移默认字符长度
+
+Laravel 5.4 默认使用 `utf8mb4` 字符编码，该编码支持对 "emojis" 表情在数据库进行存储。如果你从 Laravel 5.3 升级，不需要对字符编码做切换。
+
+如果你选择手动切换到这个字符编码，并且运行小于 MySQL 5.7.7 release 版本的数据库，你可能还需要手动配置迁移命令生成默认字符长度，你可以在 `AppServiceProvider` 中调用 `Schema::defaultStringLength` 方法来实现这一配置：
+
+    use Illuminate\Support\Facades\Schema;
+
+    /**
+     * 引导任何应用服务
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+    }
 
 <a name="laravel-5.3"></a>
 ## Laravel 5.3

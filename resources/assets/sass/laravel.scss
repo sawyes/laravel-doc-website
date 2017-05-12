@@ -1,0 +1,60 @@
+@charset "utf-8";
+
+// base
+@import "core/settings";          // color + font variables
+@import "core/normalize";         // css reset
+@import "core/mixins";            // utilities
+@import "core/base";              // base helpers and typographical styles
+
+// third party components
+@import "components/bootstrap";   // buttons + dropdowns
+@import "components/prism";       // code highlighting
+@import "components/slide-menu";  // sliding sidebar nav
+
+// content components
+@import "components/buttons";     // modified bootstrap buttons
+@import "components/callouts";    // promos and things to catch they eye
+@import "components/packages";    // columns of cool laravel ecosystem packages
+@import "components/footer";      // the footer
+@import "components/nav";         // top nav
+@import "components/panels";      // homepage blocks
+@import "components/windows";     // browser + terminal containers
+@import "components/sidebar";
+@import "components/grid";
+
+// content
+@import "content/home";
+@import "content/community";
+@import "content/docs";
+@import "content/404";
+
+#carbonads {
+  display: block;
+  overflow: hidden;
+  margin-bottom: 1em;
+  padding: 1em;
+  border: dashed 1px #e6e6e6;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#carbonads span {
+  display: block;
+  overflow: hidden;
+}
+
+.carbon-img {
+  display: block;
+  margin: 0 auto 1em;
+}
+
+.carbon-text {
+  display: block;
+  margin-bottom: .5em;
+}
+
+.carbon-poweredby {
+  display: block;
+  font-size: 11px;
+}

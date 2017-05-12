@@ -53,7 +53,9 @@ class DocsController extends Controller
         }
 
         $sectionPage = $page ?: 'installation';
-        $content = $this->docs->get($version, $sectionPage);
+
+        //  Crawler default value ISO-8859-1 
+        $content = '<meta charset="utf-8">' . $this->docs->get($version, $sectionPage);
 
         if (is_null($content)) {
             abort(404);

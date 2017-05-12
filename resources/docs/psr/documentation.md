@@ -1,0 +1,7 @@
+- PSR规范
+    - [基础编码规范](/docs/{{version}}/installation)
+    - [编码风格规范](/docs/{{version}}/psr2)
+    - [日志接口规范](/docs/{{version}}/psr3)
+    - [自动加载规范](/docs/{{version}}/psr4)
+    - [缓存接口规范](/docs/{{version}}/psr6)
+    - [HTTP 消息接口规范](/docs/{{version}}/psr7)

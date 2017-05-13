@@ -13,6 +13,7 @@
 /node_modules
 composer.phar
 .env.*
-.env
 .DS_Store
 Thumbs.db
+/.idea
+/.idea/

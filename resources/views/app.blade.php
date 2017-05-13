@@ -78,7 +78,7 @@
 	@include('partials.algolia_template')
 
 	<script src="{{asset('assets/js2/laravel.js')}}{{-- elixir('assets/js/laravel.js') --}}"></script>
-	<script src="/assets/js2/viewport-units-buggyfill.js"></script>
+	<script src="{{asset('assets/js2/viewport-units-buggyfill.js')}}"></script>
 	<script>window.viewportUnitsBuggyfill.init();</script>
 	<script>
 		var _gaq=[['_setAccount','UA-23865777-1'],['_trackPageview']];

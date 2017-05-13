@@ -19,5 +19,15 @@ elixir(function(mix) {
         'resources/assets/js/'
     );
 
-    mix.version(['assets/css/laravel.css', 'assets/js/laravel.js']);
+    // mix.scripts(
+    //     // resource + plugins path
+    //     [
+    //         'plugins/pin.js',
+    //     ],
+    //     // save path
+    //     'public/assets/js2/app.min.js',
+    //     // resource path
+    //     'resources/assets/js/'
+    // );
+    mix.version(['assets/css/laravel.css', 'assets/js/laravel.js', 'assets/js2/app.min.js']);
 });

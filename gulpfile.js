@@ -29,5 +29,5 @@ elixir(function(mix) {
     //     // resource path
     //     'resources/assets/js/'
     // );
-    mix.version(['assets/css/laravel.css', 'assets/js/laravel.js', 'assets/js2/app.min.js']);
+    mix.version(['assets/css/laravel.css', 'assets/js/laravel.js']);
 });

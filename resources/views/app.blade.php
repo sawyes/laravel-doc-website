@@ -18,6 +18,9 @@
 	<link rel="stylesheet" href="{{asset('assets/css2/laravel.css')}}{{-- elixir('assets/css/laravel.css') --}}">
 	{{--<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.min.css" type="text/css" >--}}
 	<link rel="stylesheet" href="{{ asset('assets/css2/flexboxgrid.min.css') }}" type="text/css" >
+
+	{{-- custom css make by gulp--}}
+	<link rel="stylesheet" href="{{ asset('assets/css2/all.min.css') }}" type="text/css" >
 	<link rel="apple-touch-icon" href="/favicon.png">
 
 	{{--It's the main to search view--}}
@@ -79,6 +82,9 @@
 
 	<script src="{{asset('assets/js2/laravel.js')}}{{-- elixir('assets/js/laravel.js') --}}"></script>
 	<script src="{{asset('assets/js2/viewport-units-buggyfill.js')}}"></script>
+
+	{{-- custom css make by gulp--}}
+	<script src="{{asset('assets/js2/all.min.js')}}"></script>
 	<script>window.viewportUnitsBuggyfill.init();</script>
 	<script>
 		var _gaq=[['_setAccount','UA-23865777-1'],['_trackPageview']];
@@ -88,24 +94,7 @@
 			s.parentNode.insertBefore(g,s);
 		}(document,'script'));
 
-		// docs menu silder bar
-		$(function(){
-			var menu_list = $('section.sidebar ul>li>ul');
-			var menu = $('section.sidebar ul>li');
 
-			menu_list.find('li')
-					.each(function(index,item){
-						// current docs
-						if($(item).css('font-weight') == 'bold') {
-							$(item).parent().show();
-							return true;
-						}
-					});
-			menu.click(function(){
-				$(this).children().toggle('quick');
-			});
-
-		});
 	</script>
 </body>
 </html>

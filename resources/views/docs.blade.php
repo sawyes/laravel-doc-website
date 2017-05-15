@@ -20,11 +20,7 @@
 	</div>
 
 </nav>
-<style>
-	section.sidebar ul>li>ul {
-		display: none;
-	}
-</style>
+
 <div class="docs-wrapper container">
 
 	<section class="sidebar">

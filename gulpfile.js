@@ -2,6 +2,9 @@ var elixir = require('laravel-elixir');
 
 elixir(function(mix) {
     mix.sass('laravel.scss', 'public/assets/css');
+    mix.styles([
+        'docs.css'
+    ], 'public/assets/css2/all.min.css');
 
     mix.scripts(
         [
@@ -16,6 +19,13 @@ elixir(function(mix) {
             'laravel.js'
         ],
         'public/assets/js/laravel.js',
+        'resources/assets/js/'
+    );
+
+    mix.scripts([
+            'docs.js'
+        ],
+        'public/assets/js2/all.min.js',
         'resources/assets/js/'
     );
 

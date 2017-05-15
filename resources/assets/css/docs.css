@@ -1,0 +1,26 @@
+/*
+* origin
+*/
+section.sidebar ul>li>ul {
+    display: none;
+}
+
+section.sidebar>ul>li {
+    font-size: 14px;
+    padding: .75rem .75rem .75rem 0;
+    margin: 0;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-transition: color .1s linear;
+    transition: color .1s linear;
+    border-bottom: 1px dashed rgba(0,0,0,.1);
+}
+
+section.sidebar ul>li:hover {
+    cursor: pointer;
+    color: #9E9E9E;
+}
+
+.font-gray a{
+    color: #7b7b7b;
+}

@@ -85,8 +85,27 @@
 		(function(d,t){
 			var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
 			g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-			s.parentNode.insertBefore(g,s)
+			s.parentNode.insertBefore(g,s);
 		}(document,'script'));
+
+		// docs menu silder bar
+		$(function(){
+			var menu_list = $('section.sidebar ul>li>ul');
+			var menu = $('section.sidebar ul>li');
+
+			menu_list.find('li')
+					.each(function(index,item){
+						// current docs
+						if($(item).css('font-weight') == 'bold') {
+							$(item).parent().show();
+							return true;
+						}
+					});
+			menu.click(function(){
+				$(this).children().toggle('quick');
+			});
+
+		});
 	</script>
 </body>
 </html>

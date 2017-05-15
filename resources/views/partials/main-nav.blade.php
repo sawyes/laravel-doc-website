@@ -1,5 +1,5 @@
 <li class="nav-docs"><a href="/docs">文档</a></li>
-<li class="nav-laracasts"><a href="/index_zh-CN.html">速查表</a></li>
+<li class="nav-laracasts"><a href="/index_zh-CN.html" target="_blank">速查表</a></li>
 <li class="nav-laravel-news"><a href="https://laravel-news.com">News</a></li>
 <li class="nav-partners"><a href="/partners">Partners</a></li>
 <li class="nav-forge"><a href="https://forge.laravel.com">Forge</a></li>

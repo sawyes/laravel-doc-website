@@ -24,18 +24,8 @@
 <div class="docs-wrapper container">
 
 	<section class="sidebar">
-		{{-- ad div --}}
-		<!-- <script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?zoneid=1673&serve=C6AILKT&placement=laravelcom" id="_carbonads_js"></script> -->
-
 		{!! $index !!}
 	</section>
-
-	{{-- <div id="search">
-		<div id="search-wrapper">
-			<input placeholder="" type="text" id="search-input" />
-			<i id="cross" class="icon"></i>
-		</div>
-	</div> --}}
 
 	<article>
 		{!! $content !!}

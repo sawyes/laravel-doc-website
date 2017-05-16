@@ -22,4 +22,24 @@ $(function(){
         $(this).children().toggle('quick');
     });
 
+    // 滚动
+    $(document).ready(function () {
+        $('.scotch-panel-wrapper').after('<img class="returnTop" src="/assets/images/huojian.png"/>');
+        $('.returnTop').on('click',function(){
+            $('html,body').animate({scrollTop:'0px'},400);
+        });
+    });
+    $(document).on('scroll',function(){
+        //当前滚动条的Y坐标
+        var scrollY = $(document).scrollTop();
+        //浏览器窗口可见高度
+        var screenY =  window.innerHeight;
+        //向下滑动一定距离，显示小火箭
+        if( scrollY > screenY-screenY/3 ){
+            $('.returnTop').fadeIn(1000);
+        }else{
+            //document.title= document.documentElement.scrollTop + ',' + window.innerHeight;
+            $('.returnTop').fadeOut(1000);
+        }
+    });
 });

@@ -1,0 +1,759 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>ä» Vuex 0.6.x è¿ç§»åˆ° 1.0 - Vue.js 2.x ä¸­æ–‡æ–‡æ¡£ - vuefe.cn</title>
+        <meta charset="utf-8">
+        <meta name="description" content="Vue.js - JavaScript æ¸è¿›å¼æ¡†æ¶">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+        <link rel="alternate" hreflang="x-default" href="https://vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="zh" href="https://cn.vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="ja" href="https://jp.vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="ru" href="https://ru.vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="ko" href="https://kr.vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="pt-BR" href="https://br.vuejs.org/v2/guide/migration-vuex.html">
+        <link rel="alternate" hreflang="fr" href="https://fr.vuejs.org/v2/guide/migration-vuex.html">
+
+        <meta property="og:type" content="article">
+        <meta property="og:title" content="ä» Vuex 0.6.x è¿ç§»åˆ° 1.0 â€” Vue.js">
+        <meta property="og:description" content="Vue.js - JavaScript æ¸è¿›å¼æ¡†æ¶">
+        <meta property="og:image" content="https://vuefe.cn//images/logo.png">
+
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="ä» Vuex 0.6.x è¿ç§»åˆ° 1.0 â€” Vue.js">
+        <meta name="twitter:description" content="Vue.js - JavaScript æ¸è¿›å¼æ¡†æ¶">
+        <meta name="twitter:image" content="https://vuefe.cn/images/logo.png">
+
+        <link rel="apple-touch-icon" sizes="57x57" href="/images/icons/apple-icon-57x57.png">
+        <link rel="apple-touch-icon" sizes="60x60" href="/images/icons/apple-icon-60x60.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="/images/icons/apple-icon-72x72.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="/images/icons/apple-icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="/images/icons/apple-icon-114x114.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/images/icons/apple-icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="/images/icons/apple-icon-144x144.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/images/icons/apple-icon-152x152.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-icon-180x180.png">
+        <link rel="icon" type="image/png" sizes="192x192"  href="/images/icons/android-icon-192x192.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="96x96" href="/images/icons/favicon-96x96.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png">
+        <meta name="msapplication-TileImage" content="/images/icons/ms-icon-144x144.png">
+        <link rel="icon" href="/images/logo.png" type="image/png">
+
+        <meta name="msapplication-TileColor" content="#4fc08d">
+        <meta name="theme-color" content="#4fc08d">
+
+        <meta name="msapplication-config" content="browserconfig.xml">
+        <link rel="manifest" href="/manifest.json">
+
+        <link href="../../../maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" tppabs="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+        <!-- main page styles -->
+        <link rel="stylesheet" href="../../css/page.css" tppabs="https://vuefe.cn/css/page.css">
+
+        <!-- this needs to be loaded before guide's inline scripts -->
+        <script src="../../js/vue.js" tppabs="https://vuefe.cn/js/vue.js"></script>
+        <script>window.PAGE_TYPE = "guide"</script>
+        <script src="../../../unpkg.com/axios@0.16.2/dist/axios.min.js" tppabs="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script>
+        var _hmt = _hmt || [];
+        (function() {
+          var hm = document.createElement("script");
+          hm.src = "../../../hm.baidu.com/hm.js-ebacf70d9d85cfb235c83d600113ee3e"/*tpa=https://hm.baidu.com/hm.js?ebacf70d9d85cfb235c83d600113ee3e*/;
+          var s = document.getElementsByTagName("script")[0];
+          s.parentNode.insertBefore(hm, s);
+        })();
+        </script>
+    </head>
+    <body class="docs">        <div id="mobile-bar" >
+            <a class="menu-button"></a>
+            <a class="logo" href="javascript:if(confirm('https://vuefe.cn/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/'" tppabs="https://vuefe.cn/"></a>
+        </div>
+        <div id="header">
+  <a id="logo" href="javascript:if(confirm('https://vuefe.cn/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/'" tppabs="https://vuefe.cn/">
+    <img src="../../images/logo.png" tppabs="https://vuefe.cn/images/logo.png">
+    <span>Vue.js <span style="font-size: 12px;">(2017.07.17 302093657)</span></span>
+  </a>
+<a style="
+    position: absolute;
+    top: 100%;
+    left: 60px;
+    padding: 0 10px;
+    background: #41b883;
+    border-radius: 3px;
+    margin-top: -10px;
+    line-height: 30px;
+    color: white;
+    font-weight: 400;
+    letter-spacing: 1px;
+    box-shadow: 0 1px 2px rgba(0,0,0,.3);
+  " target="_blank" 
+  href="javascript:if(confirm('https://shang.qq.com/wpa/qunwpa?idkey=22de3f3b4d9c2a857b44c7000dac2d05856d2a62ac8ee45febd61f5973af5ef7  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://shang.qq.com/wpa/qunwpa?idkey=22de3f3b4d9c2a857b44c7000dac2d05856d2a62ac8ee45febd61f5973af5ef7'" tppabs="https://shang.qq.com/wpa/qunwpa?idkey=22de3f3b4d9c2a857b44c7000dac2d05856d2a62ac8ee45febd61f5973af5ef7">  ç‚¹å‡»åŠ å…¥vueæŠ€æœ¯æ ˆ8ç¾¤ 302093657)
+</a>
+  <ul id="nav">
+    <li>
+  <form id="search-form">
+    <input type="text" id="search-query-nav" class="search-query st-default-search-input">
+  </form>
+</li>
+<li><a href="index.htm" tppabs="https://vuefe.cn/v2/guide/" class="nav-link current">æ•™ç¨‹</a></li>
+<li><a href="../api/index.htm" tppabs="https://vuefe.cn/v2/api/" class="nav-link">API</a></li>
+<li><a href="javascript:if(confirm('https://vuefe.cn/v2/examples/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/v2/examples/'" tppabs="https://vuefe.cn/v2/examples/" class="nav-link">ç¤ºä¾‹</a></li>
+<li class="nav-dropdown-container">
+  <a class="nav-link">å…³äº</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="javascript:if(confirm('https://vuefe.cn/about/index.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/about/index.html'" tppabs="https://vuefe.cn/about/index.html" class="nav-link">è´¡çŒ®è€…</a></li>
+    <li><a href="javascript:if(confirm('https://vuefe.cn/about/message.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/about/message.html'" tppabs="https://vuefe.cn/about/message.html" class="nav-link">ç•™è¨€æ¿</a></li>
+  </ul>
+</li>
+
+<li class="nav-dropdown-container">
+  <a class="nav-link">ç»„ä»¶åº“æ¨è</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="javascript:if(confirm('https://www.iviewui.com/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://www.iviewui.com/'" tppabs="https://www.iviewui.com/"  target="_blank" class="nav-link">iview</a></li>
+    <li><a href="javascript:if(confirm('http://element.eleme.io/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://element.eleme.io/'" tppabs="http://element.eleme.io/"  target="_blank" class="nav-link">element-ui</a></li>
+    <li><a href="javascript:if(confirm('http://vue.ydui.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://vue.ydui.org/'" tppabs="http://vue.ydui.org/"  target="_blank" class="nav-link">YDUI</a></li>
+    <li><a href="javascript:if(confirm('http://mint-ui.github.io/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://mint-ui.github.io/#!/zh-cn'" tppabs="http://mint-ui.github.io/#!/zh-cn"  target="_blank" class="nav-link">mint-ui</a></li>
+  </ul>
+</li>
+
+<li class="nav-dropdown-container ecosystem">
+  <a class="nav-link">ç”Ÿæ€ç³»ç»Ÿ</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+<li><h4>æ ¸å¿ƒæ’ä»¶</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://router.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://router.vuejs.org/'" tppabs="https://router.vuejs.org/" class="nav-link" target="_blank">Vue Router</a></li>
+      <li><a href="javascript:if(confirm('https://vuex.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuex.vuejs.org/'" tppabs="https://vuex.vuejs.org/" class="nav-link" target="_blank">Vuex</a></li>
+      <li><a href="javascript:if(confirm('https://ssr.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://ssr.vuejs.org/'" tppabs="https://ssr.vuejs.org/" class="nav-link" target="_blank">Vue SSR</a></li>
+    </ul></li>
+    <li><h4>èµ„æºåˆ—è¡¨</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs'" tppabs="https://github.com/vuejs" class="nav-link" target="_blank">å®˜æ–¹ä»“åº“</a></li>
+        <li><a href="javascript:if(confirm('https://curated.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://curated.vuejs.org/'" tppabs="https://curated.vuejs.org/" class="nav-link" target="_blank">Vue å±•è§ˆ</a></li>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs/awesome-vue  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/awesome-vue'" tppabs="https://github.com/vuejs/awesome-vue" class="nav-link" target="_blank">Vue èµ„æº</a></li>
+      <li><a href="javascript:if(confirm('https://doc.webpack-china.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://doc.webpack-china.org/'" tppabs="https://doc.webpack-china.org/" target="_blank">webpack ä¸­æ–‡</a></li>
+    </ul></li>
+    <li><h4>å¸®åŠ©</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('http://forum.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://forum.vuejs.org/'" tppabs="http://forum.vuejs.org/" class="nav-link" target="_blank">è®ºå›</a></li>
+      <li><a href="javascript:if(confirm('https://gitter.im/vuejs/vue  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://gitter.im/vuejs/vue'" tppabs="https://gitter.im/vuejs/vue" class="nav-link" target="_blank">èŠå¤©å®¤</a></li>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs-templates  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs-templates'" tppabs="https://github.com/vuejs-templates" class="nav-link" target="_blank">æ¨¡æ¿</a></li>
+    </ul></li>
+    <li><h4>ä¿¡æ¯</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://vuejobs.com/?ref=vuejs  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuejobs.com/?ref=vuejs'" tppabs="https://vuejobs.com/?ref=vuejs" class="nav-link" target="_blank">å·¥ä½œ</a></li>
+    </ul></li>
+  </ul>
+</li>
+
+
+
+<li class="nav-dropdown-container language">
+  <a class="nav-link">å¤šè¯­è¨€</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="migration-vuex.html" tppabs="https://vuefe.cn/v2/guide/migration-vuex.html" class="nav-link" target="_blank">ä¸­æ–‡</a></li>
+    <li><a href="javascript:if(confirm('https://vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">English</a></li>
+    <li><a href="javascript:if(confirm('https://jp.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://jp.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://jp.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">æ—¥æœ¬èª</a></li>
+    <li><a href="javascript:if(confirm('https://ru.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://ru.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://ru.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">Ğ ÑƒÑÑĞºĞ¸Ğ¹</a></li>
+    <li><a href="javascript:if(confirm('https://kr.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://kr.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://kr.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">í•œêµ­ì–´</a></li>
+    <li><a href="javascript:if(confirm('https://br.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://br.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://br.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">PortuguÃªs</a></li>
+    <li><a href="javascript:if(confirm('https://fr.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://fr.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://fr.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">FranÃ§ais</a></li>
+  </ul>
+</li>
+
+<li>
+  <a href="javascript:if(confirm('https://vue.threadless.com/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vue.threadless.com/'" tppabs="https://vue.threadless.com/" target="_blank" class="nav-link shop">Shop</a>
+</li>
+
+  </ul>
+</div>
+
+        
+            <div id="main" class="fix-sidebar">
+                
+                    
+    <div class="sidebar">
+    <div class="sidebar-inner">
+        <ul class="main-menu">
+            <li>
+  <form id="search-form">
+    <input type="text" id="search-query-sidebar" class="search-query st-default-search-input">
+  </form>
+</li>
+<li><a href="index.htm" tppabs="https://vuefe.cn/v2/guide/" class="nav-link current">æ•™ç¨‹</a></li>
+<li><a href="../api/index.htm" tppabs="https://vuefe.cn/v2/api/" class="nav-link">API</a></li>
+<li><a href="javascript:if(confirm('https://vuefe.cn/v2/examples/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/v2/examples/'" tppabs="https://vuefe.cn/v2/examples/" class="nav-link">ç¤ºä¾‹</a></li>
+<li class="nav-dropdown-container">
+  <a class="nav-link">å…³äº</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="javascript:if(confirm('https://vuefe.cn/about/index.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/about/index.html'" tppabs="https://vuefe.cn/about/index.html" class="nav-link">è´¡çŒ®è€…</a></li>
+    <li><a href="javascript:if(confirm('https://vuefe.cn/about/message.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuefe.cn/about/message.html'" tppabs="https://vuefe.cn/about/message.html" class="nav-link">ç•™è¨€æ¿</a></li>
+  </ul>
+</li>
+
+<li class="nav-dropdown-container">
+  <a class="nav-link">ç»„ä»¶åº“æ¨è</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="javascript:if(confirm('https://www.iviewui.com/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://www.iviewui.com/'" tppabs="https://www.iviewui.com/"  target="_blank" class="nav-link">iview</a></li>
+    <li><a href="javascript:if(confirm('http://element.eleme.io/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://element.eleme.io/'" tppabs="http://element.eleme.io/"  target="_blank" class="nav-link">element-ui</a></li>
+    <li><a href="javascript:if(confirm('http://vue.ydui.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://vue.ydui.org/'" tppabs="http://vue.ydui.org/"  target="_blank" class="nav-link">YDUI</a></li>
+    <li><a href="javascript:if(confirm('http://mint-ui.github.io/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://mint-ui.github.io/#!/zh-cn'" tppabs="http://mint-ui.github.io/#!/zh-cn"  target="_blank" class="nav-link">mint-ui</a></li>
+  </ul>
+</li>
+
+<li class="nav-dropdown-container ecosystem">
+  <a class="nav-link">ç”Ÿæ€ç³»ç»Ÿ</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+<li><h4>æ ¸å¿ƒæ’ä»¶</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://router.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://router.vuejs.org/'" tppabs="https://router.vuejs.org/" class="nav-link" target="_blank">Vue Router</a></li>
+      <li><a href="javascript:if(confirm('https://vuex.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuex.vuejs.org/'" tppabs="https://vuex.vuejs.org/" class="nav-link" target="_blank">Vuex</a></li>
+      <li><a href="javascript:if(confirm('https://ssr.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://ssr.vuejs.org/'" tppabs="https://ssr.vuejs.org/" class="nav-link" target="_blank">Vue SSR</a></li>
+    </ul></li>
+    <li><h4>èµ„æºåˆ—è¡¨</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs'" tppabs="https://github.com/vuejs" class="nav-link" target="_blank">å®˜æ–¹ä»“åº“</a></li>
+        <li><a href="javascript:if(confirm('https://curated.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://curated.vuejs.org/'" tppabs="https://curated.vuejs.org/" class="nav-link" target="_blank">Vue å±•è§ˆ</a></li>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs/awesome-vue  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/awesome-vue'" tppabs="https://github.com/vuejs/awesome-vue" class="nav-link" target="_blank">Vue èµ„æº</a></li>
+      <li><a href="javascript:if(confirm('https://doc.webpack-china.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://doc.webpack-china.org/'" tppabs="https://doc.webpack-china.org/" target="_blank">webpack ä¸­æ–‡</a></li>
+    </ul></li>
+    <li><h4>å¸®åŠ©</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('http://forum.vuejs.org/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='http://forum.vuejs.org/'" tppabs="http://forum.vuejs.org/" class="nav-link" target="_blank">è®ºå›</a></li>
+      <li><a href="javascript:if(confirm('https://gitter.im/vuejs/vue  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://gitter.im/vuejs/vue'" tppabs="https://gitter.im/vuejs/vue" class="nav-link" target="_blank">èŠå¤©å®¤</a></li>
+      <li><a href="javascript:if(confirm('https://github.com/vuejs-templates  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs-templates'" tppabs="https://github.com/vuejs-templates" class="nav-link" target="_blank">æ¨¡æ¿</a></li>
+    </ul></li>
+    <li><h4>ä¿¡æ¯</h4></li>
+    <li><ul>
+      <li><a href="javascript:if(confirm('https://vuejobs.com/?ref=vuejs  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuejobs.com/?ref=vuejs'" tppabs="https://vuejobs.com/?ref=vuejs" class="nav-link" target="_blank">å·¥ä½œ</a></li>
+    </ul></li>
+  </ul>
+</li>
+
+
+
+<li class="nav-dropdown-container language">
+  <a class="nav-link">å¤šè¯­è¨€</a><span class="arrow"></span>
+  <ul class="nav-dropdown">
+    <li><a href="migration-vuex.html" tppabs="https://vuefe.cn/v2/guide/migration-vuex.html" class="nav-link" target="_blank">ä¸­æ–‡</a></li>
+    <li><a href="javascript:if(confirm('https://vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">English</a></li>
+    <li><a href="javascript:if(confirm('https://jp.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://jp.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://jp.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">æ—¥æœ¬èª</a></li>
+    <li><a href="javascript:if(confirm('https://ru.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://ru.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://ru.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">Ğ ÑƒÑÑĞºĞ¸Ğ¹</a></li>
+    <li><a href="javascript:if(confirm('https://kr.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://kr.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://kr.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">í•œêµ­ì–´</a></li>
+    <li><a href="javascript:if(confirm('https://br.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://br.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://br.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">PortuguÃªs</a></li>
+    <li><a href="javascript:if(confirm('https://fr.vuejs.org/v2/guide/migration-vuex.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://fr.vuejs.org/v2/guide/migration-vuex.html'" tppabs="https://fr.vuejs.org/v2/guide/migration-vuex.html" class="nav-link" target="_blank">FranÃ§ais</a></li>
+  </ul>
+</li>
+
+<li>
+  <a href="javascript:if(confirm('https://vue.threadless.com/  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vue.threadless.com/'" tppabs="https://vue.threadless.com/" target="_blank" class="nav-link shop">Shop</a>
+</li>
+
+        </ul>
+        <div class="list">
+            <h2>
+                Guide
+                
+                    <select class="version-select">
+                        <option value="SELF" selected>2.x</option>
+                        <option value="v1">1.0</option>
+                        <option value="012">0.12</option>
+                        <option value="011">0.11</option>
+                    </select>
+                
+            </h2>
+            <ul class="menu-root">
+    
+        
+        
+            
+                <li><h3>åŸºç¡€æ¦‚è¦</h3></li>
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="installation.html" tppabs="https://vuefe.cn/v2/guide/installation.html" class="sidebar-link">å®‰è£…</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="index.html" tppabs="https://vuefe.cn/v2/guide/index.html" class="sidebar-link">ä»‹ç»</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="instance.html" tppabs="https://vuefe.cn/v2/guide/instance.html" class="sidebar-link">Vue å®ä¾‹</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="syntax.html" tppabs="https://vuefe.cn/v2/guide/syntax.html" class="sidebar-link">æ¨¡æ¿è¯­æ³•</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="computed.html" tppabs="https://vuefe.cn/v2/guide/computed.html" class="sidebar-link">è®¡ç®—å±æ€§</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="class-and-style.html" tppabs="https://vuefe.cn/v2/guide/class-and-style.html" class="sidebar-link">Class ä¸ Style ç»‘å®š</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="conditional.html" tppabs="https://vuefe.cn/v2/guide/conditional.html" class="sidebar-link">æ¡ä»¶æ¸²æŸ“</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="list.html" tppabs="https://vuefe.cn/v2/guide/list.html" class="sidebar-link">åˆ—è¡¨æ¸²æŸ“</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="events.html" tppabs="https://vuefe.cn/v2/guide/events.html" class="sidebar-link">äº‹ä»¶å¤„ç†å™¨</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="forms.html" tppabs="https://vuefe.cn/v2/guide/forms.html" class="sidebar-link">è¡¨å•æ§ä»¶ç»‘å®š</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="components.html" tppabs="https://vuefe.cn/v2/guide/components.html" class="sidebar-link">ç»„ä»¶</a>
+        </li>
+    
+        
+        
+            
+            
+                <li><h3>é«˜çº§è¿›é˜¶</h3></li>
+            
+            
+            
+        
+        
+        <li>
+            <a href="reactivity.html" tppabs="https://vuefe.cn/v2/guide/reactivity.html" class="sidebar-link">æ·±å…¥å“åº”å¼åŸç†</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="transitions.html" tppabs="https://vuefe.cn/v2/guide/transitions.html" class="sidebar-link">è¿‡æ¸¡æ•ˆæœ</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="transitioning-state.html" tppabs="https://vuefe.cn/v2/guide/transitioning-state.html" class="sidebar-link">è¿‡æ¸¡çŠ¶æ€</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="render-function.html" tppabs="https://vuefe.cn/v2/guide/render-function.html" class="sidebar-link">Render å‡½æ•°</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="custom-directive.html" tppabs="https://vuefe.cn/v2/guide/custom-directive.html" class="sidebar-link">è‡ªå®šä¹‰æŒ‡ä»¤</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="mixins.html" tppabs="https://vuefe.cn/v2/guide/mixins.html" class="sidebar-link">æ··åˆ(Mixins)</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="plugins.html" tppabs="https://vuefe.cn/v2/guide/plugins.html" class="sidebar-link">æ’ä»¶</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="single-file-components.html" tppabs="https://vuefe.cn/v2/guide/single-file-components.html" class="sidebar-link">å•æ–‡ä»¶ç»„ä»¶</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="deployment.html" tppabs="https://vuefe.cn/v2/guide/deployment.html" class="sidebar-link">ç”Ÿäº§ç¯å¢ƒéƒ¨ç½²</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="routing.html" tppabs="https://vuefe.cn/v2/guide/routing.html" class="sidebar-link">è·¯ç”±</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="state-management.html" tppabs="https://vuefe.cn/v2/guide/state-management.html" class="sidebar-link">çŠ¶æ€ç®¡ç†</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="unit-testing.html" tppabs="https://vuefe.cn/v2/guide/unit-testing.html" class="sidebar-link">å•å…ƒæµ‹è¯•</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="ssr.html" tppabs="https://vuefe.cn/v2/guide/ssr.html" class="sidebar-link">æœåŠ¡ç«¯æ¸²æŸ“</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="typescript.html" tppabs="https://vuefe.cn/v2/guide/typescript.html" class="sidebar-link">TypeScript æ”¯æŒ</a>
+        </li>
+    
+        
+        
+            
+            
+            
+                <li><h3>å‡çº§è¿ç§»</h3></li>
+            
+            
+        
+        
+        <li>
+            <a href="migration.html" tppabs="https://vuefe.cn/v2/guide/migration.html" class="sidebar-link">ä» Vue 1.x è¿ç§»</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="migration-vue-router.html" tppabs="https://vuefe.cn/v2/guide/migration-vue-router.html" class="sidebar-link">ä» Vue Router 0.7.x è¿ç§»</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="migration-vuex.html" tppabs="https://vuefe.cn/v2/guide/migration-vuex.html" class="sidebar-link current">ä» Vuex 0.6.x è¿ç§»åˆ° 1.0</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+                <li><h3>å…¶ä»–æ›´å¤š</h3></li>
+            
+        
+        
+        <li>
+            <a href="comparison.html" tppabs="https://vuefe.cn/v2/guide/comparison.html" class="sidebar-link">å¯¹æ¯”å…¶ä»–æ¡†æ¶</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="join.html" tppabs="https://vuefe.cn/v2/guide/join.html" class="sidebar-link">åŠ å…¥Vue.jsç¤¾åŒº</a>
+        </li>
+    
+        
+        
+            
+            
+            
+            
+        
+        
+        <li>
+            <a href="team.html" tppabs="https://vuefe.cn/v2/guide/team.html" class="sidebar-link">Meet the Team</a>
+        </li>
+    
+    
+</ul>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="content guide with-sidebar migration-vuex-guide">
+    
+      
+        
+      
+    
+    
+      <h1>ä» Vuex 0.6.x è¿ç§»åˆ° 1.0</h1>
+    
+    
+    <blockquote>
+<p>Vuex 2.0 å·²ç»å‘å¸ƒäº†ï¼Œä½†æ˜¯è¿™ä»½æŒ‡å—åªæ¶µç›–è¿ç§»åˆ° 1.0ï¼Ÿè¿™æ˜¯æ‰“é”™äº†å—ï¼Ÿæ­¤å¤–ï¼Œä¼¼ä¹ Vuex 1.0 å’Œ 2.0 ä¹ŸåŒæ—¶å‘å¸ƒã€‚è¿™æ˜¯æ€ä¹ˆå›äº‹ï¼Ÿæˆ‘è¯¥ç”¨å“ªä¸€ä¸ªå¹¶ä¸”å“ªä¸€ä¸ªå…¼å®¹ Vue 2.0å‘¢ï¼Ÿ</p>
+</blockquote>
+<p>Vuex 1.0 å’Œ 2.0 å¦‚ä¸‹ï¼š</p>
+<ul>
+<li>éƒ½å®Œå…¨æ”¯æŒ Vue 1.0 å’Œ 2.0</li>
+<li>å°†åœ¨å¯é¢„è§çš„æœªæ¥ä¿ç•™æ”¯æŒ</li>
+</ul>
+<p>ç„¶è€Œå®ƒä»¬çš„ç›®æ ‡ç”¨æˆ·ç¨å¾®æœ‰æ‰€ä¸åŒã€‚</p>
+<p><strong>Vuex 2.0</strong> ä»æ ¹æœ¬ä¸Šé‡æ–°è®¾è®¡å¹¶ä¸”æä¾›ç®€æ´çš„ APIï¼Œç”¨äºå¸®åŠ©æ­£åœ¨å¼€å§‹ä¸€ä¸ªæ–°é¡¹ç›®çš„ç”¨æˆ·ï¼Œæˆ–æƒ³è¦ç”¨å®¢æˆ·ç«¯çŠ¶æ€ç®¡ç†å‰æ²¿æŠ€æœ¯çš„ç”¨æˆ·ã€‚<strong>æ­¤è¿ç§»æŒ‡å—ä¸æ¶µç›– Vuex 2.0 ç›¸å…³å†…å®¹</strong>ï¼Œå› æ­¤å¦‚æœä½ æƒ³äº†è§£æ›´å¤šï¼Œè¯·æŸ¥é˜… <a href="javascript:if(confirm('https://vuex.vuejs.org/en/index.html  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://vuex.vuejs.org/en/index.html'" tppabs="https://vuex.vuejs.org/en/index.html" target="_blank" rel="external">Vuex 2.0 æ–‡æ¡£</a>ã€‚</p>
+<p><strong>Vuex 1.0</strong> ä¸»è¦æ˜¯å‘ä¸‹å…¼å®¹ï¼Œæ‰€ä»¥å‡çº§åªéœ€è¦å¾ˆå°çš„æ”¹åŠ¨ã€‚æ¨èæ‹¥æœ‰å¤§é‡ç°å­˜ä»£ç åº“çš„ç”¨æˆ·ï¼Œæˆ–åªæƒ³å°½å¯èƒ½å¹³æ»‘å‡çº§ Vue 2.0 çš„ç”¨æˆ·ã€‚è¿™ä»½æŒ‡å—è‡´åŠ›ä¿ƒè¿›è¿™ä¸€è¿‡ç¨‹ï¼Œä½†ä»…åŒ…æ‹¬è¿ç§»è¯´æ˜ã€‚å®Œæ•´ä½¿ç”¨æŒ‡å—è¯·æŸ¥é˜… <a href="javascript:if(confirm('https://github.com/vuejs/vuex/tree/1.0/docs/en  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vuex/tree/1.0/docs/en'" tppabs="https://github.com/vuejs/vuex/tree/1.0/docs/en" target="_blank" rel="external">Vuex 1.0 æ–‡æ¡£</a>ã€‚</p>
+<h2 id="å¸¦å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„-store-watch-æ›¿æ¢"><a href="#å¸¦å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„-store-watch-æ›¿æ¢" class="headerlink" title="å¸¦å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„ store.watch æ›¿æ¢"></a>å¸¦å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„ <code>store.watch</code> <sup>æ›¿æ¢</sup></h2><h2 id="ä¼ å…¥å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„-store-watch-åºŸå¼ƒ"><a href="#ä¼ å…¥å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„-store-watch-åºŸå¼ƒ" class="headerlink" title="ä¼ å…¥å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„ store.watch åºŸå¼ƒ"></a>ä¼ å…¥å­—ç¬¦ä¸²å±æ€§è·¯å¾„çš„ <code>store.watch</code> <sup>åºŸå¼ƒ</sup></h2><p><code>store.watch</code> ç°åœ¨åªæ¥å—å‡½æ•°ã€‚å› æ­¤ï¼Œä¸‹é¢ä¾‹å­ä½ éœ€è¦æ›¿æ¢ï¼š</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><div class="line">store.watch(<span class="string">'user.notifications'</span>, callback)</div></pre></td></tr></table></figure>
+<p>ä¸ºï¼š</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><div class="line">store.watch(</div><div class="line">  <span class="comment">// å½“è¿”å›ç»“æœæ”¹å˜...</span></div><div class="line">  <span class="function"><span class="keyword">function</span> (<span class="params">state</span>) </span>&#123;</div><div class="line">    <span class="keyword">return</span> state.user.notifications</div><div class="line">  &#125;,</div><div class="line">  <span class="comment">// æ‰§è¡Œå›è°ƒå‡½æ•°</span></div><div class="line">  callback</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>è¿™å¸®åŠ©ä½ æ›´åŠ å®Œå–„çš„æ§åˆ¶é‚£äº›éœ€è¦ç›‘å¬çš„å“åº”å¼å±æ€§ã€‚</p>
+
+<div class="upgrade-path">
+  <h4>å‡çº§æ–¹æ³•</h4>
+  <p>åœ¨ä»£ç åº“è¿è¡Œ<a href="javascript:if(confirm('https://github.com/vuejs/vue-migration-helper  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vue-migration-helper'" tppabs="https://github.com/vuejs/vue-migration-helper" target="_blank" rel="external">è¿ç§»å·¥å…·</a>ï¼ŒæŸ¥æ‰¾åœ¨ <code>store.watch</code> ä¸­ä½¿ç”¨å­—ç¬¦ä¸²ä½œä¸ºç¬¬ä¸€ä¸ªå‚æ•°çš„äº‹ä¾‹ã€‚</p>
+</div>
+
+<h2 id="Store-çš„äº‹ä»¶è§¦å‘å™¨-ç§»é™¤"><a href="#Store-çš„äº‹ä»¶è§¦å‘å™¨-ç§»é™¤" class="headerlink" title="Store çš„äº‹ä»¶è§¦å‘å™¨ ç§»é™¤"></a>Store çš„äº‹ä»¶è§¦å‘å™¨ <sup>ç§»é™¤</sup></h2><p>store å®ä¾‹ä¸å†æš´éœ²äº‹ä»¶è§¦å‘å™¨(event emitter)æ¥å£(<code>on</code>, <code>off</code>, <code>emit</code>)ã€‚å¦‚æœä½ ä¹‹å‰ä½¿ç”¨ store ä½œä¸ºå…¨å±€çš„ event busï¼Œè¿ç§»è¯´æ˜ç›¸å…³å†…å®¹è¯·æŸ¥é˜…<a href="migration.html#dispatch-and-broadcast-removed" tppabs="https://vuefe.cn/v2/guide/migration.html#dispatch-and-broadcast-removed">æ­¤ç« èŠ‚</a>ã€‚</p>
+<p>ä¸ºäº†æ›¿æ¢æ­£åœ¨ä½¿ç”¨è§‚å¯Ÿ store è‡ªèº«è§¦å‘äº‹ä»¶çš„è¿™äº›æ¥å£ï¼Œï¼ˆä¾‹å¦‚ï¼š<code>store.on(&#39;mutation&#39;, callback)</code>ï¼‰ï¼Œæˆ‘ä»¬å¼•å…¥æ–°çš„æ–¹æ³• <code>store.subscribe</code>ã€‚åœ¨æ’ä»¶ä¸­çš„å…¸å‹ä½¿ç”¨æ–¹å¼å¦‚ä¸‹ï¼š</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><div class="line"><span class="keyword">var</span> myPlugin = <span class="function"><span class="params">store</span> =&gt;</span> &#123;</div><div class="line">  store.subscribe(<span class="function"><span class="keyword">function</span> (<span class="params">mutation, state</span>) </span>&#123;</div><div class="line">    <span class="comment">// Do something...</span></div><div class="line">  &#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>æ›´å¤šä¿¡æ¯è¯·æŸ¥é˜…<a href="javascript:if(confirm('https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md'" tppabs="https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md" target="_blank" rel="external">æ’ä»¶æ–‡æ¡£</a>çš„ç¤ºä¾‹ã€‚</p>
+
+<div class="upgrade-path">
+  <h4>å‡çº§æ–¹å¼</h4>
+  <p>åœ¨ä»£ç åº“è¿è¡Œ<a href="javascript:if(confirm('https://github.com/vuejs/vue-migration-helper  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vue-migration-helper'" tppabs="https://github.com/vuejs/vue-migration-helper" target="_blank" rel="external">è¿ç§»å·¥å…·</a>ï¼ŒæŸ¥æ‰¾ä½¿ç”¨äº† <code>store.on</code>, <code>store.off</code>, <code>store.emit</code> çš„äº‹ä¾‹ã€‚</p>
+</div>
+
+<h2 id="ä¸­é—´ä»¶-æ›¿æ¢"><a href="#ä¸­é—´ä»¶-æ›¿æ¢" class="headerlink" title="ä¸­é—´ä»¶ æ›¿æ¢"></a>ä¸­é—´ä»¶ <sup>æ›¿æ¢</sup></h2><p>ä¸­é—´ä»¶è¢«æ›¿æ¢ä¸ºæ’ä»¶ã€‚æ’ä»¶æ˜¯æ¥æ”¶ store ä½œä¸ºä»…æœ‰å‚æ•°çš„åŸºæœ¬å‡½æ•°ï¼Œèƒ½å¤Ÿç›‘å¬ store ä¸­çš„ mutation äº‹ä»¶ï¼š</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><div class="line"><span class="keyword">const</span> myPlugins = <span class="function"><span class="params">store</span> =&gt;</span> &#123;</div><div class="line">  store.subscribe(<span class="string">'mutation'</span>, (mutation, state) =&gt; &#123;</div><div class="line">    <span class="comment">// Do something...</span></div><div class="line">  &#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>æ›´å¤šè¯¦æƒ…, è¯·æŸ¥é˜… <a href="javascript:if(confirm('https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md'" tppabs="https://github.com/vuejs/vuex/blob/1.0/docs/en/plugins.md" target="_blank" rel="external">æ’ä»¶æ–‡æ¡£</a>ã€‚</p>
+
+<div class="upgrade-path">
+  <h4>å‡çº§æ–¹æ³•</h4>
+  <p>åœ¨ä»£ç åº“è¿è¡Œ<a href="javascript:if(confirm('https://github.com/vuejs/vue-migration-helper  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuejs/vue-migration-helper'" tppabs="https://github.com/vuejs/vue-migration-helper" target="_blank" rel="external">è¿ç§»å·¥å…·</a>ï¼ŒæŸ¥æ‰¾ä½¿ç”¨äº† <code>middlewares</code> é€‰é¡¹çš„äº‹ä¾‹ã€‚</p>
+</div>
+
+
+    <div class="footer">
+      å‘ç°é”™è¯¯ï¼Ÿæƒ³å‚ä¸ç¼–è¾‘ï¼Ÿ
+      <a href="javascript:if(confirm('https://github.com/vuefe/vuejs.org/blob/2.0-cn/src/v2/guide/migration-vuex.md  \n\n¸ÃÎÄ¼şÎŞ·¨ÓÃ Teleport Ultra ÏÂÔØ, ÒòÎª ËüÊÇÒ»¸öÓò»òÂ·¾¶Íâ²¿±»ÉèÖÃÎªËüµÄÆôÊ¼µØÖ·µÄµØÖ·¡£  \n\nÄãÏëÔÚ·şÎñÆ÷ÉÏ´ò¿ªËü?'))window.location='https://github.com/vuefe/vuejs.org/blob/2.0-cn/src/v2/guide/migration-vuex.md'" tppabs="https://github.com/vuefe/vuejs.org/blob/2.0-cn/src/v2/guide/migration-vuex.md" target="_blank">
+        åœ¨ Github ä¸Šç¼–è¾‘æ­¤é¡µï¼
+      </a>
+    </div>
+</div>
+
+                
+            </div>
+            <script src="../../js/smooth-scroll.min.js" tppabs="https://vuefe.cn/js/smooth-scroll.min.js"></script>
+        
+
+        <!-- main custom script for sidebars, version selects etc. -->
+        <script src="../../js/css.escape.js" tppabs="https://vuefe.cn/js/css.escape.js"></script>
+        <script src="../../js/common.js" tppabs="https://vuefe.cn/js/common.js"></script>
+
+        <!-- search -->
+        <link href="../../../cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css" tppabs="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.css" rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="../../css/search.css" tppabs="https://vuefe.cn/css/search.css">
+        <script src="../../../cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js" tppabs="https://cdn.jsdelivr.net/docsearch.js/1/docsearch.min.js"></script>
+        <script>
+        [
+          '#search-query-nav',
+          '#search-query-sidebar',
+          '#search-query-menu'
+        ].forEach(function (selector) {
+          if (!document.querySelector(selector)) return
+          // search index defaults to v2
+          var match = window.location.pathname.match(/^\/(v\d+)/)
+          var version = match ? match[1] : 'v2'
+          docsearch({
+            appId: 'BH4D9OD16A',
+            apiKey: '5638280abff9d207417bb03be05f0b25',
+            indexName: 'vuejs_cn2',
+            inputSelector: selector,
+            algoliaOptions: { facetFilters: ["version:" + version] }
+          })
+        })
+        </script>
+
+        <!-- fastclick -->
+        <script src="../../../cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js" tppabs="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          FastClick.attach(document.body)
+        }, false)
+        </script>
+
+        <script src="../../js/vuefe-min.fe7c4b3c46a9ec32c769.js" tppabs="https://vuefe.cn/js/vuefe-min.fe7c4b3c46a9ec32c769.js"></script>
+    </body>
+</html>

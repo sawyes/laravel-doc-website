@@ -112,6 +112,7 @@ class Documentation
             '5.3' => '5.3',
             '5.2' => '5.2',
             'psr' => 'psr',
+            'ES6' => 'ES6',
         ];
     }
 }

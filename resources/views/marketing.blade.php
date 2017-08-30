@@ -20,6 +20,44 @@
 
 <section class="hero">
 	<div class="container">
+        
+        <div class="callout rule">
+            <span class="text">目前收集的文档</span>
+        </div>
+
+        <div class="callouts">
+            <a href="http://dt.app/vuefe.cn/v2/guide/index.html" class="callout minimal third pop teal">
+                <div class="callout-head">
+                    <div class="callout-title">VUE</div>
+                    <div class="callout-icon">{!! svg('cashier') !!}</div>
+                </div>
+                <p>教程和API基础</p>
+            </a>
+
+            <a href="http://dt.app/index_zh-CN.html" class="callout minimal third pop teal">
+                <div class="callout-head">
+                    <div class="callout-title">速查表</div>
+                    <div class="callout-icon">{!! svg('cashier') !!}</div>
+                </div>
+                <p>Laravel 常用命令快速查找</p>
+            </a>
+
+        </div>
+        
+        @foreach (collect($versions)->chunk(3) as $key => $chunk)
+            <div class="callouts">
+                @foreach ($chunk as $key => $display)
+                    <a href="{{ url('docs/'.$key) }}" class="callout minimal third">
+                        <div class="callout-head">
+                            <div class="callout-title">{{ $display }}</div>
+                            <div class="callout-icon">{!! svg('echo')!!}</div>
+                        </div>
+                        <p>{{ $display }}</p>
+                    </a>
+                @endforeach
+            </div>
+        @endforeach
+
 
         <div class="content">
             <h1>Love beautiful code? We do too.</h1>

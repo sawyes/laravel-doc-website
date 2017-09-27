@@ -26,7 +26,7 @@
         </div>
 
         <div class="callouts">
-            <a href="http://dt.app/vuefe.cn/v2/guide/index.html" class="callout minimal third pop teal">
+            <a href="/vuefe.cn/v2/guide/index.html" class="callout minimal third pop teal">
                 <div class="callout-head">
                     <div class="callout-title">VUE</div>
                     <div class="callout-icon">{!! svg('cashier') !!}</div>
@@ -34,7 +34,7 @@
                 <p>教程和API基础</p>
             </a>
 
-            <a href="http://dt.app/index_zh-CN.html" class="callout minimal third pop teal">
+            <a href="/index_zh-CN.html" class="callout minimal third pop teal">
                 <div class="callout-head">
                     <div class="callout-title">速查表</div>
                     <div class="callout-icon">{!! svg('cashier') !!}</div>

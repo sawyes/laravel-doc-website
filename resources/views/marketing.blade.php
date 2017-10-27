@@ -36,7 +36,15 @@
 
             <a href="/index_zh-CN.html" class="callout minimal third pop teal">
                 <div class="callout-head">
-                    <div class="callout-title">速查表</div>
+                    <div class="callout-title">Laravel速查表</div>
+                    <div class="callout-icon">{!! svg('cashier') !!}</div>
+                </div>
+                <p>Laravel 常用命令快速查找</p>
+            </a>
+
+            <a href="/linux.html" class="callout minimal third pop teal">
+                <div class="callout-head">
+                    <div class="callout-title">Linux速查表</div>
                     <div class="callout-icon">{!! svg('cashier') !!}</div>
                 </div>
                 <p>Laravel 常用命令快速查找</p>

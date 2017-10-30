@@ -110,7 +110,8 @@ ls -al
 
 type ls
 //ls is aliased to `ls --color=auto'
-
+type ll
+//ll is aliased to `ls -l --color=auto'
 // 用人类能理解的方式输出大小 -h 好多命令都有， 注意大小变为36K
 ls -alh
 // drwxrwxr-x 993 vagrant vagrant  36K Aug 16 17:03 .npm
@@ -204,7 +205,7 @@ printenv
 // 更新环境变量, 可以解决man 乱码问题
 export LANG=en
     </pre>
-<h6>hash o(1)</h6>
+<h6>hash o(1)<a target='_blank' href="http://blog.csdn.net/wendavidoi/article/details/50670016" title="Artisan CLI @ Laravel Docs"><i class="icon-file-text"></i></a></h6>
 <pre>
 // 查看命令的命中率
     hash
@@ -222,6 +223,12 @@ N：前一个
 ?KEYWORD：向前
 n: 下一个
 N：前一个
+
+</pre>
+<h6>X window中翻屏(黑窗口)</h6>
+<pre>
+shift + pageup
+shift + pagedown
 </pre>
 </section>
 
@@ -268,9 +275,97 @@ source ~/.bash
 </pre>
 </section>
 
+<section class="cmd-description grid-item">
+    <h4><a name="文本处理" href="#文本处理">文本处理</a></h4>
+    <h6>printf</h6>
+<pre class="prettyprint lang-php">
+printf "hello, %s\r\n" world
+//hello, world
+printf "float %.2f\r\n" 1.11911
+//float 1.12
+</pre>
+<h6>tr</h6>
+<pre>
+// 默认为交互式，同时出现 ab转换AB
+tr 'ab' 'AB'
+// 结合重定向, 逐个字符比较，替换为大写
+tr 'a-z' 'A-Z' < /etc/passwd
+// 出现字符a或者b都会删除
+tr -d 'ab'
+</pre>
+</section>
 
+<section class="cmd-description grid-item">
+    <h4><a name="查看文本" href="#查看文本">查看文本</a></h4>
+<h6>cat、tac、more、less、head、tail</h6>
+    <h6>cat || tac</h6>
+<pre class="prettyprint lang-php">
+-n 行号
+-E 显示结束符
+-a 显示特殊符号
 
+// 可以连接多个文件
+cat 1.txt 2.txt
 
+// 和egrep结合，过滤空行和#开头的字符
+// 理解^$为什么是空行？因为linux空行就是只有一个$结束符号，用-E命令可以理解
+cat httpd.conf | egrep -v '^$|#'
+</pre>
+<h6>more 翻屏</h6>
+<pre>
+backspace 向后一页
+b 向前一页
+</pre>
+<h6>less 用得最多</h6>
+<pre>
+// 支持搜索，翻到最后不退出， man命令就是less打开的
+backspace 向后一页
+b 向前一页
+</pre>
+<h6>tail | head</h6>
+<pre>
+-n 显示多少行  
+tail -f: 查看文件尾部，不退出，等待显示后续追加至此文件的新内容；  
+</pre>
+<h6>cut</h6>
+<pre>
+-d delimiter 分隔符,默认为空格
+-f field 制定要显示字段
+// 冒号作为分隔符，截取第一个字段
+cut -d : -f 1 /etc/passwd
+// -f1,3  显示1,3字段
+// -f1-3  显示1到3个字段
+</pre>
+<h6>sort</h6>
+<pre>
+// 默认ascii字符排序
+-r 逆序
+-n 按数值大小排序  
+-t, --field-separator=SEP字段分隔符
+-k key=pos1,pos2第几个位置作为排序依据
+-u uniq 去重
+-f 排序忽略字符大小写
+// :分割passwd , 以第三个字段逆序输出
+sort -t: -k3 -r /etc/passwd
+// 按照文件大小排序
+ll -h| sort -nk5
+</pre>
+<h6>uniq</h6>
+<pre>
+//相邻重复的行才认为是重复的行
+-c 重复的次数
+-d 只显示重复的行，去重后的值
+-D  显示重复的行的所有内容
+</pre>
+<h6>wc</h6>
+<pre>
+// word count, 默认显示格式
+行 单词数 字节数    
+-c, --bytes 输出字节数统计
+-m, --chars 输出字符数统计
+-l, --lines 输出行数统计
+</pre>
+</section>
 
 
 

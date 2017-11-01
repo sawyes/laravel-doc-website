@@ -233,7 +233,7 @@ shift + pagedown
 </section>
 
 <section class="cmd-description grid-item">
-    <h4><a name="日期时间" href="#日期时间">date</a></h4>
+    <h4><a name="date" href="#date">date</a></h4>
     <h6>date 系统时间管理</h6>
 <pre class="prettyprint lang-php">
 // RTC real time clock 实时时钟
@@ -265,13 +265,16 @@ cal 02 2012
     <h4><a name="alias" href="#alias">alias</a></h4>
 
 <pre class="prettyprint lang-php">
-文件~/.bashrc
+永久生效 vim ~/.bashrc
+// alias 是bash命令，只在bash生命周期内有效
 // 临时别名，存储当前会话
 alias etc='cd /etc'
 // 永久写入文件
 vim ~/.bashrc
 // 立刻生效
 source ~/.bash
+// 查看所有命令
+alias
 </pre>
 </section>
 
@@ -366,11 +369,250 @@ ll -h| sort -nk5
 -l, --lines 输出行数统计
 </pre>
 </section>
+<section class="cmd-description grid-item">
+    <h4><a name="查看版本" href="#查看版本">查看版本</a></h4>
+    <h6></h6>
+<pre class="prettyprint lang-php">
+lsb_release
+cat /etc/lsb-release
+cat /etc/issue
+cat /proc/version
+uname -a
+</pre>
+</section>
+<section class="cmd-description grid-item">
+    <h4><a name="bash" href="#bash">bash</a></h4>
+    <h6>bash特性</h6>
+<pre class="prettyprint lang-php">
+1、命令历史、命令补全
+2、管道、重定向
+3、命令别名
+4、命令行编辑
+5、命令行展开
+6、文件名通配
+7、变量
+8、编程
+</pre>
+<h6>光标跳转：</h6>
+<pre>
+Ctrl+a：跳到命令行首
+Ctrl+e：跳到命令行尾
+Ctrl+u: 删除光标至命令行首的内容
+Ctrl+k: 删除光标至命令行尾的内容
+Ctrl+l: 清屏
+Ctrl+d: 向后删除一个字符
+</pre>
+<h6>命令历史：</h6>
+<pre>
+查看命令历史：history
+-c：清空命令历史
+-d OFFSET [n]: 删除指定位置的命令
+-w：保存命令历史至历史文件中
+
+// 执行history中制定行号的命令,感叹号
+!890
+// 执行倒数第四条命令
+!-4
+// 执行上一条命令
+!!
+// !+ 字符串，执行命令历史中最近一个指定字符串开头的命令
+!ls
+// 引用前一个命令的最后一个参数
+cat /etc/httpd/conf/http.conf
+vim !$
+// 获取钱一个命令的最后一个参数到终端
+按 ESC 然后按 .
+cat /etc/httpd/conf/httpd.conf
+vim 按 ESC 然后按 
+</pre>
+<h6>环境变量</h6>
+<pre>
+echo $HISTSIZE
+echo $PATH
+</pre>
+</section>
+<section class="cmd-description grid-item">
+    <h4><a name="命令替换" href="#命令替换">命令替换</a></h4>
+<pre>
+bash支持的引号：
+``: 命令替换
+"": 弱引用，可以实现变量替换
+'': 强引用，不完成变量替换
+</pre>
+<H6>$(COMMAND)</H6>
+<pre class="prettyprint lang-php">
+echo "current path is $(pwd)"
+// current path is /etc/httpd/conf
+touch ./file-$(date +%F).txt
+</pre>
+<h6>反引号命令替换`COMMAND`</h6>
+echo "current path is `pwd`"
+</section>
+<section class="cmd-description grid-item">
+    <h4><a name="通配符" href="#通配符">通配符</a></h4>
+    <h6>man 7 glob</h6>
+<pre class="prettyprint lang-php">
+*: 任意长度的任意字符
+?：任意单个字符
+[]：匹配指定范围内的任意单个字符
+[abc], [a-m], [a-z], [A-Z], [0-9], [a-zA-Z], [0-9a-zA-Z]
+[:space:]：空白字符
+[:punct:]：标点符号
+[:lower:]：小写字母
+[:upper:]: 大写字母
+[:alpha:]: 大小写字母
+[:digit:]: 数字
+[:alnum:]: 数字和大小写字母
+    
+# man 7 glob
+[^]: 匹配指定范围之外的任意单个字符
+// 字母开头中间有空格非字母结尾
+ls [[:alpha:]]*[[:space:]]*[^[:alpha:]]
+</pre>
+</section>
+<section class="cmd-description grid-item">
+    <h4><a name="grep" href="#grep">grep</a></h4>
+    <h6>内容查找</h6>
+<pre class="prettyprint lang-php">
+// 忽略大小写递归查找文本内容vhost*, 显示匹配的文件，以及内容所在行号
+grep -rin vhost* .
+</pre>
+<h6>忽略空行和注释</h6>
+<pre>
+egrep -v "#|^&" /etc/httpd/conf/http.conf
+cat /etc/httpd/conf/http.conf | egrep -v "#|^$"
+</pre>
+</section>
 
 
+<section class="cmd-description grid-item">
+    <h4><a name="权限管理" href="#权限管理">权限管理</a></h4>
+<pre class="prettyprint lang-php">
+权限：
+r, w, x
+
+文件：
+r：可读，可以使用类似cat等命令查看文件内容；
+w：可写，可以编辑或删除此文件；
+x: 可执行，eXacutable，可以命令提示符下当作命令提交给内核运行；
+
+目录：
+r: 可以对此目录执行ls以列出内部的所有文件；
+w: 可以在此目录创建文件；
+x: 可以使用cd切换进此目录，也可以使用ls -l查看内部文件的详细信息；
+
+rwx:
+r--:只读
+r-x:读和执行
+---：无权限
+</pre>
+<h6>特殊文件</h6>
+<pre>
+// 理论上任何人都可以查看passwd
+用户：UID, /etc/passwd
+-rw-r--r-- 1 root root 2109 Apr  6  2017 /etc/passwd
+组：GID, /etc/group
+
+// 事实上，用户信息保存在passwd，密码用x代替，保存在shadow
+影子口令：
+用户：/etc/shadow
+-rw-r----- 1 root shadow 1217 Apr  6  2017 /etc/shadow
+组：/etc/gshadow
+用户类别：
+管理员：0
+普通用户： 1-65535
+    系统用户：1-499
+    一般用户：500-60000
+
+man 5 passwd
+account: 登录名
+password: 密码
+UID：
+GID：基本组ID
+comment: 注释
+HOME DIR：家目录
+SHELL：用户的默认shell
+
+cat /etc/shells 登录可用安全shell
+# /etc/shells: valid login shells
+/bin/sh
+/bin/dash
+/bin/bash
+/bin/rbash
+/usr/bin/tmux
+/usr/bin/screen
+
+/etc/shadow
+account: 登录名
+encrypted password: 加密的密码
+
+用户组类别：
+私有组：创建用户时，如果没有为其指定所属的组，系统会自动为其创建一个与用户名同名的组
+基本组：用户的默认组
+附加组，额外组：默认组以外的其它组
+
+加密方法：
+对称加密：加密和解密使用同一个密码，速度是公钥1000倍，效率快
+公钥加密（非对称加密）：每个密码都成对儿出现，一个为私钥(secret key)，一个为公钥(public key)
+单向加密(指纹加密)，散列加密：提取数据特征码，常用于数据完整性校验
+    1、雪崩效应
+    2、定长输出
+        MD5：Message Digest, 信息摘要,128位定长输出
+        SHA1：Secure Hash Algorithm, 160位定长输出
 
 
+</pre>
+<h6>md5加密</h6>
+<pre>
+md5sum /etc/inittab
+753a386bcd9ab0ca581056348463891e  inittab
+</pre>
 
+</section>
+
+<section class="cmd-description grid-item">
+    <h4><a name="用户管理" href="#用户管理">*用户管理</a></h4>
+<h6>添加用户</h6>
+<pre>
+// 添加一个用户，默认地添加到tom组
+useradd tom
+// 查看密码
+cat /etc/shadow | grep tom
+// tom:!!:17470:0:99999:7:::
+// 可以看见是没有密码的，添加一个密码
+passwd tom
+// 查看密码和私有组
+cat /etc/shadow /etc/group | grep tom
+
+为什么会有默认值？
+// 查看模板
+vim /etc/default/useradd
+# useradd defaults file
+GROUP=100
+HOME=/home
+INACTIVE=-1 #密码过期可宽限天数
+EXPIRE=     #没指定永不过期
+SHELL=/bin/bash
+SKEL=/etc/skel
+CREATE_MAIL_SPOOL=yes
+
+// 基本查看useradd
+which useradd
+ll $(which useradd)
+ll `which useradd`
+// 别名adduser
+ll `which adduser`
+lrwxrwxrwx. 1 root root 7  8月 17 2015 /usr/sbin/adduser -> useradd
+</pre>
+<h6>修改密码</h6>
+<pre>
+passwd tom
+</pre>
+<h6>添加组</h6>
+<pre>
+groupadd mygroup
+</pre>
+</section>
                 </div>
             </div>
         </div>

@@ -109,10 +109,11 @@ class Documentation
         return [
             'master' => 'Master',
             '5.4' => '5.4',
-            '5.3' => '5.3',
-            '5.2' => '5.2',
+            'linux' => 'linux',
             'psr' => 'psr',
             'ES6' => 'ES6',
+            '5.3' => '5.3',
+            '5.2' => '5.2',
         ];
     }
 }

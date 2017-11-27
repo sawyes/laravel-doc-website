@@ -77,7 +77,34 @@ installation.md
 
 ```
 
-> "##" 才会出现"#"大标记二级标题
+> "##" 才会出现"#"大标记二级标题, 注意a标签的属性为name
+
+### 添加导航链接
+
+路由地址格式，其中master为version
+> http://your.app/docs/master/new
+
+修改文件 app/Documentation.php，在右上角，添加文档库链接入口
+
+```
+    /**
+     * Get the publicly available versions of the documentation
+     *
+     * @return array
+     */
+    public static function getDocVersions()
+    {
+        return [
+            'master' => 'Master',
+            '5.4' => '5.4',
+            'linux' => 'linux',
+            'psr' => 'psr',
+            'ES6' => 'ES6',
+            '5.3' => '5.3',
+            '5.2' => '5.2',
+        ];
+    }
+```
 
 <a name="clear-cache"></a>
 ## 清除文档缓存

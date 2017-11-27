@@ -209,6 +209,9 @@ $PATH
 $HISTSIZE
 $SHELL 当前用户shell
 
+// 环境变量添加路径
+# PATH=$PATH:/tmp
+
 // 输出当前用户环境变量，echo $PATH,如何做到添加变量，添加用户的时候拥有默认环境变量
     </pre>
 <h6>hash o(1)<a target='_blank' href="http://blog.csdn.net/wendavidoi/article/details/50670016" title="Artisan CLI @ Laravel Docs"><i class="icon-file-text"></i></a></h6>
@@ -901,6 +904,9 @@ usermod
     -U：解锁帐号
 
 usermod -u 2000 user1
+
+// 为用户user1添加附加组grp2
+usermod -a -G grp2 user1
 </pre>
 <h6>chsh 修改用户默认shell</h6>
 <pre>
@@ -977,7 +983,10 @@ groupdel
 gpasswd 为组设定密码
 // 应用场景，用户临时切换其他组以获得对应资源，注意原本这个组不属于该用户，否则是可以不输入密码立刻切换的
 // 该命令是一种登录属性，使用exit即可退出切换组
+// 为用户user1添加附加组grp2
+usermod -a -G grp2 user1
 newgrp mygroup
+
 // 这个时候就要为gpasswd添加密码了
 // 切换组以后创建一个文件,发现组的名称变更了为mygroup，因为基本组已经切换了
 touch mygroup.txt
@@ -1071,7 +1080,7 @@ cat >> 2017-08.log << EOF
 <pre class="prettyprint lang-php">
 // 引用变量, 大花括号， ${VAR_NAME}, 大多数时候可以省略
 // 双引号弱引用，内部的变量会引用
-// 单引号强引用，背部变量不会引用
+// 单引号强引用，内部变量不会引用
 // 本地变量仅用于当前bash
 # name=peter
 # echo $name 
@@ -1107,8 +1116,9 @@ $1,$2,$3
 <h6>特殊变量</h6>
 <pre>
 $?: 上一个命令的执行状态返回值；
-// 输出执行状态返回代码
-echo $?
+$#：参数的个数
+$*: 参数列表
+$@：参数列表
 
 程序执行，可能有两类返回值：
     程序执行结果
@@ -1117,6 +1127,25 @@ echo $?
         1-255：错误执行，1，2，127系统预留；
 </pre>
 
+<h6>变量重新赋值</h6>
+<pre>
+# PERSON=peter
+# PERSON=$PERSON:10
+// result: peter:10
+# echo $PERSON
+// 环境变量添加路径
+# PATH=$PATH:/tmp
+</pre>
+
+<h6>shebang魔数</h6>
+<pre>
+#!/bin/shell
+</pre>
+<h6>运算</h6>
+A=2
+B=3
+C=$A+$B
+echo $C // 2+3 字符串
 <h6>输出重定向</h6>
 <pre>
 /dev/null: 软件设备， bit bucket，数据黑洞    

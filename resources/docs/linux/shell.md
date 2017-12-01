@@ -13,6 +13,7 @@
 - [代码执行](#code-run)
 - [变量操作](#var)
     - [查看](#var-index)
+    - [变量声明](#var-declare)
     - [运算](#var-add)
     - [删除](#var-del)
 - [条件判断](#condition)
@@ -21,7 +22,7 @@
     - [控制结构](#condition-control)
     - [整数比较](#condition-num-oprator)
     - [逻辑关系](#condition-logic-relation)
-
+- [循环控制](#loop-control)
 
 > 不要忘记Linux创建的文件没有执行权限，shell也不例外，chmod u+x filename
 
@@ -175,6 +176,19 @@ env
 export
 ```
 
+<a name='var-declare'></a>
+### 变量声明
+
+关键字 declar
+
+* -i 数值类型， 默认地bash不支持浮点型计算
+* -x 声明变量为环境变量
+
+```
+// 声明一个变量SUM为整数类型
+declare -i SUM=0
+```
+
 <a name='var-add'></a>
 ### 运算
 
@@ -203,6 +217,18 @@ echo $C // 2+3 字符串
 ```
 
 > 判断是否为数字, expr $n + 0
+
+字符比较(help let查看手册)
+==
+!=
+>
+<
+-n string: 测试字符串是否为空,空为真
+-s string: 测试字符串是否不为空，不空为真
+```
+[[ $a == $b ]]
+[-s $a]
+```
 
 homestead 默认~/.profile环境变量
 ```
@@ -243,6 +269,10 @@ test expression
 
 # 判断参数是否存在
 [[ $1 ]]
+# 字符串测试
+[[ $a == $b ]]
+# 注意，单引号是自身$a，不代表变量
+[ "$a" == "$b" ]
 ```
 
 > 执行结果和执行状态的区别
@@ -337,11 +367,32 @@ fi
 ! id user1 && useradd user1 && echo "user1" | passwd --stdin user1  || echo "user1 exists."
 ```
 
+判断用户和组名是否一样
+```
+if [ `id -un $1` == `id -gn $1` ]; then
+    echo "it's same username groups"
+else
+    echo "it's not same username groups"
+fi
+```
 
+<a name="loo-control">
+## 循环控制
 
+### for
 
+命令替换seq, 或者展开{1,4}, {1..100}这样的表达式
 
+```
+#!/bin/bash
+#
 
+declare -i SUM=0
 
+for i in {1..100}; do
+    let SUM=$SUM+$i
+done
+echo $SUM
+```
 
-
+> 算数表达式let SUM=$SUM+$i等同于let SUM=$[$SUM+$i]

@@ -29,10 +29,10 @@
 <a name="shebang"></a>
 ## shebang魔数
 
-```
- #!/bin/shell
- # 注释行，不执行
-```
+
+    #!/bin/shell
+    # 注释行，不执行
+
 
 <a name="output-redirect"></a>
 ## 输出重定向
@@ -115,17 +115,27 @@ local var_name=test
 ### 环境变量
 
 导出环境变量
-```
-export VARNAME=VALUE
-```
+    
+    export VARNAME=VALUE
+
 
 原本变量作用域只能存在于当前的shell,export变量使其可以切换bash后保持变量
-```
-name=peter
-export name
-bash 
-echo $name
-```
+
+    name=peter
+    export name
+    bash 
+    echo $name
+
+
+* /etc/profile
+* /etc/profild.d
+
+自定义一个文件的变量
+
+    echo "export PATH=\$PATH:/usr/local/logstash-1.5.4/bin" > /etc/profile.d/logstash.sh
+
+
+<img src='/assets/img/linux-profile.png'>
 
 <a name="position-var"></a>
 ### 位置变量
@@ -219,19 +229,22 @@ echo $C // 2+3 字符串
 > 判断是否为数字, expr $n + 0
 
 字符比较(help let查看手册)
-==
-!=
->
-<
+
+```
+!=,==,<
+
 -n string: 测试字符串是否为空,空为真
 -s string: 测试字符串是否不为空，不空为真
-```
+
 [[ $a == $b ]]
 [-s $a]
 ```
 
+
+
 homestead 默认~/.profile环境变量
-```
+
+```code
 # set PATH so it includes user's private bin directories
 PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 PATH="/home/vagrant/.composer/vendor/bin:$PATH"
@@ -376,23 +389,37 @@ else
 fi
 ```
 
-<a name="loo-control">
+<a name="loo-control"></a>
 ## 循环控制
 
 ### for
 
 命令替换seq, 或者展开{1,4}, {1..100}这样的表达式
 
-```
-#!/bin/bash
-#
 
-declare -i SUM=0
+    #!/bin/bash
+    #
 
-for i in {1..100}; do
-    let SUM=$SUM+$i
-done
-echo $SUM
-```
+    declare -i SUM=0
+    
+    for i in {1..100}; do
+        let SUM=$SUM+$i
+    done
+    echo $SUM
+
+也可以使用seq命令生成
+
+
+    #！bin/bash
+    #
+    
+    for i in `seq 1 100`; do 
+        let SUM=$SUM+$i
+    done
+    echo $SUM
+    
+
+
+
 
 > 算数表达式let SUM=$SUM+$i等同于let SUM=$[$SUM+$i]

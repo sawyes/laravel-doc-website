@@ -42,13 +42,13 @@ BEGIN为脚本开始前动作, END 为脚本结束后动作
 
 * 命令行方式 
 ```
-    awk [-F  field-separator]  'commands'  input-file(s)
+awk [-F  field-separator]  'commands'  input-file(s)
 
-    [-F域分隔符]是可选的
+[-F域分隔符]是可选的
 
-    commands 是真正awk命令
+commands 是真正awk命令
 
-    input-file(s) 是待处理的文件。
+input-file(s) 是待处理的文件。
 ```   
 
 * shell脚本方式

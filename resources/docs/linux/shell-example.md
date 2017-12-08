@@ -3,6 +3,7 @@
 - [添加一个用户](#user-shell)
 - [判断数值是否相等](#equal-num)
 - [空行判断](#empty-line)
+- [获取具有指定bash的用户](#bash-user)
 
 <a name="#user-shell"></a>
 ## 添加一个用户
@@ -129,5 +130,29 @@ else
   echo "No blank line."
 fi
 
+```
+<a name='bash-user'>
+## 获取具有指定bash的用户
+
+${变量}
+
+```
+#!/bin/bash
+#
+if [ $1 == '-s' ]; then
+  ! grep "${2}$" /etc/shells &> /dev/null && echo "Invalid shell." && exit 7
+elif [ $1 == '--help' ];then
+  echo "Usage: showshells.sh -s SHELL | --help"
+  exit 0
+else
+  echo "Unknown Options."
+  exit 8
+fi
+
+NUMOFUSER=`grep "${2}$" /etc/passwd | wc -l`
+SHELLUSERS=`grep "${2}$" /etc/passwd | cut -d: -f1`
+SHELLUSERS=`echo $SHELLUSERS | sed 's@[[:space:]]@,@g'`
+
+echo -e "$2, $NUMOFUSER users, they are: \n$SHELLUSERS"
 ```
 

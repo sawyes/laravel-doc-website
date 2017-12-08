@@ -1,8 +1,10 @@
 - 前言
     - [鸡汤](/docs/{{version}}/installation)
-- 编程
+- 基础命令
     - [shell](/docs/{{version}}/shell)
     - [shell例子](/docs/{{version}}/shell-example)
     - [awk](/docs/{{version}}/awk)
     - [sed](/docs/{{version}}/sed)
-
+    - [vim](/docs/{{version}}/vim)
+    - [文件查找](/docs/{{version}}/find)
+    - [用户管理](/docs/{{version}}/user)

@@ -160,6 +160,9 @@ cp SRC DEST
 
 // 归档备份, 属性，软连接等全部保留
 cp -a /etc /backup/etc-2013-02-28
+
+// 复制文件夹下的内容到另一个文件夹下, 如初始化用户
+cp -r /etc/skel/. /home/user1
 </pre>
 <h6>touch创建文件</h6>
 <pre class="prettyprint lang-php">
@@ -676,9 +679,82 @@ cat /etc/httpd/conf/http.conf | grep -vEn "#|^$"
 
 <section class="cmd-description grid-item">
     <h4><a name="find" href="#find">find</a></h4>
+<h6>基础</h6>
+<pre class="prettyprint lang-php">
+find path -name "regexp"
+find 查找路径 查找标准 查找到以后的处理运作
+查找路径：默认为当前目录
+查找标准：默认为指定路径下的所有文件
+处理运作：默认为显示
+</pre>
+
+<h4>时间范围</h4>
+<pre>
+-mtime n file's data was last modified n*24 hours ago
+-ctime n file's  status  was  last  changed  n*24 hours ago.
+-atime
+    [+|-]#
+-mmin
+-cmin
+-amin
+    [+|-]#
+</pre>
+<h4>权限</h4>
+<pre>
+-executable
+-readable
+-print
+Search for files which are executable but not readable.
+find /sbin /usr/sbin -executable \! -readable -print
+</pre>
+<h4>实例</h4>
+<pre>
+1、查找/var目录下属主为root并且属组为mail的所有文件；
+find /var -user root -group mail
+
+2、查找/usr目录下不属于root,bin,或student的文件；
+find /usr -not -user root -a -not -user bin -a -not -user student
+find /usr -not \( -user root -o -user bin -o -user student \)
+
+3、查找/etc目录下最近一周内内容修改过且不属于root及student用户的文件；
+find /etc -mtime -7 -not \ ( -user root -o -user student \)
+find /etc -mtime -7 -not -user root -a -not -user student
+
+
+4、查找当前系统上没有属主或属组且最近1天内曾被访问过的文件，并将其属主属组均修改为root；
+find / \( -nouser -o -nogroup \) -a -atime -1 -exec chown root:root {} \; 
+
+5、查找/etc目录下大于1M的文件，并将其文件名写入/tmp/etc.largefiles文件中；
+find /etc -size +1M >> /tmp/etc.largefiles
+
+6、查找/etc目录下所有用户都没有写权限的文件，显示出其详细信息；
+find /etc -not -perm /222 -ls	
+</pre>
+
+
+</section>
+
+<section class="cmd-description grid-item">
+    <h4><a name="xargs" href="#xargs">xargs</a></h4>
     <h6></h6>
 <pre class="prettyprint lang-php">
-find /mnt/cdrom/Package -name "*finger*"
+find / -size +100M | xargs {} > /tmp/large.file
+</pre>
+</section>
+
+<section class="cmd-description grid-item">
+    <h4><a name="locate" href="#locate">locate</a></h4>
+    <h6></h6>
+<pre class="prettyprint lang-php">
+非实时,根据系统数据进行查找
+
+updatedb 更新数据库索引, 默认地最近创建的文件无法查找, 所以必须先得索引
+
+locate -A 搜索所有
+locate -b redis 字符匹配 搜索文件名含有redis的文件(不是路径)
+locate --regexp 'etc.*redis.*f' 正则匹配
+locate -i REDIS 忽略大小写匹配
+locate -e redis.conf 仅显示locate数据库中存在,同时文件在系统中也存在的文件
 </pre>
 </section>
 
@@ -733,6 +809,27 @@ chmod g=r,o=w /path
 chmod go=rx /path
 
 chmod u-x,g+x /path
+
+suid 不到最后使用suid
+chmod u+s /bin/cat
+-rwsr-xr-x 1 root root 52080 Feb 18  2016 cat*
+/usr/bin/passwd 是特殊场景
+如果文件本身就有执行权限, 那么suid显示为s, 否则S
+
+guid 非常有用的知识点
+// 指定目录为guid权限, 则目录内创建的任何文件都为上级的属组
+chmod g+ws /home/project/log
+chown :logger /home/project/log
+// 追加用户到同一个附加组, 此时log文件夹下所有创建的文件都是logger组
+usermod -a -G loger hadoop
+usermod -a -G loger hive
+usermod -a -G loger hbase
+
+// sticky 和guid结合使用,否则创建文件不会有相同的组
+// 表示一个公共目录中任何人都可以创建删除自己的文件, 但是不能删除别人的文件
+chmod o+t /home/project/log
+
+
 </pre>
 <h6>基础</h6>
 <pre class="prettyprint lang-php">
@@ -826,6 +923,8 @@ md5sum /etc/inittab
     <h4><a name="用户管理" href="#用户管理">*用户管理</a></h4>
 <h6>添加用户</h6>
 <pre>
+默认情况下新建用户只能在home目录有操作权限, 如果手动创建的目录, 请注意要chown给予用户权限
+
 // 添加一个用户，默认地添加到tom组
 useradd tom
 // 查看密码
@@ -971,6 +1070,15 @@ id -Gn
 finger user1
 </pre>
 </section>
+<section class="cmd-description grid-item">
+<h4><a name="sticky" href="#sticky">sticky</a></h4>
+<pre class="prettyprint lang-php">
+在一个公共目录,每个用户都可以创建文件, 删除自己的文件, 但是不能删除别人的文件
+chmod o+t /dir
+chmod o-t /dir
+</pre>
+</section>
+
 <section class="cmd-description grid-item">
     <h4><a name="计算器" href="#计算器">计算器</a></h4>
     <h6>bc</h6>

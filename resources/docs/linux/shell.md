@@ -414,7 +414,7 @@ fi
     #
     
     for i in `seq 1 100`; do 
-        let SUM=$SUM+$i
+        let SUM+=$i
     done
     echo $SUM
     
@@ -422,4 +422,4 @@ fi
 
 
 
-> 算数表达式let SUM=$SUM+$i等同于let SUM=$[$SUM+$i]
+> 算数表达式let SUM=$SUM+$i等同于let SUM=$[$SUM+$i], 等同于let SUM+=$i

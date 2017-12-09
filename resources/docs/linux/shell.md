@@ -311,7 +311,7 @@ if id $NAME; then
 -d FILE: 测试指定路径是否为目录
 -r FILE: 测试当前用户对指定文件是否有读取权限；
 -w FILE: 写
--x FILE: 执行
+-x FILE: 执行,也用于测试判断是否为空
 
 [ -e /etc/inittab ]
 [ -x /etc/rc.d/rc.sysinit ] 
@@ -371,8 +371,8 @@ fi
 <a href="condition-logic-relation"></a>
 ### 逻辑关系
 
-* 与 &&
-* 或 ||
+* 与 &&, -a
+* 或 ||, -o
 * 非 !
 
 如果用户存在，就显示用户已存在；否则，就添加此用户
@@ -387,6 +387,13 @@ if [ `id -un $1` == `id -gn $1` ]; then
 else
     echo "it's not same username groups"
 fi
+```
+
+判断朱建明是非为空或者主机名为123
+
+如果当前主机的主机名为空，或者为(none)，或者为localhost，就将其改为www.magedu.com
+```
+[ -z `hostname` ] || [ `hostname` == '(none)' -o `hostname` == 'localhost' ] && hostname www.magedu.com
 ```
 
 <a name="loo-control"></a>

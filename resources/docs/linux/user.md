@@ -7,8 +7,10 @@
 - [FACL](#facl)
     - [getfacl](#getfacl)
     - [setfacl](#setfacl)
-    - [操作实例](#facl-example)
-
+    - [effective](#effective)
+    - [Default ACL](#default-acl)
+    - [chacl](#chacl)
+    
 <a name='what-happen'></a>
 ## 权限管理底层
 
@@ -96,68 +98,177 @@ Filesystem Access Control List 文件系统访问列表
 <a name='getfacl'></a>
 ### getfacl
 
-    vagrant@homestead:~$ getfacl test.sh
-    # file: test.sh
-    # owner: vagrant
-    # group: vagrant
-    user::rwx
-    group::r-x
-    other::r-x
+默认情况下获取文件的访问规则
+
+    peter@homestead:/tmp/test$ touch filename
+    peter@homestead:/tmp/test$ getfacl filename
+    # file: filename
+    # owner: peter
+    # group: peter
+    user::rw-
+    group::rw-
+    other::r--
+    peter@homestead:/tmp/test$ ll filename 
+    -rw-rw-r-- 1 peter peter 0 Dec  8 16:22 filename
+
+授权vagrant用户具有rwx权限
+
+    peter@homestead:/tmp/test$ setfacl -m u:vagrant:rwx filename
+
+下面我们用getfacl来看定义了FACL规则文件
+
+    peter@homestead:/tmp/test$ getfacl filename 
+    # file: filename
+    # owner: peter
+    # group: peter
+    user::rw-
+    user:vagrant:rwx
+    group::rw-
+    mask::rwx
+    other::r--
+
+我们发现group::rw-在linux文件系统组的权限竟然为rwx(未授权vagrant为rw-), 授权用户权限, 组权限却变了
+
+    peter@homestead:/tmp/test$ ll filename
+    -rw-rwxr--+ 1 peter peter 33 Dec  8 16:28 filename*
+
+'+' 号, 表示这是一个FACL文件
+
+* 疑问点: 属主peter只有rw权限, peter授权vagrant, vagrant拥有rwx权限, 那么peter,vagrant对文件filename的执行权限如何
+
+答案: **惊奇的是没有执行权限的peter, 成功让vagrant用户拥有执行权限**, peter用户只有rw权限, 会被系统deny
+
+* 疑问点: 属组peter的其他用户对filename执行权限如何?
+
+答案: **同组(peter)也无法执行filename文件**, 因为rwx权限不再表示同组权限, 而是FACL的mask权限, peter组的权限依然为rw
+
+> 结论 如果一个文件设置了FACL(+号文件), 我们都需要通过getfacl来确认权限, 以免发生混淆
+
+基础知识
+
+    // 这个是文件权限
+    ACL_USER_OBJ：相当于Linux里file_owner的permission 
+
+    ACL_USER：定义了额外的用户可以对此文件拥有的permission 
+
+    // 这个是文件权限
+    ACL_GROUP_OBJ：相当于Linux里group的permission 
+
+    ACL_GROUP：定义了额外的组可以对此文件拥有的permission 
+
+    ACL_MASK：定义了ACL_USER, ACL_GROUP_OBJ和ACL_GROUP的最大权限 (这个我下面还会专门讨论) 
+
+    // 这个是文件权限
+    ACL_OTHER：相当于Linux里other的permission
+
+继续, 设置文件filename的mask为read only
+
+
 
 <a name='setfacl'></a>
 ### setfacl
 
-setfacl -m u:username:rwx test.sh
+> 默认复制不理会ACL属性, 这里特意说明, cp  -p  可以复制文件或目录的acl规则到新的位置
+
+选项
 
 ```
---mask 指定
--m: 设定
+--mask：重新计算有效权限，即使ACL mask被明确指定。
+-m(--modify): 修改文件或目录的规则
     u:UID:perm
     g:GID:perm
--x：取消
+-x(--remove): 删除ACL规则
     u:UID
     g:GID
+
+-b,--remove-all：删除所有扩展的acl规则，基本的acl规则(所有者，群组，其他）将被保留。 
+-k,--remove-default：删除缺省的acl规则。如果没有缺省规则，将不提示。 
+-n，--no-mask：不要重新计算有效权限。setfacl默认会重新计算ACL mask，除非mask被明确的制定。 
+ 
+-d，--default：设定默认的acl规则。 
+--restore=file：从文件恢复备份的acl规则（这些文件可由getfacl -R产生）。通过这种机制可以恢复整个目录树的acl规则。此参数不能和除--test以外的任何参数一同执行。 
+--test：测试模式，不会改变任何文件的acl规则，操作后的acl规格将被列出。 
+-R，--recursive：递归的对所有文件及目录进行操作。
+-L，--logical：跟踪符号链接，默认情况下只跟踪符号链接文件，跳过符号链接目录。 
+-P，--physical：跳过所有符号链接，包括符号链接文件。
 ```
 
-> 知识确认: 设置的权限能超过自身吗?
+授权其他用户对文件具有访问权限
 
-<a name='facl-example'></a>
-### 操作实例
-默认地, peter用户无法修改test.sh, Permission denied
+    setfacl -m u:user1:r filename
 
-    peter@homestead:/home/vagrant$ echo "hello world" >> test.sh
-    bash: test.sh: Permission denied
+设置mask为read
 
-vagrant用户修改test.sh, 多了一下user:peter:rw-
+    setfacl -m mask::r-- filename 
+<a name='effective'></a>
+### effective
 
-```
-vagrant@homestead:~$ setfacl -m u:peter:rw test.sh
-vagrant@homestead:~$ getfacl test.sh 
-# file: test.sh
-# owner: vagrant
-# group: vagrant
-user::rwx
-user:peter:rw-
-group::r-x
-mask::rwx
-other::r-x
+继续上述操作, 变更mask权限由rwx到r--
 
-vagrant@homestead:~$ su peter
-# 此时peter用户写入成功
-peter@homestead:/home/vagrant$ echo "hello world" >> test.sh
-```
+    peter@homestead:/tmp/test$ setfacl -m mask::r-- filename 
+    peter@homestead:/tmp/test$ ll filename
+    -rw-r--r--+ 1 peter peter 33 Dec  8 16:28 filename
+    peter@homestead:/tmp/test$ getfacl filename
+    # file: filename
+    # owner: peter
+    # group: peter
+    user::rw-
+    user:vagrant:rwx		#effective:r--
+    group::rw-			#effective:r--
+    mask::r--
+    other::r--
 
-取消文件访问列表
+组权限变为了r--, 是和mask对应的, 这点没变
 
-    setfacl -x u:peter test.sh 
+mask的含义是设置最大权限, 超过权限的都会被屏蔽, 这个就是effective的意义
 
+此时vagrant 不具有执行权限了
 
+<a name='default-acl'></a>
+### Default Acl
 
+> 作用于目录, 目录下的文件自动使用目录的默认ACL
 
+举个例子, root用户创建了一个目录
 
+    root@homestead:/tmp# mkdir dir
+    root@homestead:/tmp# getfacl --omit-header dir
+    user::rwx
+    group::r-x
+    other::r-x
 
+默认ACL个i这, 设置用户peter对dir目录拥有rw权限
 
+    root@homestead:/tmp# setfacl -d -m u:peter:rw dir
+    root@homestead:/tmp# getfacl dir
+    # file: dir
+    # owner: root
+    # group: root
+    user::rwx
+    group::r-x
+    other::r-x
+    default:user::rwx
+    default:user:peter:rw-
+    default:group::r-x
+    default:mask::rwx
+    default:other::r-x
 
+这个操作, 用户希望dir文件夹下创建的任何文件, peter都默认拥有rw权限, 可以看到, 默认dir目录下的文件都用上了FACL(即便复制过来的文件也会默认用上这个规则)
 
+    root@homestead:/tmp# cd dir
+    root@homestead:/tmp/dir# touch test
+    root@homestead:/tmp/dir# getfacl --omit-header test 
+    user::rw-
+    user:peter:rw-
+    group::r-x			#effective:r--
+    mask::rw-
+    other::r--
 
+<a name='chacl'></a>
+### chacl
 
+可以彻底删除文件或目录的ACL属性, 包括Default ACL
+
+    chacl -B filename
+
+默认地, setfacl -x 删除的acl属性还会有 '+' 号

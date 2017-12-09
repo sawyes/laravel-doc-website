@@ -4,6 +4,7 @@
 - [判断数值是否相等](#equal-num)
 - [空行判断](#empty-line)
 - [获取具有指定bash的用户](#bash-user)
+- [随机数求大小](#random)
 
 <a name="#user-shell"></a>
 ## 添加一个用户
@@ -155,4 +156,27 @@ SHELLUSERS=`echo $SHELLUSERS | sed 's@[[:space:]]@,@g'`
 
 echo -e "$2, $NUMOFUSER users, they are: \n$SHELLUSERS"
 ```
+<a name='random'></a>
+## 随机数
 
+写一个脚本，利用RANDOM生成10个随机数，并找出其中的最大值，和最小值；
+```
+#!/bin/bash
+#
+declare -i MAX=0
+declare -i MIN=0
+
+for I in {1..10}; do
+  MYRAND=$RANDOM
+  [ $I -eq 1 ] && MIN=$MYRAND
+  if [ $I -le 9 ]; then
+    echo -n "$MYRAND,"
+  else
+    echo "$MYRAND"
+  fi
+  [ $MYRAND -gt $MAX ] && MAX=$MYRAND
+  [ $MYRAND -lt $MIN ] && MIN=$MYRAND
+done
+
+echo $MAX, $MIN
+```

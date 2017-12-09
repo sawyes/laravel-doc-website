@@ -1,5 +1,6 @@
 - 前言
     - [鸡汤](/docs/{{version}}/installation)
+    - [艺术命令行](/docs/{{version}}/jlevythe-art-of-command-line)
 - 基础命令
     - [shell](/docs/{{version}}/shell)
     - [shell例子](/docs/{{version}}/shell-example)

@@ -163,6 +163,9 @@ cp -a /etc /backup/etc-2013-02-28
 
 // 复制文件夹下的内容到另一个文件夹下, 如初始化用户
 cp -r /etc/skel/. /home/user1
+// 忘了吧,当复制对象下存在目录的时候可以用* 代替.,否则可能报错, 建议用"."复制即可
+cp -r /etc/* /home/user1
+
 </pre>
 <h6>touch创建文件</h6>
 <pre class="prettyprint lang-php">
@@ -1373,6 +1376,459 @@ lastlog: 显示每一个用户最近一次的成功登录信息；
 随机数生成器：
 /dev/random:
 /dev/urandom:
+</pre>
+</section>
+<section class="cmd-description grid-item">
+<h4>
+    <a name="MBR" href="#MBR">MBR</a>
+</h4>
+<h6></h6>
+<pre class="prettyprint lang-php">
+Master Boot Record主引导记录
+共512Byte
+    446Byte BootLoader  程序
+    64Byte 每16Byte标识一个主分区, 每块硬盘只能有4个分区
+    2Byte  Magic Number 标记MBR是否有效
+</pre>
+</section>
+
+<section class="cmd-description grid-item">
+    <h4>
+        <a name="ln" href="#ln">ln</a>
+    </h4>
+<pre class="prettyprint lang-php">
+ln link 链接
+
+ln [-s -v] SRC DEST
+
+硬链接：
+1、只能对文件创建，不能应用于目录；
+2、不能跨文件系统；
+3、创建硬链接会增加文件被链接的次数；
+	
+符号链接：
+1、可应用于目录；
+2、可以跨文件系统；
+3、不会增加被链接文件的链接次数；
+4、其大小为指定的路径所包含的字符个数；
+    
+ln hardlink dsthardlink
+ln -s softlink dstsoftlink
+
+ls -il 用inode去观察软硬链接
+硬链接, inode值相同
+软链接, 只是路径指向, 文件大小为路径字符串大小
+</pre>
+</section>
+<section class="cmd-description grid-item">
+<h4>
+    <a name="磁盘管理" href="#磁盘管理">*磁盘管理</a>
+</h4>
+<h6>du</h6>
+<pre class="prettyprint lang-php">
+递归统计目录大小
+Summarize disk usage of the set of FILEs, recursively for directories.
+-s
+-h	
+
+du -h /etc 统计etc目录下每个文件的大小
+du -sh /etc 统计/etc目录的大小
+
+du -ah /etc 统计结果显示不仅需要显示目录, 也得包含文件的大小
+</pre>
+<h6>df</h6>
+<pre>
+df - report file system disk space usage
+显示磁盘分区情况
+-i inode 使用情况
+-h 单位换算
+-P 美化结果显示, 过长的结果不让换行
+
+df 查看磁盘块使用情况, df -h 转换块单位为人类可识别单位(M,G)
+df -i 查看磁盘inodes使用情况
+
+vagrant@homestead:/etc$ df -P -i
+Filesystem                    Inodes  IUsed   IFree IUse% Mounted on
+udev                          252276    423  251853    1% /dev
+</pre>
+<h6>设备文件</h6>
+<pre>
+b: 按块为单位，随机访问的设备；
+c：按字符为单位，线性设备；
+
+注意, 设备文件中, 逗号前面的是主设备号, 后面的是次设备号
+主设备号（major number）:标识设备类型
+次设备号（minor number）:表示同一种类型中不同设备
+vagrant@homestead:/etc$ ll /dev/ | grep sd
+brw-rw----  1 root    disk      8,   0 Dec 10 14:22 sda
+brw-rw----  1 root    disk      8,   1 Dec 10 14:22 sda1
+brw-rw----  1 root    disk      8,   2 Dec 10 14:22 sda2
+brw-rw----  1 root    disk      8,   5 Dec 10 14:22 sda5
+
+b 表示块设备
+
+硬盘设备的设备文件名：
+IDE, ATA：hd
+SATA：sd
+SCSI: sd
+USB: sd
+    a,b,c,...来区别同一种类型下的不同设备
+    
+IDE: 
+	第一个IDE口：主、从
+		/dev/hda, /dev/hdb
+	第二个IDE口：主、从
+        /dev/hdc, /dev/hdd
+
+固定的hd硬盘
+hda: 
+	hda1: 第一个主分区
+	hda2: 
+	hda3:
+	hda4:
+    hda5: 第一个逻辑分区
+            
+sd是无序的, 看接口, 看系统内核识别顺序
+
+</pre>
+<h6>mknod</h6>
+<pre>
+创建块或字符设备
+mknod [OPTION]... NAME TYPE [MAJOR MINOR]
+    -m MODE 权限
+
+// 创建一个字符设备mydev, 主设备号66, 次设备号0
+mknod mydev c 66 0
+mknod -m 640 mydev2 66 1
+
+// 查看当前tty链接
+tty
+echo "hello world" >> /dev/pts/0
+// 报废一个系统?刺激
+echo "hello world" >> /dev/sda
+
+</pre>
+</section>
+<section class="cmd-description grid-item">
+    <h4>
+        <a name="fdisk" href="#fdisk">fdisk</a>
+    </h4>
+<pre class="prettyprint lang-php">
+查看当前系统识别了几块硬盘：
+fdisk -l [/dev/to/some_device_file]
+
+
+fdisk /dev/sda
+	p: 显示当前硬件的分区，包括没保存的改动
+	n: 创建新分区
+		e: 扩展分区
+		p: 主分区
+	d: 删除一个分区
+	w: 保存退出
+	q: 不保存退出
+	t: 修改分区类型
+		L: 
+    l: 显示所支持的所有类型
+    
+当前系统内核分区信息, fdisk分区后, 内核还没有加载
+
+partprobe 重读内核分区表红帽5以前, 一般用这个
+partx 6
+cat /proc/partitions
+</pre>
+<h6>分区操作</h6>
+<pre>
+// 1. 查看自身分区情况
+fdisk -l
+Device     Boot   Start      End  Sectors  Size Id Type
+/dev/sda1  *       2048   999423   997376  487M 83 Linux
+/dev/sda2       1001470 83884031 82882562 39.5G  5 Extended
+/dev/sda5       1001472 83884031 82882560 39.5G 8e Linux LVM
+// 2. 操作分区
+fdisk /dev/sda
+// 3. 进入了命令行模式
+p #打印显示当前分区情况
+Disk /dev/sda: 40 GiB, 42949672960 bytes, 83886080 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x1d4bba8c
+
+Device     Boot   Start      End  Sectors  Size Id Type
+/dev/sda1  *       2048   999423   997376  487M 83 Linux
+/dev/sda2       1001470 83884031 82882562 39.5G  5 Extended
+/dev/sda5       1001472 83884031 82882560 39.5G 8e Linux LVM
+
+// 其中id为分区类型, 输入l, 列出id 和分区类型的对应关系
+...
+82 Linux swap / So
+83 Linux
+...
+
+// 新建分区
+n
+|--p 主分区(最多4个,第四个一般设置为扩展, 可以继续设置分区)
+|--e 扩展分区
+
+p 创建一个主分区
+|--Partition number 选择分区编号(一般为1-4), 默认可以直接按回车
+   |--First sector 开始扇区编号
+   |--Last sector 结束扇区编号   输入可以"+10G",表示分区大小
+
+w 保存退出
+q 退出,放弃操作
+
+// 4.更新分区
+cat /proc/partitions
+// RH5通知内核更新分区
+partprobe  
+partprobe /dev/sda
+// RH6通知内核更新分区
+partx -u /dev/sda
+
+</pre>
+<h6>mkfs</h6>
+<pre>
+make file system
+
+// 查看当前内核所支持的文件系统类型, 然后确定-t选项, 不支持的文件系统类型是因为内核不支持, 内核编译的时候去掉了
+// vfat == fat32
+cat /proc/filesystem
+
+// 格式化分区文件系统, 重新创建文件系统会损坏原有文件,  这个命令也是意味格式化
+mkfs -t ext2 /dev/sda5
+等同于
+mkfs.ext3 /dev/sdb5
+
+
+创建成功后观察提示信息
+...
+Block size=4096 (log=2)
+...
+655360 inodes, 2621440 blocks
+...
+131072 blocks (5.00%) reserved for the super user
+...
+80 block groups
+32768 blocks per group...
+8192 inodes per group
+Superblock backups stored on blocks: 
+    32768, 98304, 163840, 229376,...
+...
+Creating journal (32768 blocks): done
+...
+
+32768 blocks / 8192 inodes = 4, 每4个block一个inode, 16K
+
+inode: 记录与自身相关的block磁盘信息,快速定位, 属组,属主,inode编号,时间戳, 文件大小
+
+Filesystem label 文件系统的卷标(C,D)
+
+block groups 块组
+
+journal: ext3 后的日志功能,数据写入inode信息,先保存在log块, 然后在转移, 以达到修复硬盘快速定位错误数据
+
+预留5%的空间给予系统管理员在将来磁盘空间出问题的时候维护
+
+Superblock 拥有多个备份, 记录全局信息,如多少块组, 每个块组大小, 块大小, Inode空闲信息等
+
+超级块组的信息显得至关重要, 因而备份是十分必要, 每一个块组都有自己的块位图,inode块图
+
+// 磁盘被划分了N个块组组成
+BootBlock - block group 0 -Block group 1 ....
+// 一个块组组成
+Superblock-GDT(group descript 快组描述)-Block Bitmap-Inode Bitmap-Inode Table-Data Block
+
+// sdb6使用fat32文件系统,
+mkfs.vfat /dev/sdb6
+</pre>
+
+<h6>mke2fs(同样适用与mkfs系列)</h6>
+<pre>
+选项
+-j 创建ext3文件系统
+-b 指定Block Size大小, 默认4096, 这个参数基本不用动, 提升了系统提示太大
+    mke2fs -b 2048 /dev/sdb5    
+-L volume-label 卷标, File System Label
+    mke2fs -L WEB_DATA /dev/sdb5
+-m 预留给超级用户的块百分比,默认为5个百分比, 进输入数字即可, 这个命令还是很有意义的, 尤其大硬盘
+     mke2fs -m 3 /dev/sdb5
+-i 指定多少个字节大小就产生一个inode, 块的倍数
+     mke2fs -i 4096 /dev/sdb5
+-N 手动指定inode个数,不按照块字节比例创建了
+-F 强制
+-E 用户指定额外文件系统属性
+
+提示内容和mkfs.ext系列相同,不再详述
+
+mk ->tab查看mk相关命令
+
+// ext2文件系统, 等同mkfs.ext2 /dev/sdb5
+mke2fs /dev/sdb5
+// ext3
+// 多一行提示Creating journal (32768 blocks): done
+mke2fs -j /dev/sdb5
+
+// 为分区sdb6, 创建一个ext4文件系统预留3%空间给系统管理员维护硬盘,卷标为TEST_DATA
+mkfs.ext4 -m 3 -L TEST_DATA /dev/sdb6
+
+</pre>
+
+<h6>blkid</h6>
+<pre>
+查看block属性, 磁盘属性
+
+[root@localhost centos]# blkid /dev/sdb6
+/dev/sdb6: LABEL="TEST_DATA" UUID="24713fc9-9d74-4aca-aac6-62cce331cf3b" TYPE="ext4" 
+[root@localhost centos]#
+</pre>
+<h6>e2label</h6>
+<pre>
+// 查看卷标
+e2label /dev/sdb5
+// 设置卷标
+e2label /dev/sdb5 WEB_DATA
+</pre>
+<h6>findfs</h6>
+<pre>
+findfs [options] {LABEL,UUID,PARTUUID,PARTLABEL}=value
+findfs LABEL=WEB_DATA
+</pre>
+<h6>tune2fs</h6>
+<pre>
+查看超级块信息
+无损升级 ext2->ext3等属性转换, 文件不损坏, 有数据也没问题,其他文件系统不可以
+-j 设置ext3格式
+-L 设置卷标
+-m 调整预留百分比
+-r 预留块数量,而不是百分比
+-o 设定默认规则
+   acl 文件访问控制
+-c Maximum mount count 指定挂在次数达到设定值后进行自检, 0或-1关闭此功能
+-i Mount count 没挂载多少天后进行自检,0或-1关闭此功能, 结合-c使用
+-l 显示超级块中的信息, 很有用的选项
+
+// 为分区/dev/sdb5创建一个ext2文件系统
+[root@localhost centos]# mke2fs -L WEB_DATA /dev/sdb5
+// 无损变更为ext3
+[root@localhost centos]# tune2fs -j /dev/sdb5 
+tune2fs 1.42.9 (28-Dec-2013)
+Creating journal inode: done
+// 查看结果
+[root@localhost centos]# blkid /dev/sdb5
+/dev/sdb5: LABEL="WEB_DATA" UUID="4ddb3cab-1cd8-4ea4-ac23-37a57636893d" SEC_TYPE="ext2" TYPE="ext3"
+
+// 卷标
+tune2fs -L WWW /dev/sdb
+
+tune2fs -m 1 /dev/sdb5
+</pre>
+<h6>dumpe2fs</h6>
+<pre>
+显示超级块中的信息
+dumpe2fs /dev/sdb5
+dumpe2fs -h /dev/sdb5 只显示超级块信息
+
+详细的dumpe2fs 包含了每个分组的信息, 从信息的free block中可以清晰地看到文件碎片的表现形式, 不连续的block空间
+</pre>
+
+<h6>fsck</h6>
+<pre>
+检查并且修复文件系统
+-t FSTYPE: 指定文件系统类型, ext4
+-a 自动修复
+</pre>
+
+<h6>e2fsck</h6>
+<pre>
+修复ext2,ext3文件系统了些
+-f 强制
+-p 自动修复
+
+e2fsck -f /dev/sdb5
+e2fsck -f -p /dev/sdb5
+
+</pre>
+
+<h6>mount</h6>
+<pre>
+-a 挂载/etc/fstab中的所有文件系统
+-n 默认情况下, 挂载一个设备都保存信息在/etc/mtab, -n选项表示挂载时不写入这个文件
+-t FSTYPE, 指定正在挂载的文件系统类型,默认可以不指定, 程序调用blkid自动获取
+-r 只读挂载,光盘常用
+-w 读写挂载
+-o 指定额外的挂载选项, 详情看man, 默认异步(async),actime等
+    ro
+    rw
+    remount
+    mount -o remount,ro,noexec,loop /dev/sdb5 /mnt/test
+--bind
+--move
+
+挂载文件系统
+mkdir /mnt/test
+mount /dev/sdb5 /mnt/test
+
+mount 不带参数显示当前已经挂载的设备, 和挂载点(实际上显示/etc/mtab文件信息)
+
+挂载iso
+mount -o loop /home/test.iso /media
+</pre>
+
+<h6>umount</h6>
+<pre>
+1. 设备不在占用
+2. 事先存在
+3. 目录中的原有文件暂时隐藏
+
+mount /dev/sdb5
+或者
+mount /mnt/test
+</pre>
+</section>
+<section class="cmd-description grid-item">
+<h4>
+    <a name="free" href="#free">free</a>
+</h4>
+<h6></h6>
+<pre class="prettyprint lang-php">
+查看内存使用情况
+
+free -m
+              total        used        free      shared  buff/cache   available
+Mem:           2000         297        1019          70         683        1426
+-/+ buffers/cache:          201        300
+Swap:          1023           0        1023
+
+真正使用空间为-200, 自由空间为+300, 因为buff.cache是可以释放的
+
+</pre>
+</section>
+<section class="cmd-description grid-item">
+<h4>
+    <a name="dd" href="#dd">dd</a>
+</h4>
+<h6></h6>
+<pre class="prettyprint lang-php">
+if in file
+of out file
+dd if=/dev/zero of=/swapfile bs=1M count=1
+</pre>
+</section>
+<section class="cmd-description grid-item">
+<h4>
+    <a name="fuser" href="#fuser">fuser</a>
+</h4>
+<h6></h6>
+<pre class="prettyprint lang-php">
+fuser: 验正进程正在使用的文件或套接字文件
+	-v: 查看某文件上正在运行的进程
+    -km: 终止访问某文件挂载点的所有进程
+
+fuser -v /home 查看home目录下的所有进程
+
+fuser -km /mnt/cdrom 结束/mnt/cdrom的所有程序
 </pre>
 </section>
                 </div>

@@ -115,8 +115,19 @@ installation.md
 
 
 ```
-* * * * * php /path/to/project/artisan docs:clear-cache >> /dev/null 2>&1
-* * * * * php /path/to/project/artisan cache:clear >> /dev/null 2>&1
+* * * * * php /home/vagrant/Code/dt/artisan docs:clear-cache >> /dev/null 2>&1
+* * * * * php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 5; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 10; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 15; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 20; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 25; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 30; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 35; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 40; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 45; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 50; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
+* * * * * sleep 55; php /home/vagrant/Code/dt/artisan cache:clear >> /dev/null 2>&1
 ```
 
 

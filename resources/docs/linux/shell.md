@@ -342,6 +342,7 @@ a.sh: line 3: `if [ $# -lt 2 ]; then;'
 <a name="condition-control"></a>
 ## 控制结构
 
+### if
 ```
 if 判断条件
     statement1
@@ -356,6 +357,78 @@ else
     statement3
     statement4
     ...
+fi
+```
+
+### case
+
+case语句：选择结构
+
+> shift 含义删除第一个参数, 因而第二个参数变为第一个, 常常和case结合使用(shift 2删除两个)
+
+```
+case SWITCH in 
+value1)
+  statement
+  ...
+  ;;
+value2)
+  statement
+  ...
+  ;;
+*)
+  statement
+  ...
+  ;;
+esac
+```
+
+练习:showlogged.sh -v -c -h|--help
+
+其中，`-h`选项只能单独使用，用于显示帮助信息；`-c`选项时，显示当前系统上登录的所有用户数；如果同时使用了`-v`选项，则既显示同时登录的用户数，又显示登录的用户的相关信息；如
+```
+Logged users: 4. 
+
+They are:
+root     tty2         Feb 18 02:41
+root     pts/1        Mar  8 08:36 (172.16.100.177)
+root     pts/5        Mar  8 07:56 (172.16.100.177)
+hadoop   pts/6        Mar  8 09:16 (172.16.100.177)
+```
+
+例子
+
+```
+#!/bin/bash
+#
+declare -i SHOWNUM=0
+declare -i SHOWUSERS=0
+
+for I in `seq 1 $#`; do
+  if [ $# -gt 0 ]; then
+    case $1 in
+    -h|--help)
+      echo "Usage: `basename $0` -h|--help -c|--count -v|--verbose"
+      exit 0 ;;
+    -v|--verbose)
+      let SHOWUSERS=1
+      shift ;;
+    -c|--count)
+      let SHOWNUM=1
+      shift ;;
+    *)
+      echo "Usage: `basename $0` -h|--help -c|--count -v|--verbose"
+      exit 8 ;;
+    esac
+  fi
+done
+
+if [ $SHOWNUM -eq 1 ]; then
+  echo "Logged users: `who | wc -l`."
+  if [ $SHOWUSERS -eq 1 ]; then
+    echo "They are:"
+    who
+  fi
 fi
 ```
 

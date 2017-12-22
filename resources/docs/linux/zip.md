@@ -62,6 +62,8 @@ zip: 既归档又压缩的工具
     tar jvcf test.tar.gz test*.txt
     # x 展开压缩文件
     tar vxf test.tar.gz
+    # -C 解压文件到指定的目录
+    tar -xf test.tar.gz -C ~/.
 
 选项
 

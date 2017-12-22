@@ -1136,3 +1136,161 @@ lvremove /dev/mapper/myvg-mylv
 Do you really want to remove active logical volume myvg/mylv? [y/n]: y
   Logical volume "mylv" successfully removed
 ```
+
+#### 扩展
+
+lvextend, 扩展LV卷大小, 物理边界
+
+    # 扩展到20G
+    lvextend -L 20G /dev/myvg/mylv
+    # 增加3G
+    lvextend -L +3G /dev/myvg/mylv
+
+resize2fs(ext2, ext4), 逻辑边界
+
+    resize2fs /dev/myvg/mylv 5G
+    # 通常地和-p结合, 表示物理边界有多大空间, 能用多少就用多少
+    resize2fs -p /dev/myvg/mylv
+
+创建一个2G大小的lv, 文件系统ext3, 并且开机可自动挂载到/users目录, 扩展LV大小到3G
+
+```
+[root@localhost centos]# lvcreate -L 2G -n testlv myvg
+
+[root@localhost centos]# lvs
+  LV     VG   Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  testlv myvg -wi-a----- 2.00g 
+
+[root@localhost centos]# mkdir /users
+[root@localhost centos]# tail -n 1 /etc/fstab 
+/dev/myvg/testlv			/users			ext3	defaults,acl	0 0
+[root@localhost centos]# mke2fs -j /dev/myvg/testlv
+# 重新读取/etc/fstab, 立刻挂载分区
+[root@localhost centos]# mount -a
+
+扩展
+ 未扩展前
+[root@localhost /]# df -lh | grep testlv
+/dev/mapper/myvg-testlv  2.0G  3.1M  1.9G   1% /users
+
+ 扩展物理边界
+[root@localhost /]# lvextend -L 3G /dev/myvg/testlv
+  Size of logical volume myvg/testlv changed from 2.00 GiB (512 extents) to 3.00 GiB (768 extents).
+  Logical volume myvg/testlv successfully resized.
+ 查看lvs大小已经变更为3G
+[root@localhost /]# lvs
+  LV     VG   Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  testlv myvg -wi-ao---- 3.00g 
+ 分区依然还是2G(逻辑边界)
+[root@localhost /]# df -h | grep testlv
+/dev/mapper/myvg-testlv  2.0G  3.1M  1.9G   1% /users
+
+ 开始扩展逻辑边界
+[root@localhost /]# resize2fs -p /dev/myvg/testlv 
+resize2fs 1.42.9 (28-Dec-2013)
+Filesystem at /dev/myvg/testlv is mounted on /users; on-line resizing required
+old_desc_blocks = 1, new_desc_blocks = 1
+The filesystem on /dev/myvg/testlv is now 786432 blocks long.
+ 再次查看, 逻辑边界已经扩展到了3G
+[root@localhost /]# df -h | grep testlv
+/dev/mapper/myvg-testlv  2.9G  3.1M  2.8G   1% /users
+```
+
+> 分为两个步骤, 既要扩展LV(物理边界), 也要扩展文件系统(逻辑边界), resize2fs只对ext文件系统作用
+
+
+#### 缩减
+
+缩减过程和扩展刚号相反, 风险非常高
+
+注意：
+
+* 不能在线缩减，得先卸载；
+* 确保缩减后的空间大小依然能存储原有的所有数据；
+* 在缩减之前应该先强行检查文件，以确保文件系统处于一至性状态；
+
+    resize2fs /dev/myvg/testlv 2G
+    lvreduce -L 2G /dev/myvg/testlv
+
+确认空间缩减后不能小于2.1M, 是否挂载等
+
+    [root@localhost /]# df -h | grep testlv
+    /dev/mapper/myvg-testlv  2.9G  3.1M  2.8G   1% /users
+
+确保卸载成功
+
+    [root@localhost /]# umount /users
+    [root@localhost /]# mount | grep testlv
+
+强行文件系统检查
+
+    [root@localhost centos]# e2fsck -f /dev/myvg/testlv 
+    e2fsck 1.42.9 (28-Dec-2013)
+    第一步: 检查inode,块,和大小
+    第二步: 检查目录结构
+    第3步: 检查目录连接性
+    Pass 4: Checking reference counts
+    第5步: 检查簇概要信息
+    /dev/myvg/testlv: 12/196608 files (0.0% non-contiguous), 29518/786432 blocks
+
+缩减逻辑边界
+
+    [root@localhost centos]# resize2fs /dev/myvg/testlv 2G
+    resize2fs 1.42.9 (28-Dec-2013)
+    Resizing the filesystem on /dev/myvg/testlv to 524288 (4k) blocks.
+    The filesystem on /dev/myvg/testlv is now 524288 blocks long.
+
+缩减物理边界,系统有提示可能会有风险
+
+    [root@localhost centos]# lvreduce -L 2G /dev/myvg/testlv 
+    WARNING: Reducing active logical volume to 2.00 GiB.
+    THIS MAY DESTROY YOUR DATA (filesystem etc.)
+    Do you really want to reduce myvg/testlv? [y/n]: y
+    Size of logical volume myvg/testlv changed from 3.00 GiB (768 extents) to 2.00 GiB (512 extents).
+    Logical volume myvg/testlv successfully resized.
+
+重新挂载, 并且可以看见文件无损坏
+
+    [root@localhost centos]# mount -a
+    [root@localhost centos]# df -lh | grep testlv
+    /dev/mapper/myvg-testlv  2.0G  3.1M  1.9G    1% /users
+
+#### 快照卷
+
+* 生命周期为整个数据时长；在这段时长内，数据的增长量不能超出快照卷大小,否则会自我销毁
+* 快照卷应该是只读的；
+* 跟原卷在同一卷组内；
+
+lvcreate
+
+    -s 快照卷
+    -p 权限 r|w
+
+    lvcreate -L 2G -n SLV_NAME -p r /dev/myvg/testlv
+
+为testlv创建快照卷1G的快照卷(一般选择为一样大小, 这里仅为实验)
+```
+[root@localhost users]# lvcreate -L 1G -n lv_snap -s -p r /dev/myvg/testlv
+  Using default stripesize 64.00 KiB.
+  Logical volume "lv_snap" created.
+
+[root@localhost users]# lvs
+  LV      VG   Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
+  lv_snap myvg sri-a-s--- 1.00g      testlv 0.00                                   
+  testlv  myvg owi-aos--- 2.00g 
+```
+
+> 应该挂载快照卷的大小, 权限, 对应的快照源LV
+
+挂载快照卷, 发现, 新建的快照卷上已经有数据内容, 默认为只读挂载
+
+    [root@localhost users]# mkdir /lv_snap
+    [root@localhost users]# mount /dev/myvg/lv_snap /lv_snap/
+    mount: /dev/mapper/myvg-lv_snap 写保护，将以只读方式挂载
+    [root@localhost users]# cd /lv_snap/
+    [root@localhost lv_snap]# ll
+    总用量 20
+    -rw-r--r--. 1 root root   511 12月 22 06:34 inittab
+    drwx------. 2 root root 16384 12月 22 06:29 lost+found
+
+现在对源LV卷的inittab文件进行编辑修改, 发现快照卷的内容并没有发生变更, 因而目前这样使用还不是完全备份+增量备份机制

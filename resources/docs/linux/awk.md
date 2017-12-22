@@ -21,18 +21,18 @@ awk是一个强大的文本分析工具，相对于grep的查找，[sed的编辑
 ## 使用
 
 尽管操作可能会很复杂，但语法总是这样
-
-    awk '{pattern + action}' {filenames}
-    如：awk -F':' '/root/{print $1}' /etc/passwd
-
+```
+awk '{pattern + action}' {filenames}
+如：awk -F':' '/root/{print $1}' /etc/passwd
+```
 
 其中 pattern 表示 AWK 在数据中查找的内容,花括号（{}）不需要在程序中始终出现, -F 为操作项分隔域
 
 添加行首和行尾
-
-    #如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以逗号分割,而且在所有行添加列名name,shell,在最后一行添加"blue,/bin/nosh"。
-    cat /etc/passwd |awk  -F ':'  'BEGIN {print "name,shell"}  {print $1","$7} END {print "blue,/bin/nosh"}'
-
+```
+#如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以逗号分割,而且在所有行添加列名name,shell,在最后一行添加"blue,/bin/nosh"。
+cat /etc/passwd |awk  -F ':'  'BEGIN {print "name,shell"}  {print $1","$7} END {print "blue,/bin/nosh"}'
+```
 BEGIN为脚本开始前动作, END 为脚本结束后动作
 
 <a name='use-way'></a>
@@ -41,6 +41,7 @@ BEGIN为脚本开始前动作, END 为脚本结束后动作
 有三种方式调用awk
 
 * 命令行方式 
+
 ```
 awk [-F  field-separator]  'commands'  input-file(s)
 

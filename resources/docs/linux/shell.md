@@ -11,9 +11,11 @@
     - [位置变量](#position-var)
     - [特殊变量](#special-var)
 - [代码执行](#code-run)
+- [颜色输出](#shell-color)
 - [变量操作](#var)
     - [查看](#var-index)
     - [变量声明](#var-declare)
+    - [交互式赋值](#var-read)
     - [运算](#var-add)
     - [删除](#var-del)
 - [条件判断](#condition)
@@ -23,6 +25,8 @@
     - [整数比较](#condition-num-oprator)
     - [逻辑关系](#condition-logic-relation)
 - [循环控制](#loop-control)
+    - [for](#for)
+    - [while](#while)
 
 > 不要忘记Linux创建的文件没有执行权限，shell也不例外，chmod u+x filename
 
@@ -199,6 +203,28 @@ export
 declare -i SUM=0
 ```
 
+<a name='var-read'></a>
+### 交互式赋值
+
+```
+read NAME    ######屏幕要求输入变量
+echo $name
+
+# 交互输入多个变量值, 空格隔开
+read -p "input tow params" A B
+echo "$A $B"
+
+# 超时判断
+超时5秒
+read -t 5 -p "input tow params" A B
+#如果为空则赋予默认值
+[ -z $A ] && A=100
+[ -z $A ] && b=100
+
+```
+
+
+
 <a name='var-add'></a>
 ### 运算
 
@@ -339,6 +365,38 @@ a.sh: line 3: syntax error near unexpected token `;'
 a.sh: line 3: `if [ $# -lt 2 ]; then;'
 
 ```
+
+<a name="shell-color"></a>
+## 颜色输出
+
+echo -e 可以转义字符, `echo -e "\ttest"`可以识别输出制表符,利用这点做颜色输出控制
+
+    # 字体红色, 单位数表示**加粗**, 双位默认为颜色
+    echo -e "\033[31mHello world\033[0m"
+    # 背景绿色, 字体红色
+    echo -e "\033[42;31mHello world\033[0m"
+    # 加粗, 背景绿色, 字体红色
+    echo -e "\033[1;42;31mHello world\033[0m"
+    # 仅加粗
+    echo -e "\033[1mhello\033[0m"
+
+### Control
+\033 表示`control`键, 成对出现的闭合标记,第一个`m`表示颜色字体等设定结束, 第二个`m`表示`control`结束
+
+### 双位数控制
+
+第一位数3为前景色, 4为背景色, 第二位数为7种颜色类型
+
+[31m表示颜色, [31m,[32m...[37m 7种前景色,`红绿黄蓝紫青灰`
+
+### 单位数
+
+* 1 表示字体加粗
+* 4 下划线
+* 5 快速闪烁
+* 6 慢速闪烁(终端基本每效果)
+* 7 前景背景色互换
+
 <a name="condition-control"></a>
 ## 控制结构
 
@@ -472,6 +530,7 @@ fi
 <a name="loo-control"></a>
 ## 循环控制
 
+<a name='for'></a>
 ### for
 
 命令替换seq, 或者展开{1,4}, {1..100}这样的表达式
@@ -498,8 +557,15 @@ fi
     done
     echo $SUM
     
-
-
-
-
 > 算数表达式let SUM=$SUM+$i等同于let SUM=$[$SUM+$i], 等同于let SUM+=$i
+
+<a name='while'></a>
+### while
+
+while循环：适用于循环次数未知的场景，要有退出条件
+语法：
+
+	while CONDITION; do
+	  statement
+	  ...
+	done

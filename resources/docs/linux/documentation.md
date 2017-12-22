@@ -10,3 +10,4 @@
     - [文件查找](/docs/{{version}}/find)
     - [用户管理](/docs/{{version}}/user)
     - [磁盘管理](/docs/{{version}}/disk_manager)
+    - [解压缩](/docs/{{version}}/zip)

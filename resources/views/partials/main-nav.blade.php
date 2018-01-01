@@ -1,5 +1,18 @@
-<li class="nav-docs"><a href="/docs">文档</a></li>
-<li class="nav-laracasts"><a href="/index_zh-CN.html" target="_blank">速查表</a></li>
+<li class="dropdown community-dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">文档 <span class="caret"></span></a>
+	<ul class="dropdown-menu" role="menu">
+		<li><a href="/docs/5.4" target="_self">laravel 5.4</a></li>
+		<li><a href="/docs/linux" target="_self">linux</a></li>
+	</ul>
+</li>
+<li class="dropdown community-dropdown">
+	<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">速查表 <span class="caret"></span></a>
+	<ul class="dropdown-menu" role="menu">
+
+		<li><a href="/index_zh-CN.html" target="_blank">laravel</a></li>
+		<li><a href="/index_zh-CN.html" target="_blank">linux</a></li>
+	</ul>
+</li>
 <li class="nav-laracasts"><a href="/vuefe.cn/v2/guide/index.html" target="_blank">VUE</a></li>
 <li class="nav-laravel-news"><a href="https://laravel-news.com">News</a></li>
 <li class="nav-partners"><a href="/partners">Partners</a></li>

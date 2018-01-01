@@ -1294,3 +1294,8 @@ lvcreate
     drwx------. 2 root root 16384 12月 22 06:29 lost+found
 
 现在对源LV卷的inittab文件进行编辑修改, 发现快照卷的内容并没有发生变更, 因而目前这样使用还不是完全备份+增量备份机制
+
+移除快照卷
+
+    umount /lv_snap
+    lvremove /dev/myvg/lv_snap

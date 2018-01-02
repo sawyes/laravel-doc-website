@@ -10,7 +10,7 @@
 	<ul class="dropdown-menu" role="menu">
 
 		<li><a href="/index_zh-CN.html" target="_blank">laravel</a></li>
-		<li><a href="/index_zh-CN.html" target="_blank">linux</a></li>
+		<li><a href="/linux.html" target="_blank">linux</a></li>
 	</ul>
 </li>
 <li class="nav-laracasts"><a href="/vuefe.cn/v2/guide/index.html" target="_blank">VUE</a></li>

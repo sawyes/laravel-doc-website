@@ -9,9 +9,17 @@
     - [vim](/docs/{{version}}/vim)
     - [文件查找](/docs/{{version}}/find)
     - [解压缩](/docs/{{version}}/zip)
+    - [yum](/docs/{{version}}/yum)
 - 服务管理
     - [网络管理](/docs/{{version}}/net)
     - [用户管理](/docs/{{version}}/user)
     - [磁盘管理](/docs/{{version}}/disk_manager)
 - ELK
     - [elasticsearch](/docs/{{version}}/elasticsearch)
+    - [kibana](/docs/{{version}}/kibana)
+    - [logstash](/docs/{{version}}/logstash)
+    - [dsl](/docs/{{version}}/dsl)
+- Hadoop
+    - [hadoop](/docs/{{version}}/hadoop)
+- Vargrant
+    - [vagrant](/docs/{{version}}/vagrant)

@@ -132,7 +132,7 @@ else
 fi
 
 ```
-<a name='bash-user'>
+<a name='bash-user'></a>
 ## 获取具有指定bash的用户
 
 ${变量}

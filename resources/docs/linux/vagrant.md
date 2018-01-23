@@ -1,8 +1,8 @@
-# vgrant
+# vagrant
 
 - [简介](#intro)
 - [安装](#install)
-- [安装](#uninstall)
+- [卸载](#uninstall)
 
 <a name='intro'></a>
 ## 简介
@@ -69,6 +69,8 @@
 * versions->version 为显示的版本号
 * versions->providers->name 包含了虚拟机驱动, 可以为vmware, virtualbox
 * versions->providers->url 为导入的box路径
+
+<a name='uninstall'></a>
 ## 卸载
 
 ### 方法一(推荐)
@@ -78,7 +80,9 @@
 1. 关闭虚拟机软件
 2. vagrant box 启动目录(vagrant init folder)
 
-      vagrant destroy -f
+```
+vagrant destroy -f
+```
 
 ### 方法二
 

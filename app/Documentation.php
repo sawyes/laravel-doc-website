@@ -110,6 +110,7 @@ class Documentation
             'master' => 'Master',
             '5.4' => '5.4',
             'linux' => 'linux',
+            'python' => 'python',
             'psr' => 'psr',
             'ES6' => 'ES6',
             '5.3' => '5.3',

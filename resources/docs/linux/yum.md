@@ -4,6 +4,8 @@
 - [自建yum仓库](#custom-yum-respositroy)
 - [epel仓库](#epel-respositroy)
 
+[USTC国内镜像源](http://mirrors.ustc.edu.cn/)
+
 <a name='cache'></a>
 ## 缓存
 

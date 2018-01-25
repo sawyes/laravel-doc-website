@@ -80,6 +80,8 @@ pip install --upgrade pip
     
 如果出现报错, 请到[兼容window编译的python](https://www.lfd.uci.edu/~gohlke/pythonlibs/#twisted)查找对应版本的安装包(`32/64`)
 
+    pip install /path/to/pywin32
+
     pip install /path/to/Twisted-17.9.0-cp36-cp36m-win_amd64.whl
 
 
@@ -112,6 +114,7 @@ http 源不安全`--trusted-host`添加信任参数即可
 
     [global]
     index-url = https://pypi.douban.com/simple
+
 
 
 

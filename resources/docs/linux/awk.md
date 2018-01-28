@@ -4,12 +4,14 @@
 - [使用](#usage)
     - [调用方式](#use-way)
 - [入门](#first)
+    - [正则匹配](#reg)
 - [内置变量](#awk-var)
 - [printf & print](#print)
 - [BEGIN & END](#begingend)
 - [AWK编程](#coding)
     - [if](#if)
     - [循环语句](#for)
+    - [split](#split)
 - [总结](#end)
 
 <a name="intor"></a>
@@ -68,7 +70,7 @@ awk -f awk-script-file input-file(s)
 <a name="first"></a>
 ## 入门
 
-如果只是显示/etc/passwd的账户
+如果只是显示`/etc/passwd`的账户, 应以`:`切割
 
     #cat /etc/passwd |awk  -F ':'  '{print $1}'  
     root
@@ -81,7 +83,7 @@ awk -f awk-script-file input-file(s)
 -F指定域分隔符为':'。
 
 
-如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以tab键分割
+如果只是显示/etc/passwd的账户和账户对应的shell,而账户与shell之间以tab键分割显示
 
     #cat /etc/passwd |awk  -F ':'  '{print $1"\t"$7}'
     root    /bin/bash
@@ -89,12 +91,22 @@ awk -f awk-script-file input-file(s)
     bin     /bin/sh
     sys     /bin/sh
 
+<a name='reg'></a>
+### 正则匹配
 
-搜索/etc/passwd有root关键字的所有行
+搜索/etc/passwd的root账户, 以root开头和结尾
 
-    #awk -F: '/root/' /etc/passwd
+    awk -F: '/^root\>/' /etc/passwd
     root:x:0:0:root:/root:/bin/bash
 
+
+`\>`表示单词的结尾, `\<`表示单词开始
+
+    netstat -antp | awk '/\<tcp\>/'
+
+以redis开头或者bash结束
+
+    awk '/^redis|bash$/' /etc/passwd
 
 <a name="awk-var"></a>
 ## 内置变量
@@ -143,7 +155,7 @@ awk有许多内置变量用来设置环境信息，这些变量可以被改变�
 
 count是自定义变量。之前的action{}里都是只有一个print,其实print只是一个语句，而action{}可以有多个语句，以;号隔开。
 
-
+<a name='if'></a>
 ### if
 
 统计某个文件夹下的文件占用的字节数,过滤4096大小的文件(一般都是文件夹):
@@ -151,6 +163,7 @@ count是自定义变量。之前的action{}里都是只有一个print,其实prin
     ls -l |awk 'BEGIN {size=0;print "[start]size is ", size} {if($5!=4096){size=size+$5;}} END{print "[end]size is ", size/1024/1024,"M"}' 
     [end]size is  8.22339 M
 
+<a name='for'></a>
 ### 循环语句
 
 awk中的循环语句同样借鉴于C语言，支持while、do/while、for、break、continue，这些关键字的语义和C语言中的语义完全相同。
@@ -167,6 +180,20 @@ awk中的循环语句同样借鉴于C语言，支持while、do/while、for、bre
     ......
 
  因为awk中数组的下标可以是数字和字母，数组的下标通常被称为关键字(key)。值和关键字都存储在内部的一张针对key/value应用hash的表格里。由于hash不是顺序存储，因此在显示数组内容时会发现，它们并不是按照你预料的顺序显示出来的。数组和变量一样，都是在使用时自动创建的，awk也同样会自动判断其存储的是数字还是字符串。一般而言，awk中的数组用来从记录中收集信息，可以用于计算总和、统计单词以及跟踪模板被匹配的次数等等。
+
+### split
+
+split 第一个参数为输入字段, 第二个参数为保存分割后的变量, 第三个参数为分割字符, 保存变量数组从1开始
+
+仅输出tcp链接,的每个ip地址
+
+    netstat -antp | awk '/\<tcp\>/{split($5, ip, ":");print ip[1]}'
+
+### 统计
+
+统计每个ip地址的tcp连接数
+
+    netstat -antp | awk '/\<tcp\>/ {split($5, ip, ":");count[ip[1]]++;} END{for(i in count) {printf("ip: %s count: %s\n",i, count[i])}}'
 
 <a name='end'></a>
 ## 总结

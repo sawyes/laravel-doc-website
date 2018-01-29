@@ -110,29 +110,31 @@ If you’re using `Anaconda` or `Miniconda`, you can install the package from th
                 yield response.follow(a, callback=self.parse)
 ```
 
-新闻网站实例, 获取最新动态新闻, 打开链接获取其内容
+新闻网站实例, 打开最新新闻模块, 跟踪新闻链接, 打开链接内容获取class为entry-title的h1内容(即新闻标题), 保存到text.json中
 ```
-   import scrapy
-   
-   class QuotesSpider(scrapy.Spider):
-       name = "quotes"
-       start_urls = [
-           'http://www.199it.com/newly',
-       ]
-   
-       def parse(self, response):
-           for a in response.xpath('//article/.//h2/a'):
-               yield response.follow(a, callback=self.parse_article)
-   
-       def parse_article(self, response):
-           def extract_with_css(query):
-               if response.css(query).extract_first() is not None:
-                   return response.css(query).extract_first().strip()
-   
-           yield {
-               'title': extract_with_css('h1.entry-title::text')
-           }
+import scrapy
+
+class QuotesSpider(scrapy.Spider):
+    name = "quotes"
+    start_urls = [
+        'http://www.199it.com/newly',
+    ]
+
+    def parse(self, response):
+        for a in response.xpath('//article/.//h2/a'):
+            yield response.follow(a, callback=self.parse_article)
+
+    def parse_article(self, response):
+        for title in response.xpath('//h1[@class="entry-title"]/text()').extract():
+            if title is not None:
+                yield {
+                    'title': title
+                }
+
+
 ``` 
+
+scrapy crawl quotes -o test.json
 
 <a name='setting-encoding'></a>
 ## 编码设置

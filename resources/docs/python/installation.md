@@ -17,7 +17,7 @@ centos 7, 非必要步骤
     yum install epel-release
     yum makecache
 
-linux 一般自带python, 检查python 版本
+linux 一般自带python, 检查python 版本,` python-devel`无论如何都要安装, 否则各种奇怪的报错
 
     python -V
     

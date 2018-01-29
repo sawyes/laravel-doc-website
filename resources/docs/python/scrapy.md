@@ -1,6 +1,22 @@
 # scrapy
 
-- [简单入门]('helloworld')
+- [安装](#install)
+    - [conda安装](#conda-install)
+- [简单入门](#helloworld)
+- [编码设置](#setting-encoding)
+
+<a name='install'></a>
+## 安装
+[install](https://docs.scrapy.org/en/latest/intro/install.html)
+
+<a name='conda-install'></a>
+### conda安装
+
+If you’re using `Anaconda` or `Miniconda`, you can install the package from the conda-forge channel, which has up-to-date packages for Linux, Windows and OS X.
+
+使用conda安装
+
+    conda install -c conda-forge scrapy
 
 <a name='helloworld'></a>
 ## 简单入门
@@ -35,6 +51,7 @@
     NEWSPIDER_MODULE = 'baidu.spiders'
     ROBOTSTXT_OBEY = False   # 关闭
     USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36'
+    FEED_EXPORT_ENCODING = 'utf-8' # 中文默认编码
 
 简单查看百度页面
 
@@ -71,5 +88,63 @@
                      print ('title: %s, url %s'%(''.join(text), ''.join(link)))
 
     
+### 递归获取
+
+官网示例
+
+```
+    import scrapy
+
+    class QuotesSpider(scrapy.Spider):    name = "quotes"
+        start_urls = [ 
+            'http://quotes.toscrape.com/page/1/',
+        ]   
     
+        def parse(self, response):
+            for quote in response.css('div.quote'):
+                yield {
+                    'text': quote.css('span.text::text').extract_first(),
+                    'author': quote.css('small.author::text').extract_first(),                'tags': quote.css('div.tags a.tag::text').extract(),
+                }   
+            for a in response.css('li.next a'):
+                yield response.follow(a, callback=self.parse)
+```
+
+新闻网站实例, 获取最新动态新闻, 打开链接获取其内容
+```
+   import scrapy
+   
+   class QuotesSpider(scrapy.Spider):
+       name = "quotes"
+       start_urls = [
+           'http://www.199it.com/newly',
+       ]
+   
+       def parse(self, response):
+           for a in response.xpath('//article/.//h2/a'):
+               yield response.follow(a, callback=self.parse_article)
+   
+       def parse_article(self, response):
+           def extract_with_css(query):
+               if response.css(query).extract_first() is not None:
+                   return response.css(query).extract_first().strip()
+   
+           yield {
+               'title': extract_with_css('h1.entry-title::text')
+           }
+``` 
+
+<a name='setting-encoding'></a>
+## 编码设置
+
+中文默认是Unicode,如:
+
+    \u5317\u4eac\u5927\u5b66
+
+
+在setting文件中设置：
+
+    FEED_EXPORT_ENCODING = 'utf-8'
+
+
 

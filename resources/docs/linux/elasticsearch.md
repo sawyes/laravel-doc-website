@@ -14,6 +14,7 @@
     - [_search_shards](#_search_shards)
 - [插件](#plugins)
     - [安装方式](#plugins-install)
+    - [sql插件](#plugins-sql)
 - [API](#api)
     - [查询格式](#api-fommat)
     - [查询帮助](#api-help)
@@ -430,6 +431,26 @@ http://localhost:9200/_plugin/plugin_name
 
 
 <a name="api"></a>
+
+<a name='plugins-sql'></a>
+### sql插件
+
+[插件github地址](https://github.com/NLPchina/elasticsearch-sql)
+
+查找插件运行目录
+
+    rpm -ql elasticsearch | grep /bin/elasticsearch-plugin
+
+6.1.2为例
+
+    ./bin/elasticsearch-plugin install https://github.com/NLPchina/elasticsearch-sql/releases/download/6.1.2.0/elasticsearch-sql-6.1.2.0.zip
+
+测试
+
+    GET _sql?sql=select * from ad_reports limit 1
+    GET _sql/_explain?sql=select * from ad_reports limit 1
+
+
 ## API
 
 四类Restful API:

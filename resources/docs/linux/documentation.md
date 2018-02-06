@@ -14,6 +14,7 @@
     - [网络管理](/docs/{{version}}/net)
     - [用户管理](/docs/{{version}}/user)
     - [磁盘管理](/docs/{{version}}/disk_manager)
+    - [nginx](/docs/{{version}}/nginx)
 - ELK
     - [elasticsearch](/docs/{{version}}/elasticsearch)
     - [kibana](/docs/{{version}}/kibana)

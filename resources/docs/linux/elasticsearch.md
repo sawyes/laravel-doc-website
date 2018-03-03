@@ -15,6 +15,7 @@
 - [插件](#plugins)
     - [安装方式](#plugins-install)
     - [sql插件](#plugins-sql)
+    - [x-pack插件](#plugins-xpack)
 - [API](#api)
     - [查询格式](#api-fommat)
     - [查询帮助](#api-help)
@@ -29,6 +30,13 @@
 - [mapping](#mapping)
     - [routing](#routing)
     - [all](#all)
+
+[官方ELK文档](https://www.elastic.co/guide/index.html)
+
+[官方开发文档API](https://www.elastic.co/guide/en/elasticsearch/client/index.html)
+
+[柴少鹏的官方网站-elk](http://www.51niux.com/?cate=44)
+
 
 <a name='intro'></a>
 ## 为了搜索,你懂的
@@ -429,9 +437,6 @@ http://localhost:9200/_plugin/plugin_name
 * head
 * kopf
 
-
-<a name="api"></a>
-
 <a name='plugins-sql'></a>
 ### sql插件
 
@@ -451,6 +456,39 @@ http://localhost:9200/_plugin/plugin_name
     GET _sql/_explain?sql=select * from ad_reports limit 1
 
 
+
+<a name='plugins-xpack'></a>
+### x-pack插件
+
+[官网安装教程](https://www.elastic.co/guide/en/elasticsearch/reference/master/installing-xpack-es.html)
+
+进入es plugins目录
+
+    rpm -ql elasticsearch | grep /bin/elasticsearch-plugin
+    /usr/share/elasticsearch/bin/elasticsearch-plugin
+    
+    cd /usr/share/elasticsearch
+
+安装插件
+
+    bin/elasticsearch-plugin install x-pack
+
+X-Pack将尝试在Elasticsearch中自动创建一些索引。默认情况下，Elasticsearch配置为允许自动创建索引，不需要额外的步骤。但是，如果你有Elasticsearch禁用自动创建索引，你必须配置 action.auto_create_index的 elasticsearch.yml，让X-包创建以下指标
+
+    vim /etc/elasticsearch/elasticsearch.yml
+    action.auto_create_index: .security,.monitoring*,.watches,.triggered_watches,.watcher-history*,.ml*
+
+交互式设置`elastic`,`kibana`,`logstash_system`三个内置账户的密码
+
+    bin/x-pack/setup-passwords interactive
+    service elasticsearch restart
+
+> 注：设置密码可用于在kibana登陆，否则用户名密码框为黑色不可输入
+
+> 注意：第一次在集群中安装xpack必须执行完整的集群重启，所有集群节点必须安装X-PACK并且启用其安全性
+
+
+<a name='api'></a>
 ## API
 
 四类Restful API:

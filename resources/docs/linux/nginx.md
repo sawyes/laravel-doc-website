@@ -14,6 +14,7 @@
 - [location](#location)
     - [expires](#expires)
     - [http_user_agent](#http_user_agent)
+    - [client_max_body_size](#client_max_body_size)
 
 [官方配置指南](https://nginx.org/en/docs/)
 [官方配置样例](https://www.nginx.com/resources/wiki/start/topics/examples/fullexample2/)
@@ -522,7 +523,7 @@ max_fails 次失败后，暂停的时间。
 特点, 设置了`response headers`报文的`expires`字段, 并且通过调试工具查看, 可以看见资源的释放时间, 如果没有看见需要ctrl + f5进行强行刷新资源
 
 
-<a name='http_user_agent '></a>
+<a name='http_user_agent'></a>
 ### http_user_agent 
 
 匹配谷歌浏览器示例
@@ -532,4 +533,13 @@ max_fails 次失败后，暂停的时间。
             echo "yes, i catch your request header!!";
         }
     }
+<a name='client_max_body_size'></a>
+### client_max_body_size    
 
+上传文件大小限制, 上传超过1M大的客户端文件无法正常上传
+
+    location / {  
+        root   html;  
+        index  index.html index.htm;  
+        client_max_body_size    1000m;  
+    }  

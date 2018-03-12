@@ -57,7 +57,7 @@ persistent模式下varnish服务器对于CPU性能要求不高, 磁盘IO性能�
 <a name='varnishd'></a>
 ## varnishd
 
-
+帮助
 ```
 man varnishd
 
@@ -70,5 +70,7 @@ man varnishd
 VARNISH_LISTEN_PORT=6081
 ...
 VARNISH_ADMIN_LISTEN_PORT=6082
+...
+VARNISH_STORAGE="malloc,256M"
 ```
 

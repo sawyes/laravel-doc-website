@@ -15,6 +15,7 @@
     - [用户管理](/docs/{{version}}/user)
     - [磁盘管理](/docs/{{version}}/disk_manager)
     - [nginx](/docs/{{version}}/nginx)
+    - [varnish](/docs/{{version}}/varnish)
 - ELK
     - [elasticsearch](/docs/{{version}}/elasticsearch)
     - [kibana](/docs/{{version}}/kibana)

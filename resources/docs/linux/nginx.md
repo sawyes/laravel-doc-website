@@ -15,6 +15,8 @@
     - [expires](#expires)
     - [http_user_agent](#http_user_agent)
     - [client_max_body_size](#client_max_body_size)
+- [403](#403)
+
 
 [官方配置指南](https://nginx.org/en/docs/)
 [官方配置样例](https://www.nginx.com/resources/wiki/start/topics/examples/fullexample2/)
@@ -543,3 +545,11 @@ max_fails 次失败后，暂停的时间。
         index  index.html index.htm;  
         client_max_body_size    1000m;  
     }  
+
+<a name='403'></a>
+## 403
+
+一次处理经验为运行目录无权限,先`ps aux | grep nginx`确认worker子进程的执行用户, 再执行相关赋权操作
+
+
+

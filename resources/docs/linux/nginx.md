@@ -5,6 +5,9 @@
     - [开机启动](#start-on)
     - [yum](#yum)
     - [启动](#start)
+- [头部定义](#header)
+    - [worker_processes](#worker_processes)
+    - [worker_rlimit_nofile](#worker_rlimit_nofile)
 - [server](#server)    
 - [http](#http)
     - [keepalive_timeout](#keepalive_timeout)
@@ -12,6 +15,7 @@
     - [upstream](#upstream)
     - [proxy](#proxy)
     - [gzip压缩配置](#gzip)
+    - [sendfile调优](#sendfile)
 - [pcre匹配模式](#pcre)
 - [location](#location)
     - [缓存](#cache)
@@ -366,12 +370,35 @@ centos 7 安装示例
 
     nginx -c /etc/nginx/nginx.conf
     nginx -s reload
-    
+
+<a name='header'></a>
+## 头部定义
+
+nginx.conf文件中，Nginx中有少数的几个高级配置在模块部分之上。
+
+<a name='worker_processes'></a>
+### worker_processes 
+
+worker_processes 定义了nginx对外提供web服务时的worker进程数。最优值取决于许多因素，包括（但不限于）CPU核的数量、存储数据的硬盘数量及负载模式。不能确定的时候，将其设置为可用的CPU内核数将是一个好的开始（设置为“auto”将尝试自动检测它）。
+
+<a name='worker_rlimit_nofile'></a>
+### worker_rlimit_nofile 
+
+更改worker进程的最大打开文件数限制。如果没设置的话，这个值为操作系统的限制。设置后你的操作系统和Nginx可以处理比“ulimit -a”更多的文件，所以把这个值设高，这样nginx就不会有“too many open files”问题了。
+
+> ulimit -a FD最大为1024
+
+```
+user nginx; 
+pid /var/run/nginx.pid; 
+worker_processes auto; 
+worker_rlimit_nofile 100000; 
+```
+
 <a name='server'></a>
 ## server 
 ```
-server
-    {
+server {
         listen 443;
 
         server_name localhost;
@@ -402,11 +429,9 @@ server
         access_log  /home/wwwlogs/localhost.log;
 }
 ```
-    
+ 
 <a name='http'></a>
 ## http    
-
-
 
 <a name='keepalive_timeout'></a>
 ### keepalive_timeout
@@ -581,8 +606,46 @@ http {
 
 ```
 
-    
+<a name='sendfile'></a>
+### sendfile调优 
 
+* sendfile
+
+现在流行的web 服务器里面都提供 sendfile 选项用来提高服务器性能, 一般的网络传输过程 ,4个buffer上下文切换
+
+硬盘 >> kernel buffer >> user buffer>> kernel socket buffer >>协议栈 
+
+使用sendfile后 ,2个buffer上下文切换
+
+硬盘 >> kernel buffer (快速拷贝到kernelsocket buffer) >>协议栈 
+
+sendfile省去用户空间buffer复制的过程, 可以显著提高传输性能。DMA(Direct Memory Access，直接内存存取) ,上述中硬盘文件系统调用read()或write()保存到DMA中,然后完成上下文切换
+
+* tcp_nopush
+
+tcp_nopush只有在启用了`sendfile`时才起作用，为什么?
+
+在启用tcp_nopush后，程序接收到了数据包后不会马上发出，而是等待数据包最大时一次性发出，可以缓解网络拥堵。(Nagle化) 
+
+假设终端应用程序每产生一次操作就会返回一个字节响应数据，而典型情况一个包会拥有一个字节的数据以及40个字节长的包头，于是产生41个字节的包返回给客户端, 4000%的过载，高并发环境很轻易地就能令`网络发生拥塞`。
+为了避免这种情况，TCP堆栈实现了等待数据 0.2秒钟，因此操作后它不会发送一个数据包，而是将这段时间内的数据打成一个大的包。这一机制是由Nagle算法保证。
+
+> 在网络拥塞控制领域，我们知道有一个非常有名的算法叫做Nagle算法（Nagle algorithm），这是使用它的发明人John Nagle的名字来命名的，John Nagle在1984年首次用这个算法来尝试解决福特汽车公司的网络拥塞问题（RFC 896），该问题的具体描述是：如果我们的应用程序一次产生1个字节的数据，而这个1个字节数据又以网络数据包的形式发送到远端服务器，那么就很容易导致网络由于太多的数据包而过载。比如，当用户使用Telnet连接到远程服务器时，每一次击键操作就会产生1个字节数据，进而发送出去一个数据包，所以，在典型情况下，传送一个只拥有1个字节有效数据的数据包，却要发费40个字节长包头（即ip头20字节+tcp头20字节）的额外开销，这种有效载荷（payload）利用率极其低下的情况被统称之为愚蠢窗口症候群（Silly Window Syndrome）。可以看到，这种情况对于轻负载的网络来说，可能还可以接受，但是对于重负载的网络而言，就极有可能承载不了而轻易的发生拥塞瘫痪。Nagle算法规定：如果包的大小满足MSS，那么可以立即发送，否则数据会被放到缓冲区，等到已经发送的包被确认了之后才能继续发送。可以降低网络里小包的数量，从而提升网络性能。
+
+* tcp_nodelay 
+
+默认值:  tcp_nodelay on;开启或关闭nginx使用TCP_NODELAY选项的功能。 这个选项仅在将连接转变为长连接的时候才被启用。
+
+tcp_nodelay为什么只在keep-alive才启作用,短连接中并不存在小包阻塞的问题，而在长连接中需要做tcp_nodelay开启。如果当前HTTP是持久连接,即进行连续的Request/Response、Request/Response、…，处理，那么由于最后这个小包受到Nagle算法影响无法及时的发送出去（具体是由于客户端在未结束上一个请求前不会发出新的request数据，导致无法携带ACK而延迟确认，进而导致服务器没收到客户端对上一个小包的的确认导致最后一个小包无法发送出来）,导致第n次请求/响应未能结束，从而客户端第n+1次的Request请求数据无法发出。
+
+```
+# 设置nginx是否使用sendfile函数输出文件
+sendfile            on;
+# 告诉nginx在一个数据包里发送所有头文件，而不一个接一个的发送。(使用Nagle算法)
+tcp_nopush          on;
+# 立刻发送数据包(禁用Nagle算法),如果请求立即发出那么响应时间也会快一些
+tcp_nodelay         on;
+```
 <a name='pcre'></a>
 ## pcre匹配模式
 = 精确匹配会第一个被处理。如果发现精确匹配，**nginx停止搜索其他匹配**。
@@ -615,7 +678,9 @@ nginx的http_proxy模块，可以实现类似于Squid的缓存功能。Nginx服�
 
 缓存30天
 
-    location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+    location ~* .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
+       root         /spool/www;
+       access_log   off;
        expires 30d;
     }
 

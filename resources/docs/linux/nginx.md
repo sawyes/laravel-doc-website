@@ -6,10 +6,11 @@
     - [yum](#yum)
     - [启动](#start)
 - [http](#http)
-    - [upstream](#upstream)
-    - [健康状态检测](#healthy)
-    - [proxy](#proxy)
     - [keepalive_timeout](#keepalive_timeout)
+    - [log_format](#log_format)
+    - [upstream](#upstream)
+    - [proxy](#proxy)
+    - [gzip压缩配置](#gzip)
 - [pcre匹配模式](#pcre)
 - [location](#location)
     - [expires](#expires)
@@ -370,6 +371,28 @@ centos 7 安装示例
 <a name='http'></a>
 ## http    
 
+
+
+<a name='keepalive_timeout'></a>
+### keepalive_timeout
+
+连接超时时间，默认地连接不超时
+
+    http {
+        #keepalive_timeout  0; 
+        keepalive_timeout 65;  
+    }
+
+<a name='log_format'></a>
+### log_format
+
+```
+log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '  
+                  '$status $body_bytes_sent "$http_referer" '  
+                  '"$http_user_agent" "$http_x_forwarded_for"';  
+```
+
+
 <a name='upstream'></a>
 ### upstream
 
@@ -438,20 +461,33 @@ max_fails 次失败后，暂停的时间。
 
 其它所有的非backup机器down或者忙的时候，请求backup机器。所以这台机器压力会最轻。
 
-<a name='healthy'></a> 
-### 健康检查
-
-测试, 当存在一台服务器宕机, 则会使用下一个负载均衡地址
-
-    upstream myproject {  
-        server localhost:8001 weight=1 max_fails=2 fail_timeout=2;
-        server localhost:8002 weight=1 max_fails=2 fail_timeout=2;
-        server localhost:8003 weight=1 max_fails=2 fail_timeout=2;
-    }  
-
-
 <a name='proxy'></a>
 ### proxy
+
+缓存cache参数配置, 注意此处的缓存为文件缓存，就性能而言还是有一定瓶颈，可以考虑varnish的内存缓存架构代替
+
+```
+http {
+
+    ...
+
+    proxy_connect_timeout 5;  
+    proxy_read_timeout 60;  
+    proxy_send_timeout 5;  
+    proxy_buffer_size 16k;  
+    proxy_buffers 4 64k;  
+    proxy_busy_buffers_size 128k;  
+    proxy_temp_file_write_size 128k;  
+    #缓存到nginx的本地目录  
+    proxy_temp_path  /Users/heyongjian/Desktop/heyongjian/FSvcWeb/nginx/temp/;  
+    proxy_cache_path /Users/heyongjian/Desktop/heyongjian/FSvcWeb/nginx/temp/cache_temp levels=1:2 keys_zone=cache_one:200m inactive=1d max_size=30g;  
+    
+    ...
+}
+```
+
+> 分别正向代理和反向代理，如果用户再局域网，向外发出请求通过代理服务器，此时一般为正向代理，对于服务器而言，外部请求可以配置反向代理，他们的应用场景是不一样的
+
 
 正向代理服务器
 
@@ -475,18 +511,40 @@ max_fails 次失败后，暂停的时间。
       
         location / {  
             proxy_pass http://10.0.0.137; #被代理的服务器ip  
-            proxy_set_header  X-Real-IP  $remote_addr;
+            # proxy_pass http://myproject; # 结合upstream配置的名称，实现负载均衡
+            
+            ### force timeouts if one of backend is died ##   
+            proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;    
+            
+            ### Set headers #### 
+            proxy_set_header X-Real-IP  $remote_addr;
+            proxy_set_header Host $host;    
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;   
+            
+            ### Most PHP, Python, Rails, Java App can use this header, 强制跳转https ###    
+            # proxy_set_header X-Forwarded-Proto https;    
+            
+            # 一般配置关闭
+            proxy_redirect off
         }  
     }
-    
-<a name='keepalive_timeout'></a>
-### keepalive_timeout
 
-连接超时时间
 
-    http {
-        keepalive_timeout 65;  
-    }
+<a name='gzip'></a>
+### gzip压缩配置
+
+```
+http {
+    gzip  on;           #打开gzip压缩功能  
+    gzip_min_length 1k; #压缩阈值  
+    gzip_buffers 4 16k; #buffer 不用修改  
+    gzip_comp_level 2;  #压缩级别:1-10，数字越大压缩的越好，时间也越长  
+    gzip_types text/plain application/x-javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png;  #        压缩文件类型  
+    gzip_vary off;      #跟Squid等缓存服务有关，on的话会在Header里增加 "Vary: Accept-Encoding"  
+    gzip_disable "MSIE [1-6]\.";  #IE1-6版本不支持gzip压缩  
+}
+
+```
 
     
 
@@ -516,13 +574,42 @@ max_fails 次失败后，暂停的时间。
 <a name='expires'></a>
 ### expires
 
-缓存100天
+缓存30天
 
     location ~ .*\.(gif|jpg|jpeg|png|bmp|swf)$ {
-       expires 100d;
+       expires 30d;
     }
 
 特点, 设置了`response headers`报文的`expires`字段, 并且通过调试工具查看, 可以看见资源的释放时间, 如果没有看见需要ctrl + f5进行强行刷新资源
+
+
+反向代理缓存文件配置
+
+```
+#缓存相应的文件(静态文件)  
+location ~ \.(gif|jpg|png|htm|html|css|js|flv|ico|swf)(.*) {  
+     proxy_pass http://cluster;         #如果没有缓存则通过proxy_pass转向请求  
+     proxy_redirect off;  
+     proxy_set_header Host $host;  
+     proxy_cache cache_one;  
+     proxy_cache_valid 200 302 1h;                              #对不同的HTTP状态码设置不同的缓存时间,h小时,d天数  
+     proxy_cache_valid 301 1d;  
+     proxy_cache_valid any 1m;  
+     expires 30d;  
+}  
+```
+
+清理缓存
+
+```
+#purge插件缓存清理  
+location ~ /purge(/.*) {  
+       allow              127.0.0.1;        #能够清除缓存的服务器IP地址  
+       #allow             10.16.39.12;  
+       deny               all;  
+       proxy_cache_purge  cache_one $1$is_args$args;  
+}  
+```
 
 
 <a name='http_user_agent'></a>

@@ -5,6 +5,7 @@
     - [开机启动](#start-on)
     - [yum](#yum)
     - [启动](#start)
+- [server](#server)    
 - [http](#http)
     - [keepalive_timeout](#keepalive_timeout)
     - [log_format](#log_format)
@@ -13,7 +14,7 @@
     - [gzip压缩配置](#gzip)
 - [pcre匹配模式](#pcre)
 - [location](#location)
-    - [expires](#expires)
+    - [缓存](#cache)
     - [http_user_agent](#http_user_agent)
     - [client_max_body_size](#client_max_body_size)
 - [403](#403)
@@ -366,7 +367,41 @@ centos 7 安装示例
     nginx -c /etc/nginx/nginx.conf
     nginx -s reload
     
-    
+<a name='server'></a>
+## server 
+```
+server
+    {
+        listen 443;
+
+        server_name localhost;
+        index index.html index.htm index.php;
+        root /home/wwwroot/website/public;
+
+        ssl on;
+        ssl_certificate /home/wwwroot/ssl/test_website.com.crt;
+        ssl_certificate_key /home/wwwroot/ssl/test_website.com.key;
+
+
+        location / {
+            try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        location = /favicon.ico { access_log off; log_not_found off; }
+        location = /robots.txt  { access_log off; log_not_found off; }
+
+        access_log on;
+        error_log  /home/wwwlogs/localhost.log error;
+
+        include enable-php.conf;
+
+        location ~ /\.ht {
+            deny all;
+        }
+
+        access_log  /home/wwwlogs/localhost.log;
+}
+```
     
 <a name='http'></a>
 ## http    
@@ -571,8 +606,12 @@ http {
 ## location
 
 
-<a name='expires'></a>
-### expires
+<a name='cache'></a>
+### 缓存
+
+nginx的http_proxy模块，可以实现类似于Squid的缓存功能。Nginx服务器启动后，会对本地磁盘上的缓存文件进行扫描，在内存中建立缓存索引，并有专门的进程对缓存文件进行过期判断、更新等进行管理。
+
+只有在proxy_pass的时候，才会生成缓存，下一次请求执行到proxy_pass的时候会判断是否有缓存，如果有则直接读缓存，返回给客户端，不会执行proxy_pass；如果没有，则执行proxy_pass，并按照规则生成缓存文件；可以到nginx的cache文件夹下看是否生成了缓存文件。
 
 缓存30天
 
@@ -588,13 +627,32 @@ http {
 ```
 #缓存相应的文件(静态文件)  
 location ~ \.(gif|jpg|png|htm|html|css|js|flv|ico|swf)(.*) {  
-     proxy_pass http://cluster;         #如果没有缓存则通过proxy_pass转向请求  
+     proxy_pass http://cluster;         #如果没有缓存则通过proxy_pass转向请求 
+     
+     ### proxy_next_upstream由upstrem定义返回 ， 
+     proxy_next_upstream error timeout invalid_header http_500 http_502 http_503;    
+    
+     ### By default we don't want to redirect it ####    
      proxy_redirect off;  
-     proxy_set_header Host $host;  
+     
+     proxy_set_header Host $host; 
+     proxy_set_header X-Real-IP $remote_addr; 
+     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;    
+      
      proxy_cache cache_one;  
      proxy_cache_valid 200 302 1h;                              #对不同的HTTP状态码设置不同的缓存时间,h小时,d天数  
      proxy_cache_valid 301 1d;  
      proxy_cache_valid any 1m;  
+     
+     #如果系统很忙的时候可以申请更大的proxy_buffers 官方推荐*2
+     #proxy_busy_buffers_size 256k;
+     #proxy缓存临时文件的大小
+     #proxy_temp_file_write_size 128k;
+     #用于指定本地目录来缓冲较大的代理请求
+     proxy_temp_path /usr/local/nginx/temp;
+     #设置web缓存区名为cache_one,内存缓存空间大小为12000M，自动清除超过15天没有被访问过的缓存数据，硬盘缓存空间大小200g
+     proxy_cache_path /usr/local/nginx/cache levels=1:2 keys_zone=cache_one:200m inactive=1d max_size=30g;
+     
      expires 30d;  
 }  
 ```
@@ -611,6 +669,7 @@ location ~ /purge(/.*) {
 }  
 ```
 
+使用ngx_cache_purge [github下载](https://github.com/FRiCKLE/ngx_cache_purge)模块进行缓存清理，例如：www.wolfdream.cn/purge/xxx.jpg 就可以清除xxx图片缓存了，另外超时的缓存Nginx会自动删除。
 
 <a name='http_user_agent'></a>
 ### http_user_agent 

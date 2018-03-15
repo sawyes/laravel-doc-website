@@ -229,15 +229,20 @@ Type 'quit' to close CLI session.
 * ping
 
 健康状态检测
+
 ```
 ping
 200        
 PONG 1521124900 1.0
 
 ```
+
 * state
+
 子进程运行状态
+
 ```
+
 state
 200        
 Child in state running
@@ -281,6 +286,7 @@ active 正在使用
 available  可用
 
 使用vcl, 通过vcl.use  动态加载编译文件
+
 ```
 vcl.use test
 200        
@@ -439,7 +445,7 @@ varnishtop - Varnish log entry ranking
 
 并发场景中,观看平均请求各个指标排名,可以了解varnish性能等
 
-
+> 注意,和varnishstat一样都是读取内存共享空间的数据
 
 
 

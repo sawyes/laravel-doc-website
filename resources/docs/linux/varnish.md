@@ -12,12 +12,13 @@
 - [varnishadm](#varnishadm)
 - [varnishlog & varnishncsa](#varnishlog)
 - [varnishtop](#varnishtop)
+- [vanish engine](#varnish-engine)
 
 
 <a name='install'></a>
 ## 安装
 
-[varnish官方网站](https://www.varnish-software.com/)
+[varnish官方网站](https://varnish-cache.org//)
 
 ```
 yum -y install epel-release
@@ -447,9 +448,20 @@ varnishtop - Varnish log entry ranking
 
 > 注意,和varnishstat一样都是读取内存共享空间的数据
 
+<a name='varnish-engine'>
+## vanish engine
 
-
-
+```
+vcl_recv：实现安全策略，仅处理可以识别http方法，且只缓存get和head的方法，不缓存用户特有的数据（根据客户端的请求作出的缓存策略）
+vcl_fetch：根据服务端的响应作出的策略缓存
+vcl_pipe: 用于将请求直接发往后端主机；
+vcl_hash: 自定义hash生成时的数据来源
+vcl_pass: 用于将请求直接传递至后端主机；
+vcl_hit: 从缓存中查找到缓存对象时要执行的操作；
+vcl_miss: 从缓存中款查找到缓存对象时要执行的操作；
+vcl_deliver: 将用户请求的内容响应给客户端时用到的方法；
+vcl_error: 在varnish端合成错误响应时的缓存策略；
+```
 
 
 

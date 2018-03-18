@@ -21,6 +21,7 @@
     - [缓存](#cache)
     - [http_user_agent](#http_user_agent)
     - [client_max_body_size](#client_max_body_size)
+    - [error_log](#error_log)
 - [403](#403)
 
 
@@ -757,10 +758,43 @@ location ~ /purge(/.*) {
         client_max_body_size    1000m;  
     }  
 
+<a name='error_log'></a>
+## error_log
+
+排查错误非常有用, 如php错误会显示在其中
+
+```
+server {
+    ...
+    access_log  /home/wwwlogs/access.log;
+    error_log  /home/wwwlogs/error.log error;
+}
+```
 <a name='403'></a>
 ## 403
 
 一次处理经验为运行目录无权限,先`ps aux | grep nginx`确认worker子进程的执行用户, 再执行相关赋权操作
+
+<a name='fastcgi'></a>
+## fastcgi
+
+### nginx + fastcgi 防止跨站跨目录配置
+
+[php官网配置说明](#http://www.php.net/manual/en/install.fpm.configuration.php)
+
+此配置可以限制php只能运行在指定目录, include也不可超出其限制, 一般`$document_root`即可, 需要error_log才能看见其php报错
+
+```
+vim path/to/nginx/conf/fastcgi.conf
+
+...
+fastcgi_param PHP_ADMIN_VALUE "open_basedir=$document_root/../:/tmp/:/proc/$document_root/../";
+
+```
+
+
+
+
 
 
 

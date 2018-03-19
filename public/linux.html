@@ -71,7 +71,7 @@
             </div>
             <div class="large-10 columns code-column code-container">
                 <div class="grid">
-<!--                    
+<!--
 <section class="cmd-description grid-item">
 <h4><a name="模板" href="#模板">模板</a>
 <a target='_blank' href="" title="模板"><i class="icon-file-text"></i></a></h4>
@@ -173,7 +173,7 @@ cp -r /etc/* /home/user1
 touch -mt 201701011248 filename
 // 其他参数
 -a access time
--t time string 
+-t time string
 -m modify time
 -c change time
 </pre>
@@ -192,7 +192,7 @@ rm -fr 1.txt
 </pre>
     <h6>stat</h6>
 <pre class="prettyprint lang-php">
-stat filename 
+stat filename
   File: "filename"
   Size: 1965        Blocks: 8          IO Block: 4096   普通文件
 Device: fd00h/64768d    Inode: 654681      Links: 1
@@ -234,7 +234,7 @@ $SHELL 当前用户shell
 //man,vim中
 /KEYWORD: 向后
 n: 下一个
-N：前一个 
+N：前一个
 ?KEYWORD：向前
 n: 下一个
 N：前一个
@@ -366,8 +366,8 @@ b 向前一页
 </pre>
 <h6>tail | head</h6>
 <pre>
--n 显示多少行  
-tail -f: 查看文件尾部，不退出，等待显示后续追加至此文件的新内容；  
+-n 显示多少行
+tail -f: 查看文件尾部，不退出，等待显示后续追加至此文件的新内容；
 
 第9行数据
 head -9 /etc/inittab | tail -1
@@ -389,7 +389,7 @@ cut -d : -f 1 /etc/passwd
 <pre>
 // 默认ascii字符排序
 -r 逆序
--n 按数值大小排序  
+-n 按数值大小排序
 -t, --field-separator=SEP字段分隔符
 -k key=pos1,pos2第几个位置作为排序依据
 -u uniq 去重
@@ -409,7 +409,7 @@ ll -h| sort -nk5
 <h6>wc</h6>
 <pre>
 // word count, 默认显示格式
-行 单词数 字节数    
+行 单词数 字节数
 -c, --bytes 输出字节数统计
 -m, --chars 输出字符数统计
 -l, --lines 输出行数统计
@@ -458,13 +458,13 @@ vim !$
 // 获取钱一个命令的最后一个参数到终端
 按 ESC 然后按 .
 cat /etc/httpd/conf/httpd.conf
-vim 按 ESC 然后按 
+vim 按 ESC 然后按
 </pre>
 <h6>shell的类型</h6>
 <pre>
 登录式shell:
     正常通常某终端登录
-    su - USERNAME 
+    su - USERNAME
     su -l USERNAME
 /etc/profile --> /etc/profile.d/*.sh --> ~/.bash_profile --> ~/.bashrc --> /etc/bashrc(全局shell)
 
@@ -527,7 +527,7 @@ echo "current path is `pwd`"
 [:alpha:]: 大小写字母
 [:digit:]: 数字
 [:alnum:]: 数字和大小写字母
-    
+
 # man 7 glob
 [^]: 匹配指定范围之外的任意单个字符
 // 字母开头中间有空格非字母结尾
@@ -564,7 +564,7 @@ tail -9 /etc/passwd | head -1|cut -d: -f1,7| tee /tmp/user.out
 <h4><a name="grep" href="#grep">grep</a></h4>
 <h6>内容查找</h6>
 <pre class="prettyprint lang-php">
-grep: 
+grep:
 -i 不区分大小写
 -r -R 递归
 -n 显示行号
@@ -635,7 +635,7 @@ grep -A 2 '^cache' /proc/cpuinfo
 // 前两行
 grep -B 2 '^cache' /proc/cpuinfo
 // 前后两行
-grep -C 2 '^cache' /proc/cpuinfo 
+grep -C 2 '^cache' /proc/cpuinfo
 
 // 匹配ip地址
 alias ipaddr="egrep --color '(\<([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\>\.){3}\<([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\>'"
@@ -647,7 +647,7 @@ ifconfig | ipaddr
 1、显示/proc/meminfo文件中以不区分大小的s开头的行；
 grep -i '^s' /proc/meminfo
 grep '^[sS]' /proc/meminfo
-2、显示/etc/passwd中以nologin结尾的行; 
+2、显示/etc/passwd中以nologin结尾的行;
 grep 'nologin$' /etc/passwd
 
 取出默认shell为/sbin/nologin的用户列表
@@ -725,13 +725,13 @@ find /etc -mtime -7 -not -user root -a -not -user student
 
 
 4、查找当前系统上没有属主或属组且最近1天内曾被访问过的文件，并将其属主属组均修改为root；
-find / \( -nouser -o -nogroup \) -a -atime -1 -exec chown root:root {} \; 
+find / \( -nouser -o -nogroup \) -a -atime -1 -exec chown root:root {} \;
 
 5、查找/etc目录下大于1M的文件，并将其文件名写入/tmp/etc.largefiles文件中；
 find /etc -size +1M >> /tmp/etc.largefiles
 
 6、查找/etc目录下所有用户都没有写权限的文件，显示出其详细信息；
-find /etc -not -perm /222 -ls	
+find /etc -not -perm /222 -ls
 </pre>
 
 
@@ -951,7 +951,7 @@ SHELL=/bin/bash
 SKEL=/etc/skel
 CREATE_MAIL_SPOOL=yes
 
-useradd  [options]  USERNAME 
+useradd  [options]  USERNAME
     -u UID 大于等于500，一般和私有组gid相同
     -g GID（基本组）注意不是私有组，用户只有一个基本组，但是可以拥有多个附加组
     -G GID,...  （附加组）重点，附加组只能去/etc/group才能体现
@@ -966,7 +966,7 @@ useradd  [options]  USERNAME
 
 useradd -u 1000 user1
 //添加user2,指定基本组为grp1, 附加组为grp1, 此时此刻user2的id为1001
-useradd -g grp1 -G user1 user2 
+useradd -g grp1 -G user1 user2
 id user2
 tail -2 /etc/group
 // user1:x:1000:user2
@@ -976,7 +976,7 @@ useradd -s /bin/nologin user3
 useradd -M nologindefs
 su - nologindefs
 // su: 警告：无法切换到目录/home/nologindefs: 没有那个文件或目录
-// -bash-4.1$ 
+// -bash-4.1$
 // 修复此类登录问题，其实是缺少了一些默认的配置，复制/etc/skel的隐藏文件到其家目录即可
 
 
@@ -1017,7 +1017,7 @@ openssl -l -salt '123456'
 <h6>修改用户</h6>
 <pre>
 usermod
-    -u UID 
+    -u UID
     -g GID
     -a -G GID：不使用-a选项，会覆盖此前的附加组；
     -c comment
@@ -1047,7 +1047,7 @@ finger user1
 <h6>修改用户基础信息</h6>
 <pre>
 // 交互式补全用户基础信息，用户名，电话，公司等，其实就是注释信息的内容
-chfn user1 
+chfn user1
 </pre>
 <h6>删除用户</h6>
 <pre>
@@ -1087,8 +1087,8 @@ chmod o-t /dir
     <h6>bc</h6>
 <pre class="prettyprint lang-php">
 // 保留两位小数
-scale 2 
-//退出    
+scale 2
+//退出
 quit
 
 // shell 中bc计算
@@ -1107,7 +1107,7 @@ groupadd mygroup
 </pre>
 <h6>修改组</h6>
 <pre>
-groupmod 
+groupmod
   -g GID
   -n GROUPNAME
 </pre>
@@ -1163,7 +1163,7 @@ FSB前端总线，连接CPU和北桥，100Mhz前端总线和64位CPU表示 100M 
 
 
 </pre>
- 
+
 </section>
 
 <section class="cmd-description grid-item">
@@ -1220,9 +1220,9 @@ cat >> 2017-08.log << EOF
 // 单引号强引用，内部变量不会引用
 // 本地变量仅用于当前bash
 # name=peter
-# echo $name 
+# echo $name
 # echo "my name is $name"
-// 区分变量  
+// 区分变量
 # echo "my name is ${name}wu"  //my name is peterwu
 // 本地变量
 #  echo 'my name is ${name}wu' //my name is ${name}wu
@@ -1241,7 +1241,7 @@ export VARNAME=VALUE
 // 原本变量作用域只能存在于当前的shell,export变量使其可以切换bash后保持变量
 name=peter
 export name
-bash 
+bash
 echo $name
 </pre>
 <h6>位置变量</h6>
@@ -1285,7 +1285,7 @@ C=$A+$B
 echo $C // 2+3 字符串
 <h6>输出重定向</h6>
 <pre>
-/dev/null: 软件设备， bit bucket，数据黑洞    
+/dev/null: 软件设备， bit bucket，数据黑洞
 >
 >>
 2>
@@ -1340,7 +1340,7 @@ seq 1 2 10 // 1 3 5 7 9
 </pre>
 <h6>lastlog</h6>
 <pre>
-lastlog: 显示每一个用户最近一次的成功登录信息； 
+lastlog: 显示每一个用户最近一次的成功登录信息；
 -u USERNAME: 显示特定用户最近的登录信息
 </pre>
 </section>
@@ -1349,7 +1349,7 @@ lastlog: 显示每一个用户最近一次的成功登录信息；
     <a name="basename" href="#basename">basename</a>
 </h4>
 <pre class="prettyprint lang-php">
-    basename 
+    basename
         $0 执行脚本时的脚本路径及名称
     获取脚本名称
 </pre>
@@ -1405,13 +1405,13 @@ ln [-s -v] SRC DEST
 1、只能对文件创建，不能应用于目录；
 2、不能跨文件系统；
 3、创建硬链接会增加文件被链接的次数；
-	
+
 符号链接：
 1、可应用于目录；
 2、可以跨文件系统；
 3、不会增加被链接文件的链接次数；
 4、其大小为指定的路径所包含的字符个数；
-    
+
 ln hardlink dsthardlink
 ln -s softlink dstsoftlink
 
@@ -1429,7 +1429,7 @@ ls -il 用inode去观察软硬链接
 递归统计目录大小
 Summarize disk usage of the set of FILEs, recursively for directories.
 -s
--h	
+-h
 
 du -h /etc 统计etc目录下每个文件的大小
 du -sh /etc 统计/etc目录的大小
@@ -1473,21 +1473,21 @@ SATA：sd
 SCSI: sd
 USB: sd
     a,b,c,...来区别同一种类型下的不同设备
-    
-IDE: 
+
+IDE:
 	第一个IDE口：主、从
 		/dev/hda, /dev/hdb
 	第二个IDE口：主、从
         /dev/hdc, /dev/hdd
 
 固定的hd硬盘
-hda: 
+hda:
 	hda1: 第一个主分区
-	hda2: 
+	hda2:
 	hda3:
 	hda4:
     hda5: 第一个逻辑分区
-            
+
 sd是无序的, 看接口, 看系统内核识别顺序
 
 </pre>
@@ -1527,9 +1527,9 @@ fdisk /dev/sda
 	w: 保存退出
 	q: 不保存退出
 	t: 修改分区类型
-		L: 
+		L:
     l: 显示所支持的所有类型
-    
+
 当前系统内核分区信息, fdisk分区后, 内核还没有加载
 
 partprobe 重读内核分区表红帽5以前, 一般用这个
@@ -1582,7 +1582,7 @@ q 退出,放弃操作
 // 4.更新分区
 cat /proc/partitions
 // RH5通知内核更新分区
-partprobe  
+partprobe
 partprobe /dev/sda
 // RH6通知内核更新分区
 partx -u /dev/sda
@@ -1613,7 +1613,7 @@ Block size=4096 (log=2)
 80 block groups
 32768 blocks per group...
 8192 inodes per group
-Superblock backups stored on blocks: 
+Superblock backups stored on blocks:
     32768, 98304, 163840, 229376,...
 ...
 Creating journal (32768 blocks): done
@@ -1649,7 +1649,7 @@ mkfs.vfat /dev/sdb6
 选项
 -j 创建ext3文件系统
 -b 指定Block Size大小, 默认4096, 这个参数基本不用动, 提升了系统提示太大
-    mke2fs -b 2048 /dev/sdb5    
+    mke2fs -b 2048 /dev/sdb5
 -L volume-label 卷标, File System Label
     mke2fs -L WEB_DATA /dev/sdb5
 -m 预留给超级用户的块百分比,默认为5个百分比, 进输入数字即可, 这个命令还是很有意义的, 尤其大硬盘
@@ -1680,7 +1680,7 @@ mkfs.ext4 -m 3 -L TEST_DATA /dev/sdb6
 查看block属性, 磁盘属性
 
 [root@localhost centos]# blkid /dev/sdb6
-/dev/sdb6: LABEL="TEST_DATA" UUID="24713fc9-9d74-4aca-aac6-62cce331cf3b" TYPE="ext4" 
+/dev/sdb6: LABEL="TEST_DATA" UUID="24713fc9-9d74-4aca-aac6-62cce331cf3b" TYPE="ext4"
 [root@localhost centos]#
 </pre>
 <h6>e2label</h6>
@@ -1712,7 +1712,7 @@ findfs LABEL=WEB_DATA
 // 为分区/dev/sdb5创建一个ext2文件系统
 [root@localhost centos]# mke2fs -L WEB_DATA /dev/sdb5
 // 无损变更为ext3
-[root@localhost centos]# tune2fs -j /dev/sdb5 
+[root@localhost centos]# tune2fs -j /dev/sdb5
 tune2fs 1.42.9 (28-Dec-2013)
 Creating journal inode: done
 // 查看结果

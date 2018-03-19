@@ -21,7 +21,8 @@
     - [缓存](#cache)
     - [http_user_agent](#http_user_agent)
     - [client_max_body_size](#client_max_body_size)
-    - [error_log](#error_log)
+    - [stub_status](#stub_status)
+- [error_log](#error_log)
 - [403](#403)
 
 
@@ -757,6 +758,42 @@ location ~ /purge(/.*) {
         index  index.html index.htm;  
         client_max_body_size    1000m;  
     }  
+
+<a name='stub_status'></a>
+### stub_status
+
+Nginx中的stub_status模块主要用于查看Nginx的一些状态信息. 
+
+本模块默认是不会编译进Nginx的,如果你要使用该模块,则要在编译安装Nginx时指定:
+
+./configure –with-http_stub_status_module 
+
+    location /nginx_status
+    {
+        allow 1.1.1.1;
+        deny all;
+        stub_status on;
+        access_log   off;
+    }
+
+返回结果
+
+    Active connections: 5   
+    
+    server accepts handled requests  
+    
+     5970806143 5970806143 7560482010   
+    
+    Reading: 0 Writing: 5 Waiting: 0 
+    
+server accepts handled requests ,accepts 接收连接数, handle 处理连接数, 处理请求数
+    
+Reading: Nginx 读取到客户端的Header信息数.
+
+Writing: Nginx 返回给客户端的Header信息数.
+
+Waiting: 开启keep-alive的情况下,这个值等于 active – (reading + writing),意思就是Nginx已经处理完成,正在等候下一次请求指令的驻留连接.
+
 
 <a name='error_log'></a>
 ## error_log

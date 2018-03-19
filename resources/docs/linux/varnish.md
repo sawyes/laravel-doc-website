@@ -13,12 +13,16 @@
 - [varnishlog & varnishncsa](#varnishlog)
 - [varnishtop](#varnishtop)
 - [vanish engine](#varnish-engine)
+- [varnish对象](#varnish-obj)
+    - [vcl_deliver实战](#vcl_deliver)
+    - [vcl_recv实战](#vcl_recv)
 
 
 <a name='install'></a>
 ## 安装
 
-[varnish官方网站](https://varnish-cache.org//)
+[varnish官方网站](https://varnish-cache.org/)
+[varnish文档](http://varnish-cache.org/docs/)
 
 ```
 yum -y install epel-release
@@ -463,12 +467,146 @@ vcl_deliver: 将用户请求的内容响应给客户端时用到的方法；
 vcl_error: 在varnish端合成错误响应时的缓存策略；
 ```
 
+<a name='varnish-obj'></a>
+## varnish对象
+
+[OBJ对象](https://varnish-cache.org/docs/4.0/reference/vcl.html#obj)
+
+[varnish变量类型](https://varnish-cache.org/docs/4.0/users-guide/vcl-variables.html)
+
+> 变量类似iptables, 是和状态引擎相关的, 如hits对象只能用于vcl_hit, vcl_deliver
+#### req
+
+The request object. When Varnish has received the request the req object is created and populated. Most of the work you do in vcl_recv you do on or with the req object.
+
+#### bereq
+
+The backend request object. Varnish contructs this before sending it to the backend. It is based on the req object.
+
+#### beresp
+
+The backend response object. It contains the headers of the object coming from the backend. If you want to modify the response coming from the server you modify this object in vcl_backend_response.
+
+#### resp
+
+The HTTP response right before it is delivered to the client. It is typically modified in vcl_deliver.
+obj
+The object as it is stored in cache. Read only.
+
+[varnish action](https://varnish-cache.org/docs/4.0/users-guide/vcl-actions.html)
+
+<a name='vcl_deliver'></a>
+### vcl_deliver实战
+
+测试deliver的时候是否应用缓存
+
+    cd /etc/varnish
+    cp default.vcl default.vcl.bak
+    vim default.vcl
+    
+    # 编辑default.vcl, 添加回复报文头, obj.hits为varnish自带对象
+    sub vcl_deliver {
+        # Happens when we have all the pieces we need, and are about to send the
+        # response to the client.
+        #
+        # You can do accounting or modifying the final object here.
+    
+        if(obj.hits > 0) {
+            set resp.http.x-cache = "hit";
+        } else {
+            set resp.http.x-cache = "miss";
+        }
+    }
+    
+    # 保存退出
+    varnishadm
+    # 编译default.vcl规则为test
+    vcl.load test default.vcl
+    # vcl.test
+    
+    # 无需重启,浏览器立刻测试效果
+    HTTP/1.1 200 OK
+    ...
+    X-Varnish: 32853 229443
+    Age: 4
+    Via: 1.1 varnish-v4
+    x-cache: hit
+    Connection: keep-alive
+
+<a name='vcl_recv'></a>
+### vcl_recv 实战
+
+选择命中服务器, 一对多后端配置
+
+```
+backend default {
+    .host = "127.0.0.1";
+    .port = "8080";
+}
+
+backend java {
+    .host = "127.0.0.1";
+    .port = "8000";
+}
+
+sub vcl_recv {
+    if (req.url ~ "^/java/") {
+        set req.backend_hint = java;
+    } else {
+        set req.backend_hint = default;
+    }
+}
+```
+
+<a href='health-check'></a>
+### 健康检测
+
+[健康检测](https://varnish-cache.org/docs/4.0/users-guide/vcl-backends.html#health-checks)
 
 
+```
+import directors;
+
+backend server1 {
+    .host = "www.wubian.top";
+    .probe = {
+        .url = "/";
+        .timeout = 1s;
+        .interval = 5s;
+        .window = 5;
+        .threshold = 3;
+    }
+}
+
+backend server2 {
+    .host = "192.168.10.10";
+    .probe = {
+        .url = "/";
+        .timeout = 1s;
+        .interval = 5s;
+        .window = 5;
+        .threshold = 3;
+    }
+}
+
+sub vcl_init {
+    new vdir = directors.round_robin();
+    vdir.add_backend(server2);
+
+    vdir.add_backend(server1);
+}
 
 
+sub vcl_recv {
+    # Happens before we check if we have this in cache already.
+    #
+    # Typically you clean up the request here, removing cookies you don't need,
+    # rewriting the request, etc.
+    # 设置命中服务器
+    set req.backend_hint = vdir.backend();
+}
 
-
+```
 
 
 

@@ -1,21 +1,24 @@
 # varnish
 
 - [安装](#install)
-- [varnish配置](#varnish-config)
+    - [varnish配置](#varnish-config)
     - [varnish params](#varnish-params)
     - [default acl](#varnish-acl)
     - [存储对象](#storage)
     - [存储对象](#storage)
     - [varnishd](#varnishd)
 - [简单场景应用](#simple)
-- [varnishstat](#varnishstat)
-- [varnishadm](#varnishadm)
-- [varnishlog & varnishncsa](#varnishlog)
-- [varnishtop](#varnishtop)
-- [vanish engine](#varnish-engine)
+- [varnish管理工具](#varnish-tools)
+    - [varnishstat](#varnishstat)
+    - [varnishadm](#varnishadm)
+    - [varnishlog & varnishncsa](#varnishlog)
+    - [varnishtop](#varnishtop)
+    - [vanish engine](#varnish-engine)
+    - [vanish reload_acl](#varnish_reload_acl)
 - [varnish对象](#varnish-obj)
     - [vcl_deliver实战](#vcl_deliver)
     - [vcl_recv实战](#vcl_recv)
+    - [负载均衡&健康检测](#health-check)
 
 
 <a name='install'></a>
@@ -200,16 +203,18 @@ systemctl is-enabled httpd.service
 
 浏览器测试页面, 可以清晰看见返回头信息包含varnish
 
+<a name='varnish-tools'></a>
+## varnish管理工具
 
 <a name='varnishstat'></a>
-## varnishstat
+### varnishstat
 
 比如上述环境中, 查看命中率是检验缓存的最好方式
 
 `varnishstat`
 
 <a name='varnishadm'></a>
-## varnishadm
+### varnishadm
 
 varnishadm 是varnish管理工具, 默认配置`/etc/varnish/varnish.param`定义了管理端口的IP:port
 
@@ -366,7 +371,7 @@ ban req.http.host ~ 192.168.116.12
 此时再通过varnishstat观察命中情况,发现缓存清理已经生效(命中丢失)
 
 <a name='varnishlog'></a>
-## varnishlog & varnishncsa
+### varnishlog & varnishncsa
 
 运行`varnishlog`, 然后刷新请求页面,即可返回日志信息
 
@@ -444,7 +449,7 @@ varnishncsa 另一种日志记录方式
 
 
 <a name='varnishtop'></a>
-## varnishtop
+### varnishtop
 
 varnishtop - Varnish log entry ranking
 
@@ -452,8 +457,8 @@ varnishtop - Varnish log entry ranking
 
 > 注意,和varnishstat一样都是读取内存共享空间的数据
 
-<a name='varnish-engine'>
-## vanish engine
+<a name='varnish-engine'><a>
+### vanish engine
 
 ```
 vcl_recv：实现安全策略，仅处理可以识别http方法，且只缓存get和head的方法，不缓存用户特有的数据（根据客户端的请求作出的缓存策略）
@@ -467,12 +472,72 @@ vcl_deliver: 将用户请求的内容响应给客户端时用到的方法；
 vcl_error: 在varnish端合成错误响应时的缓存策略；
 ```
 
+<a name='varnish_reload_acl'></a>
+### varnish_reload_acl
+
+重新编译默认default_acl文件, 可以省去手动编译流程
+
+手动编译
+
+```
+# 进入编译命令行
+varnishadm
+# 显示已编译列表
+vcl.list
+# 编译/etc/varnish/default.vcl配置文件, 并命名为test
+vcl.use test default.vcl
+# 使用编译文件test
+vcl.load test
+# 立刻打开浏览器已可以测试
+```
+
+
 <a name='varnish-obj'></a>
 ## varnish对象
 
 [OBJ对象](https://varnish-cache.org/docs/4.0/reference/vcl.html#obj)
 
 [varnish变量类型](https://varnish-cache.org/docs/4.0/users-guide/vcl-variables.html)
+
+### 常见的内置变量
+
+一般来讲变量req.*的值会赋给对应的bereq.*，而变量beresp.*的值会赋给对应的resp.* 改变前者会影响后者。obj.*的初始值大多来自beresp.*,它们可以被赋给resp.*并传给客户端浏览器缓存。
+
+```
+client.ip    //客户端ip
+req.backend_hint    //要选择哪个后端资源服务器（或集群）做资源fetching
+req.http.*    //http头部
+req.method    //请求方法
+req.url    //请求的url
+req.restarts    //请求被重新投入状态机处理的次数
+
+bereq.http.*    //http头部
+bereq.method    //请求方法
+bereq.url    //请求的url
+
+resp.http.*    //响应报文的http头部
+resp.status    //相应给客户端的状态码
+resp.reason    //相应给客户端的原因短语
+
+beresp.http.*    //后端返回响应报文的http头部
+beresp.status    //后端返回的状态码
+beresp.reason    //后端返回的原因短语
+beresp.backend.ip    //后端资源服务器的ip
+beresp.backend.name    //后端资源服务器的name
+beresp.ttl    //资源的ttl值
+beresp.grace    //资源的grace值
+beresp.keep    //资源的keep值
+beresp.uncacheable    //置位则be-response中的对象将不被缓存
+
+obj.hits    //资源被命中的次数
+obj.http.*    //资源的http头部
+obj.status    //后端返回资源时给出的状态码
+obj.reason    //后端返回资源时给出的原因短语
+obj.ttl    //资源剩余的ttl值
+obj.grace    //资源剩余的grace值
+obj.keep    //资源剩余的keep值
+obj.uncacheable    //资源是否不被缓存的标志值
+```
 
 > 变量类似iptables, 是和状态引擎相关的, 如hits对象只能用于vcl_hit, vcl_deliver
 #### req
@@ -483,9 +548,28 @@ The request object. When Varnish has received the request the req object is crea
 
 The backend request object. Varnish contructs this before sending it to the backend. It is based on the req object.
 
+> backend(后端)请求对象, varnish将构造请求报文, 然后发送给后端
+
+[官网提供的参数列表](https://varnish-cache.org/docs/4.0/reference/vcl.html#bereq)
+
+以下为几个常用的对象
+
+* bereq.url
+* bereq.request
+* bereq.http.HEADER
+* bereq.proto
+
 #### beresp
 
 The backend response object. It contains the headers of the object coming from the backend. If you want to modify the response coming from the server you modify this object in vcl_backend_response.
+
+
+[官网提供的参数列表](https://varnish-cache.org/docs/4.0/reference/vcl.html#beresp)
+
+* beresp.status
+* beresp.backend.ip
+* beresp.backend.name
+* beresp.proto
 
 #### resp
 
@@ -499,6 +583,8 @@ The object as it is stored in cache. Read only.
 ### vcl_deliver实战
 
 测试deliver的时候是否应用缓存
+
+> 注意, 必须为"hit", 单引号会报错
 
     cd /etc/varnish
     cp default.vcl default.vcl.bak
@@ -550,36 +636,57 @@ backend java {
 }
 
 sub vcl_recv {
+    # 设置命中服务器
     if (req.url ~ "^/java/") {
         set req.backend_hint = java;
     } else {
         set req.backend_hint = default;
     }
+    
+    # 自定义标识位
+    if (req.httpd.User-Agent ~ "iPad"
+      req.httpd.User-Agent ~ "iPhone"
+      req.httpd.User-Agent ~ "Android") {
+    
+      set req.http.X-Device = "mobile";
+    
+    } else {
+    
+      set req.http.X-Device = "desktop";
+    
+    }
 }
 ```
 
-<a href='health-check'></a>
-### 健康检测
+<a name='vcl_recv'></a>
+### vcl_recv 实战
+
+
+<a name='health-check'></a>
+### 负载均衡&健康检测
 
 [健康检测](https://varnish-cache.org/docs/4.0/users-guide/vcl-backends.html#health-checks)
 
+需要导入`directors`, 然后定义响应的后端服务器, 初始化的时候添加轮询规则, 初始化响应对象, 通常地, 状态检测指向为隐藏的静态文件, 最后指定`vcl_recv`响应后端服务
+
+配置default.vcl
 
 ```
 import directors;
 
 backend server1 {
-    .host = "www.wubian.top";
+    .host = "192.168.10.11";
     .probe = {
         .url = "/";
         .timeout = 1s;
         .interval = 5s;
-        .window = 5;
+        .window = 5;// 最近5次检测, 3次则为正常
         .threshold = 3;
     }
 }
 
 backend server2 {
-    .host = "192.168.10.10";
+    .host = "192.168.10.12";
     .probe = {
         .url = "/";
         .timeout = 1s;

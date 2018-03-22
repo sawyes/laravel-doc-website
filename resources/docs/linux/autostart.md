@@ -3,6 +3,9 @@
 - [rc.local](#rc.local)
 - [init.d](#init.d)
 
+
+rc.local和init.d都可以操作开机启动项
+
 <a name="rc.local"></a>
 ## rc.local
 
@@ -38,6 +41,7 @@ vim /etc/init.d/active
 # Short-Description: active service
 # Description:       active service daemon
 ### END INIT INFO
+
 /root/IntelliJIDEALicenseServer_linux_amd64 &> /dev/null &
 
 ```
@@ -52,10 +56,15 @@ chkconfig also supports LSB-style init stanzas, and will apply them in preferenc
 
 ### Ubuntu开机启动
 
-`update-rc.d active.sh enable`
+```
+update-rc.d active.sh enable
+update-rc.d active.sh disable
+```
 
 
 ### CentOS
+
+通过设置`chkconfig`操作服务启动
 
 ```
 chkconfig --add active
@@ -64,10 +73,5 @@ active       	0:off	1:off	2:on	3:on	4:on	5:on	6:off
 
 chkconfig --del active
 ```
-
-
-
-
-
 
 

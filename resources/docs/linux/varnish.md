@@ -19,6 +19,7 @@
     - [vcl_deliver实战](#vcl_deliver)
     - [vcl_recv实战](#vcl_recv)
     - [负载均衡&健康检测](#health-check)
+    - [vcl官方实例](#vcl_recv_sample)
 
 
 <a name='install'></a>
@@ -26,6 +27,7 @@
 
 [varnish官方网站](https://varnish-cache.org/)
 [varnish文档](http://varnish-cache.org/docs/)
+[实现基于Keepalived+Haproxy+Varnish+LNMP企业级架构](https://www.cnblogs.com/keerya/p/7833724.html)
 
 ```
 yum -y install epel-release
@@ -658,10 +660,6 @@ sub vcl_recv {
 }
 ```
 
-<a name='vcl_recv'></a>
-### vcl_recv 实战
-
-
 <a name='health-check'></a>
 ### 负载均衡&健康检测
 
@@ -714,6 +712,106 @@ sub vcl_recv {
 }
 
 ```
+
+<a name='vcl_recv_sample'></a>
+### vcl官方实例
+
+定义不认识的头部请求直接扔后端的pass
+
+```
+sub vcl_recv {
+    if (req.method == "GET" && req.http.cookie) {
+        return(hash);    //处理完recv 引擎，给下一个hash引擎处理
+    }
+    if (req.method != "GET" &&
+        req.method != "HEAD" &&
+        req.method != "PUT" &&
+        req.method != "POST" &&
+        req.method != "TRACE" &&
+        req.method != "OPTIONS" &&
+        req.method != "PURGE" &&
+        req.method != "DELETE") {
+            return (pipe);   //除了上边的请求头部，通过通道直接扔后端的pass
+    }
+}
+```
+
+定义index.php通过特殊通道给后端的server，不经过缓存
+
+    if (req.url ~ "index.php") {
+        return(pass);
+    }
+    
+定义删除缓存的方法
+    
+    acl purgers {    # 定义可访问来源IP,权限控制
+            "127.0.0.1";
+            "172.17.0.0"/16;
+    }
+    
+    sub vcl_recv {
+        
+        if (req.method == "PURGE") {   //PURGE请求的处理的头部，清缓存
+            if (client.ip ~ purgers) {
+              return(purge);
+            }
+        }
+    }
+
+定义vcl_hash 引擎，后没有定义hit和Miss的路径，所以走默认路径
+
+```
+sub vcl_hash {
+     hash_data(req.url);
+}
+```    
+ 
+定义要缓存的文件时长
+
+```
+sub vcl_backend_response {     //自定义缓存文件的缓存时长，即TTL值
+    if (bereq.url ~ "\.(jpg|jpeg|gif|png)$") {
+        set beresp.ttl = 30d;
+    }
+    if (bereq.url ~ "\.(html|css|js)$") {
+        set beresp.ttl = 7d;
+    }
+    if (beresp.http.Set-Cookie) { //定义带Set-Cookie首部的后端响应不缓存，直接返回给客户端
+    set beresp.grace = 30m;  
+        return(deliver);
+    }
+}
+```   
+
+定义deliver 引擎
+
+```
+sub vcl_deliver {
+    if (obj.hits > 0) {    //为响应添加X-Cache首部，显示缓存是否命中
+        set resp.http.X-Cache = "HIT from " + server.ip;
+    } else {
+        set resp.http.X-Cache = "MISS";
+    }
+    unset resp.http.X-Powered-By;   //取消显示php框架版本的header头
+    unset resp.http.Via;   //取消显示varnish的header头
+}
+```    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

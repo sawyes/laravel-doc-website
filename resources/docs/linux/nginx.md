@@ -29,7 +29,7 @@
 [官方配置指南](https://nginx.org/en/docs/)
 [官方配置样例](https://www.nginx.com/resources/wiki/start/topics/examples/fullexample2/)
 [echo模块下载地址](https://github.com/openresty/echo-nginx-module/tags)
-
+[Nginx详解以及LNMP的搭建](http://www.cnblogs.com/keerya/p/7797610.html)
 
 <a name='install'></a>
 ## 安装

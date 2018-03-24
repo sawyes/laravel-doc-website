@@ -638,6 +638,12 @@ backend java {
 }
 
 sub vcl_recv {
+    
+    # 不缓存资源,(?i)忽略大小写
+    if (req.url ~ "(?i)^/admin" || req.url ~ "^/login") {
+        return (pass);
+    }
+
     # 设置命中服务器
     if (req.url ~ "^/java/") {
         set req.backend_hint = java;
@@ -777,7 +783,7 @@ sub vcl_backend_response {     //自定义缓存文件的缓存时长，即TTL�
         set beresp.ttl = 7d;
     }
     if (beresp.http.Set-Cookie) { //定义带Set-Cookie首部的后端响应不缓存，直接返回给客户端
-    set beresp.grace = 30m;  
+        set beresp.grace = 30m;  
         return(deliver);
     }
 }

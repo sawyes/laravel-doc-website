@@ -53,6 +53,7 @@ NGINX开源主线和稳定版本都可以通过两种方式安装：
 安装NGINX依赖关系, 详细看官网介绍
     
     yum -y install epel-release
+    yum -y groupinstall "development tools"
     yum -y install wget gcc gcc-c++ autoconf automake perl perl-devel perl-ExtUtils-Embed zlib zlib-devel openssl openssl-devel  gd-devel libxslt-devel
 
 选择安装第三方echo模块, 不过需要注意的是nginx版本需要和echo模块匹配, 否则可能**编译报错**

@@ -3,15 +3,20 @@
 /**
  * Set the default documentation version...
  */
-define('DEFAULT_VERSION', '5.4');
-
+if (! defined('DEFAULT_VERSION')) {
+    define('DEFAULT_VERSION', '5.5');
+}
 /**
  * Convert some text to Markdown...
  */
-function markdown($text)
-{
-    return (new ParsedownExtra)->text($text);
+
+if (! function_exists('markdown')) {
+    function markdown($text)
+    {
+        return (new ParsedownExtra)->text($text);
+    }
 }
+
 
 Route::get('/', function () {
     return view('marketing')->with(['currentVersion' => DEFAULT_VERSION, 'versions' => App\Documentation::getDocVersions()]);

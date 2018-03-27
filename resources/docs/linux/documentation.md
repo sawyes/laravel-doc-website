@@ -10,6 +10,7 @@
     - [文件查找](/docs/{{version}}/find)
     - [解压缩](/docs/{{version}}/zip)
     - [yum](/docs/{{version}}/yum)
+    - [开机启动](/docs/{{version}}/autostart)
 - 服务管理
     - [网络管理](/docs/{{version}}/net)
     - [用户管理](/docs/{{version}}/user)

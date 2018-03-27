@@ -29,7 +29,7 @@
 [官方配置指南](https://nginx.org/en/docs/)
 [官方配置样例](https://www.nginx.com/resources/wiki/start/topics/examples/fullexample2/)
 [echo模块下载地址](https://github.com/openresty/echo-nginx-module/tags)
-
+[Nginx详解以及LNMP的搭建](http://www.cnblogs.com/keerya/p/7797610.html)
 
 <a name='install'></a>
 ## 安装
@@ -53,6 +53,7 @@ NGINX开源主线和稳定版本都可以通过两种方式安装：
 安装NGINX依赖关系, 详细看官网介绍
     
     yum -y install epel-release
+    yum -y groupinstall "development tools"
     yum -y install wget gcc gcc-c++ autoconf automake perl perl-devel perl-ExtUtils-Embed zlib zlib-devel openssl openssl-devel  gd-devel libxslt-devel
 
 选择安装第三方echo模块, 不过需要注意的是nginx版本需要和echo模块匹配, 否则可能**编译报错**

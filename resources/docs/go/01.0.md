@@ -16,7 +16,7 @@ Go是一种编译型语言，它结合了解释型语言的游刃有余，动态
 
 ## 目录
   
-![](images/navi1.png?raw=true)
+![](/assets/go/images/navi1.png?raw=true)
 
 ## links
   * [目录](<preface.md>)

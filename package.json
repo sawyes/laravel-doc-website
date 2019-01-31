@@ -7,5 +7,9 @@
   "devDependencies": {
     "gulp": "^3.9.1",
     "laravel-elixir": "^6.0.0-9"
+  },
+  "dependencies": {
+    "npm": "^6.7.0",
+    "yarn": "^1.13.0"
   }
 }

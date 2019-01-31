@@ -114,6 +114,7 @@ class Documentation
             'python' => 'python',
             'psr' => 'psr',
             'ES6' => 'ES6',
+            'go' => 'go',
         ];
     }
 }
